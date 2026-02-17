@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xiehe.spine.currentHour24
 
 @Immutable
 enum class ThemeBrand {
@@ -21,6 +22,7 @@ enum class ThemeBrand {
 @Immutable
 enum class ThemeMode {
     SYSTEM,
+    AUTO_TIME,
     LIGHT,
     DARK,
 }
@@ -129,6 +131,10 @@ fun SpineTheme(
 ) {
     val dark = when (preference.mode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.AUTO_TIME -> {
+            val hour = currentHour24()
+            hour >= 20 || hour < 7
+        }
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }

@@ -398,6 +398,11 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
                     onClick = { vm.updateMode(ThemeMode.SYSTEM) },
                 )
                 SpineSelectablePill(
+                    text = "按时间",
+                    selected = preference.mode == ThemeMode.AUTO_TIME,
+                    onClick = { vm.updateMode(ThemeMode.AUTO_TIME) },
+                )
+                SpineSelectablePill(
                     text = "浅色",
                     selected = preference.mode == ThemeMode.LIGHT,
                     onClick = { vm.updateMode(ThemeMode.LIGHT) },

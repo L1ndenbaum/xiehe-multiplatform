@@ -5,3 +5,5 @@ class WasmPlatform : Platform {
 }
 
 actual fun getPlatform(): Platform = WasmPlatform()
+
+actual fun currentHour24(): Int = js("new Date().getHours()") as Int
