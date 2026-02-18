@@ -1,5 +1,10 @@
 package com.xiehe.spine.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,12 +29,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.DashboardRepository
 import com.xiehe.spine.data.PatientRepository
 import com.xiehe.spine.ui.components.SpineBottomTabBar
 import com.xiehe.spine.ui.components.SpineButton
 import com.xiehe.spine.ui.components.SpineCard
+import com.xiehe.spine.ui.components.SpineGlyph
+import com.xiehe.spine.ui.components.SpineMiniBarChart
+import com.xiehe.spine.ui.components.SpineProgressRing
 import com.xiehe.spine.ui.components.SpineSelectablePill
 import com.xiehe.spine.ui.components.SpineText
 import com.xiehe.spine.ui.components.SpineTextField
@@ -81,9 +90,13 @@ fun LoginScreen(
                 password = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            state.errorMessage?.let {
+            AnimatedVisibility(
+                visible = state.errorMessage != null,
+                enter = fadeIn() + slideInVertically { -it / 3 },
+                exit = fadeOut() + slideOutVertically { -it / 3 },
+            ) {
                 SpineText(
-                    text = it,
+                    text = state.errorMessage ?: "",
                     style = SpineTheme.typography.subhead.copy(color = colors.error),
                 )
             }
@@ -98,6 +111,7 @@ fun LoginScreen(
                 onClick = onLogin,
                 enabled = !state.loading,
                 modifier = Modifier.fillMaxWidth(),
+                leadingGlyph = SpineGlyph.PROFILE,
             )
             if (showNetworkDiagnostics) {
                 SpineButton(
@@ -105,6 +119,7 @@ fun LoginScreen(
                     onClick = onHealthCheck,
                     enabled = !state.healthChecking,
                     modifier = Modifier.fillMaxWidth(),
+                    leadingGlyph = SpineGlyph.BELL,
                 )
                 state.healthStatus?.let {
                     SpineText(
@@ -146,9 +161,16 @@ fun DashboardScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(spacing.xl),
     ) {
-        state.errorMessage?.let {
+        AnimatedVisibility(
+            visible = state.errorMessage != null,
+            enter = fadeIn() + slideInVertically { it / 2 },
+            exit = fadeOut(),
+        ) {
             SpineCard(modifier = Modifier.fillMaxWidth()) {
-                SpineText(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                SpineText(
+                    text = state.errorMessage ?: "",
+                    style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error),
+                )
             }
         }
         val overview = state.data
@@ -158,17 +180,35 @@ fun DashboardScreen(
             }
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                StatCard("累计患者", overview.totalPatients.toString(), modifier = Modifier.weight(1f))
-                StatCard("活跃患者", overview.activePatients.toString(), modifier = Modifier.weight(1f))
+                StatCard("累计患者", overview.totalPatients.toString(), SpineGlyph.USERS, modifier = Modifier.weight(1f))
+                StatCard("待处理影像", overview.pendingImages.toString(), SpineGlyph.HOURGLASS, modifier = Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                StatCard("影像总数", overview.totalImages.toString(), modifier = Modifier.weight(1f))
-                StatCard("待处理", overview.pendingImages.toString(), modifier = Modifier.weight(1f))
+                StatCard("已完成影像", overview.processedImages.toString(), SpineGlyph.CHECK, modifier = Modifier.weight(1f))
+                StatCard("累计影像", overview.totalImages.toString(), SpineGlyph.IMAGE, modifier = Modifier.weight(1f))
             }
             SpineCard(modifier = Modifier.fillMaxWidth()) {
-                SpineText("完成率 ${overview.completionRate}%")
-                SpineText("平均处理时长 ${overview.averageProcessingTime} 小时")
-                SpineText("系统提醒 ${overview.systemAlerts}")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        SpineText("完成率 ${overview.completionRate}%", style = SpineTheme.typography.title)
+                        SpineText("平均处理时长 ${overview.averageProcessingTime} 小时")
+                        SpineText("系统提醒 ${overview.systemAlerts}")
+                    }
+                    SpineProgressRing(progress = (overview.completionRate / 100f).toFloat())
+                }
+                SpineMiniBarChart(
+                    values = listOf(
+                        overview.newPatientsToday.toFloat(),
+                        (overview.newPatientsWeek / 7f),
+                        overview.imagesToday.toFloat(),
+                        (overview.imagesWeek / 7f),
+                    ),
+                    labels = listOf("今患", "周均患", "今影", "周均影"),
+                )
             }
         }
     }
@@ -178,11 +218,34 @@ fun DashboardScreen(
 private fun StatCard(
     title: String,
     value: String,
+    glyph: SpineGlyph,
     modifier: Modifier = Modifier,
 ) {
     SpineCard(modifier = modifier) {
-        SpineText(text = title, style = SpineTheme.typography.subhead)
-        SpineText(text = value, style = SpineTheme.typography.title)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SpineText(text = title, style = SpineTheme.typography.subhead)
+            Box(
+                modifier = Modifier
+                    .width(34.dp)
+                    .height(34.dp)
+                    .background(
+                        color = SpineTheme.colors.primaryMuted,
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                com.xiehe.spine.ui.components.SpineGlyphIcon(
+                    glyph = glyph,
+                    tint = SpineTheme.colors.primary,
+                    modifier = Modifier.width(16.dp).height(16.dp),
+                )
+            }
+        }
+        SpineText(text = value, style = SpineTheme.typography.display.copy(fontSize = 38.sp))
     }
 }
 
@@ -226,9 +289,15 @@ fun PatientsScreen(
                 text = "查询",
                 onClick = { vm.refresh(session, repository, onSessionUpdated) },
                 modifier = Modifier.width(76.dp),
+                leadingGlyph = SpineGlyph.DASHBOARD,
             )
         }
-        SpineButton(text = "新增患者", onClick = onAddPatient, modifier = Modifier.fillMaxWidth())
+        SpineButton(
+            text = "新增患者",
+            onClick = onAddPatient,
+            modifier = Modifier.fillMaxWidth(),
+            leadingGlyph = SpineGlyph.ADD,
+        )
         state.errorMessage?.let {
             SpineText(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
         }
@@ -254,6 +323,7 @@ fun PatientsScreen(
                             text = "详情",
                             onClick = { onOpenPatient(patient.id) },
                             modifier = Modifier.width(72.dp),
+                            leadingGlyph = SpineGlyph.PROFILE,
                         )
                     }
                 }
@@ -361,6 +431,7 @@ fun PatientFormScreen(
             },
             enabled = !state.loading,
             modifier = Modifier.fillMaxWidth(),
+            leadingGlyph = SpineGlyph.CHECK,
         )
     }
 }
@@ -385,10 +456,10 @@ fun ProfileScreen(
             SpineText(text = session.email ?: "未设置邮箱")
             SpineText(text = "用户ID: ${session.userId}")
         }
-        SpineButton(text = "个人信息", onClick = onOpenPersonalInfo, modifier = Modifier.fillMaxWidth())
-        SpineButton(text = "修改密码", onClick = onOpenChangePassword, modifier = Modifier.fillMaxWidth())
-        SpineButton(text = "外观设置", onClick = onOpenAppearance, modifier = Modifier.fillMaxWidth())
-        SpineButton(text = "退出登录", onClick = onLogout, modifier = Modifier.fillMaxWidth())
+        SpineButton(text = "个人信息", onClick = onOpenPersonalInfo, modifier = Modifier.fillMaxWidth(), leadingGlyph = SpineGlyph.PROFILE)
+        SpineButton(text = "修改密码", onClick = onOpenChangePassword, modifier = Modifier.fillMaxWidth(), leadingGlyph = SpineGlyph.CHECK)
+        SpineButton(text = "外观设置", onClick = onOpenAppearance, modifier = Modifier.fillMaxWidth(), leadingGlyph = SpineGlyph.DASHBOARD)
+        SpineButton(text = "退出登录", onClick = onLogout, modifier = Modifier.fillMaxWidth(), leadingGlyph = SpineGlyph.BACK)
     }
 }
 
@@ -473,19 +544,20 @@ fun MobileShell(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onBack: (() -> Unit)? = null,
-    rightActionText: String? = null,
+    rightActionGlyph: SpineGlyph? = null,
     onRightAction: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background),
+            .background(SpineTheme.colors.background)
+            .safeContentPadding()
     ) {
         SpineTopBar(
             title = title,
-            leftText = if (onBack != null) "←" else "",
-            rightText = rightActionText,
+            leftGlyph = if (onBack != null) SpineGlyph.BACK else null,
+            rightGlyph = rightActionGlyph,
             onLeftClick = onBack,
             onRightClick = onRightAction,
         )
@@ -493,7 +565,13 @@ fun MobileShell(
             content()
         }
         SpineBottomTabBar(
-            tabs = listOf("工作台", "患者", "影像", "我的"),
+            tabs = listOf("工作台", "患者中心", "影像中心", "个人中心"),
+            icons = listOf(
+                SpineGlyph.DASHBOARD,
+                SpineGlyph.PATIENTS,
+                SpineGlyph.IMAGES,
+                SpineGlyph.PROFILE,
+            ),
             selectedIndex = selectedTab,
             onSelect = onTabSelected,
         )

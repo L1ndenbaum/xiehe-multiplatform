@@ -13,3 +13,4 @@
 - Main release now enforces no cleartext HTTP, while dev release enables cleartext HTTP for current backend.
 - Standardized release APK filename to `xiehe-spine.apk` and app display name to `xiehe-spine`.
 - Added common tests for theme preference persistence and session store behavior.
+- Recorded a known issue: backend connectivity can vary by device/network environment (some phones route traffic through VPN/proxy and may fail with `ECONNREFUSED`).
