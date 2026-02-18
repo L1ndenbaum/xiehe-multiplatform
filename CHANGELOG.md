@@ -14,3 +14,7 @@
 - Standardized release APK filename to `xiehe-spine.apk` and app display name to `xiehe-spine`.
 - Added common tests for theme preference persistence and session store behavior.
 - Recorded a known issue: backend connectivity can vary by device/network environment (some phones route traffic through VPN/proxy and may fail with `ECONNREFUSED`).
+- Fixed shell safe-area strategy to avoid full-screen content being squeezed on some devices.
+- Fixed overlay-route navigation bug where bottom tab switching failed from personal info subpages.
+- Refactored shell UI by extracting a dedicated `SpineNavBar`/`SpineNavItem` module and moving `MobileShell` to a separate file.
+- Reduced startup debug noise: removed automatic network probe logs; debug diagnostics remain opt-in and release-disabled.

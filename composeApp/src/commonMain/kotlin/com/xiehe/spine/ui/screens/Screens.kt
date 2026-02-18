@@ -13,8 +13,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.DashboardRepository
 import com.xiehe.spine.data.PatientRepository
-import com.xiehe.spine.ui.components.SpineBottomTabBar
 import com.xiehe.spine.ui.components.SpineButton
 import com.xiehe.spine.ui.components.SpineCard
 import com.xiehe.spine.ui.components.SpineGlyph
@@ -42,7 +42,6 @@ import com.xiehe.spine.ui.components.SpineProgressRing
 import com.xiehe.spine.ui.components.SpineSelectablePill
 import com.xiehe.spine.ui.components.SpineText
 import com.xiehe.spine.ui.components.SpineTextField
-import com.xiehe.spine.ui.components.SpineTopBar
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.theme.ThemeBrand
 import com.xiehe.spine.ui.theme.ThemeMode
@@ -68,7 +67,8 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.background)
-            .safeContentPadding()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .padding(horizontal = 24.dp, vertical = 36.dp),
         verticalArrangement = Arrangement.spacedBy(spacing.x2l),
     ) {
@@ -535,45 +535,5 @@ fun PlaceholderScreen(title: String, description: String) {
                 maxLines = 3,
             )
         }
-    }
-}
-
-@Composable
-fun MobileShell(
-    title: String,
-    selectedTab: Int,
-    onTabSelected: (Int) -> Unit,
-    onBack: (() -> Unit)? = null,
-    rightActionGlyph: SpineGlyph? = null,
-    onRightAction: (() -> Unit)? = null,
-    content: @Composable () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SpineTheme.colors.background)
-            .safeContentPadding()
-    ) {
-        SpineTopBar(
-            title = title,
-            leftGlyph = if (onBack != null) SpineGlyph.BACK else null,
-            rightGlyph = rightActionGlyph,
-            onLeftClick = onBack,
-            onRightClick = onRightAction,
-        )
-        Box(modifier = Modifier.weight(1f)) {
-            content()
-        }
-        SpineBottomTabBar(
-            tabs = listOf("工作台", "患者中心", "影像中心", "个人中心"),
-            icons = listOf(
-                SpineGlyph.DASHBOARD,
-                SpineGlyph.PATIENTS,
-                SpineGlyph.IMAGES,
-                SpineGlyph.PROFILE,
-            ),
-            selectedIndex = selectedTab,
-            onSelect = onTabSelected,
-        )
     }
 }

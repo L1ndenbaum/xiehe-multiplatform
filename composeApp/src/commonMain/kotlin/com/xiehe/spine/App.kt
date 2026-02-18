@@ -67,6 +67,12 @@ fun App(
     var session by remember { mutableStateOf<UserSession?>(appContainer.authRepository.restoreSession()) }
     var selectedTab by remember { mutableIntStateOf(0) }
     var route by remember { mutableStateOf<OverlayRoute?>(null) }
+    val onTabSelected: (Int) -> Unit = remember {
+        { tab ->
+            selectedTab = tab
+            route = null
+        }
+    }
 
     val themePreference by appContainer.themeRepository.preference.collectAsState()
 
@@ -105,7 +111,7 @@ fun App(
                     0 -> MobileShell(
                         title = "工作台",
                         selectedTab = selectedTab,
-                        onTabSelected = { selectedTab = it },
+                        onTabSelected = onTabSelected,
                         rightActionGlyph = SpineGlyph.BELL,
                     ) {
                         DashboardScreen(
@@ -119,7 +125,7 @@ fun App(
                     1 -> MobileShell(
                         title = "患者中心",
                         selectedTab = selectedTab,
-                        onTabSelected = { selectedTab = it },
+                        onTabSelected = onTabSelected,
                         rightActionGlyph = SpineGlyph.ADD,
                         onRightAction = { route = OverlayRoute.PatientForm },
                     ) {
@@ -136,7 +142,7 @@ fun App(
                     2 -> MobileShell(
                         title = "影像中心",
                         selectedTab = selectedTab,
-                        onTabSelected = { selectedTab = it },
+                        onTabSelected = onTabSelected,
                         rightActionGlyph = SpineGlyph.ADD,
                     ) {
                         PlaceholderScreen(
@@ -148,7 +154,7 @@ fun App(
                     else -> MobileShell(
                         title = "个人中心",
                         selectedTab = selectedTab,
-                        onTabSelected = { selectedTab = it },
+                        onTabSelected = onTabSelected,
                     ) {
                         ProfileScreen(
                             session = activeSession,
@@ -171,7 +177,7 @@ fun App(
                         MobileShell(
                             title = "患者信息",
                             selectedTab = selectedTab,
-                            onTabSelected = { selectedTab = it },
+                            onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
                             PatientDetailScreen(
@@ -188,7 +194,7 @@ fun App(
                         MobileShell(
                             title = "添加患者",
                             selectedTab = selectedTab,
-                            onTabSelected = { selectedTab = it },
+                            onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
                             PatientFormScreen(
@@ -208,7 +214,7 @@ fun App(
                         MobileShell(
                             title = "外观设置",
                             selectedTab = selectedTab,
-                            onTabSelected = { selectedTab = it },
+                            onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
                             AppearanceScreen(vm = appearanceVm)
@@ -219,7 +225,7 @@ fun App(
                         MobileShell(
                             title = "个人信息",
                             selectedTab = selectedTab,
-                            onTabSelected = { selectedTab = it },
+                            onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
                             PlaceholderScreen(
@@ -233,7 +239,7 @@ fun App(
                         MobileShell(
                             title = "修改密码",
                             selectedTab = selectedTab,
-                            onTabSelected = { selectedTab = it },
+                            onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
                             PlaceholderScreen(
