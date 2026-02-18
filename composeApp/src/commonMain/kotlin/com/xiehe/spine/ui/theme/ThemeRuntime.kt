@@ -1,0 +1,55 @@
+package com.xiehe.spine.ui.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
+import com.xiehe.spine.currentHour24
+
+private val LocalSpineColors = compositionLocalOf { lightPalette(ThemeBrand.GREEN) }
+private val LocalSpineTypography = compositionLocalOf { defaultTypography() }
+private val LocalSpineSpacing = compositionLocalOf { DefaultSpineSpacing }
+private val LocalSpineRadius = compositionLocalOf { DefaultSpineRadius }
+
+object SpineTheme {
+    val colors: SpineColors
+        @Composable get() = LocalSpineColors.current
+
+    val typography: SpineTypography
+        @Composable get() = LocalSpineTypography.current
+
+    val spacing: SpineSpacing
+        @Composable get() = LocalSpineSpacing.current
+
+    val radius: SpineRadius
+        @Composable get() = LocalSpineRadius.current
+}
+
+@Composable
+fun SpineTheme(
+    preference: ThemePreference,
+    content: @Composable () -> Unit,
+) {
+    val dark = when (preference.mode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.AUTO_TIME -> {
+            val hour = currentHour24()
+            hour >= 20 || hour < 7
+        }
+
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+    val colors = remember(preference.brand, dark) {
+        if (dark) darkPalette(preference.brand) else lightPalette(preference.brand)
+    }
+
+    CompositionLocalProvider(
+        LocalSpineColors provides colors,
+        LocalSpineTypography provides defaultTypography(),
+        LocalSpineSpacing provides DefaultSpineSpacing,
+        LocalSpineRadius provides DefaultSpineRadius,
+        content = content,
+    )
+}
