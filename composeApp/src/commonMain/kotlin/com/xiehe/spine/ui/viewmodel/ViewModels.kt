@@ -31,6 +31,10 @@ data class LoginUiState(
     val password: String = "",
     val loading: Boolean = false,
     val errorMessage: String? = null,
+    val errorDetails: String? = null,
+    val healthChecking: Boolean = false,
+    val healthStatus: String? = null,
+    val healthDetails: String? = null,
 )
 
 class LoginViewModel : BaseViewModel() {
@@ -38,11 +42,38 @@ class LoginViewModel : BaseViewModel() {
     val state: StateFlow<LoginUiState> = _state.asStateFlow()
 
     fun updateUsername(value: String) {
-        _state.update { it.copy(username = value, errorMessage = null) }
+        _state.update { it.copy(username = value, errorMessage = null, errorDetails = null) }
     }
 
     fun updatePassword(value: String) {
-        _state.update { it.copy(password = value, errorMessage = null) }
+        _state.update { it.copy(password = value, errorMessage = null, errorDetails = null) }
+    }
+
+    fun checkConnectivity(authRepository: AuthRepository) {
+        scope.launch {
+            _state.update { it.copy(healthChecking = true, healthStatus = null, healthDetails = null) }
+            when (val result = authRepository.healthCheck()) {
+                is AppResult.Success -> {
+                    _state.update {
+                        it.copy(
+                            healthChecking = false,
+                            healthStatus = "后端连通: ${result.data.status ?: "ok"}",
+                            healthDetails = "version=${result.data.version ?: "-"} env=${result.data.environment ?: "-"}",
+                        )
+                    }
+                }
+
+                is AppResult.Failure -> {
+                    _state.update {
+                        it.copy(
+                            healthChecking = false,
+                            healthStatus = "后端不可用: ${result.message}",
+                            healthDetails = result.debugDetails ?: "code=${result.code ?: "N/A"}",
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun submit(
@@ -55,7 +86,7 @@ class LoginViewModel : BaseViewModel() {
             return
         }
         scope.launch {
-            _state.update { it.copy(loading = true, errorMessage = null) }
+            _state.update { it.copy(loading = true, errorMessage = null, errorDetails = null) }
             when (val result = authRepository.login(current.username.trim(), current.password)) {
                 is AppResult.Success -> {
                     _state.update { it.copy(loading = false) }
@@ -63,7 +94,13 @@ class LoginViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(loading = false, errorMessage = result.message) }
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            errorMessage = result.message,
+                            errorDetails = result.debugDetails ?: "code=${result.code ?: "N/A"}",
+                        )
+                    }
                 }
             }
         }

@@ -38,7 +38,10 @@ private sealed interface OverlayRoute {
 
 @Composable
 @Preview
-fun App(container: AppContainer? = null) {
+fun App(
+    container: AppContainer? = null,
+    showNetworkDiagnostics: Boolean = false,
+) {
     val appContainer = remember(container) { container ?: AppContainer.createInMemory() }
     val loginVm = remember { LoginViewModel() }
     val dashboardVm = remember { DashboardViewModel() }
@@ -64,6 +67,10 @@ fun App(container: AppContainer? = null) {
                         route = null
                     }
                 },
+                onHealthCheck = {
+                    loginVm.checkConnectivity(appContainer.authRepository)
+                },
+                showNetworkDiagnostics = showNetworkDiagnostics,
             )
             return@SpineTheme
         }

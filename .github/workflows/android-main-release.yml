@@ -25,12 +25,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Debug APK (main forbids HTTP cleartext)
-        run: ./gradlew :composeApp:assembleDebug -PallowCleartextTraffic=false --stacktrace
+        run: ./gradlew :androidApp:assembleDebug -PallowCleartextTraffic=false --stacktrace
 
       - name: Normalize APK name
         shell: bash
         run: |
-          APK_PATH=$(ls composeApp/build/outputs/apk/debug/*.apk | head -n1)
+          APK_PATH=$(ls androidApp/build/outputs/apk/debug/*.apk | head -n1)
           cp "$APK_PATH" xiehe-spine.apk
 
       - name: Compute Release Metadata

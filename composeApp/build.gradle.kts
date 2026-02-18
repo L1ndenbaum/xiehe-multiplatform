@@ -5,19 +5,20 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
 }
 
-val allowCleartextTrafficOverride = providers
-    .gradleProperty("allowCleartextTraffic")
-    .orNull
-    ?.toBooleanStrictOrNull()
-
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.xiehe.spine.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        androidResources {
+            enable = true
+        }
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -49,7 +50,6 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
@@ -86,41 +86,8 @@ kotlin {
     }
 }
 
-android {
-    namespace = "com.xiehe.spine"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "com.xiehe.spine"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    buildTypes {
-        getByName("debug") {
-            manifestPlaceholders["usesCleartextTraffic"] =
-                (allowCleartextTrafficOverride ?: true).toString()
-        }
-        getByName("release") {
-            isMinifyEnabled = false
-            manifestPlaceholders["usesCleartextTraffic"] =
-                (allowCleartextTrafficOverride ?: false).toString()
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
 dependencies {
-    debugImplementation(libs.compose.uiTooling)
+    androidRuntimeClasspath(libs.compose.uiTooling)
 }
 
 compose.desktop {

@@ -48,6 +48,8 @@ import com.xiehe.spine.ui.viewmodel.PatientsViewModel
 fun LoginScreen(
     vm: LoginViewModel,
     onLogin: () -> Unit,
+    onHealthCheck: () -> Unit,
+    showNetworkDiagnostics: Boolean,
 ) {
     val state by vm.state.collectAsState()
     val spacing = SpineTheme.spacing
@@ -85,12 +87,40 @@ fun LoginScreen(
                     style = SpineTheme.typography.subhead.copy(color = colors.error),
                 )
             }
+            state.errorDetails?.let {
+                SpineText(
+                    text = it,
+                    style = SpineTheme.typography.caption.copy(color = colors.textSecondary),
+                )
+            }
             SpineButton(
                 text = if (state.loading) "登录中..." else "登录",
                 onClick = onLogin,
                 enabled = !state.loading,
                 modifier = Modifier.fillMaxWidth(),
             )
+            if (showNetworkDiagnostics) {
+                SpineButton(
+                    text = if (state.healthChecking) "检测中..." else "连接自检(/health)",
+                    onClick = onHealthCheck,
+                    enabled = !state.healthChecking,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                state.healthStatus?.let {
+                    SpineText(
+                        text = it,
+                        style = SpineTheme.typography.subhead.copy(
+                            color = if (it.startsWith("后端连通")) colors.success else colors.warning,
+                        ),
+                    )
+                }
+                state.healthDetails?.let {
+                    SpineText(
+                        text = it,
+                        style = SpineTheme.typography.caption.copy(color = colors.textSecondary),
+                    )
+                }
+            }
         }
     }
 }

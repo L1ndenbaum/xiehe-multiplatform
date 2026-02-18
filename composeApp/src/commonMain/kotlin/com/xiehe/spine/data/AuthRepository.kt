@@ -8,6 +8,10 @@ class AuthRepository(
     private val apiClient: ApiClient,
     private val sessionStore: SessionStore,
 ) {
+    suspend fun healthCheck(): AppResult<HealthData> {
+        return apiClient.get(path = "/health/")
+    }
+
     fun restoreSession(): UserSession? = sessionStore.load()
 
     suspend fun login(username: String, password: String): AppResult<UserSession> {

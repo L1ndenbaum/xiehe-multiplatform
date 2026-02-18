@@ -18,6 +18,14 @@ private class AndroidKeyValueStore(context: Context) : KeyValueStore {
     }
 }
 
-fun createAndroidAppContainer(context: Context): AppContainer {
-    return AppContainer.create(store = AndroidKeyValueStore(context.applicationContext))
+fun createAndroidAppContainer(
+    context: Context,
+    baseUrl: String,
+    enableNetworkDiagnostics: Boolean,
+): AppContainer {
+    return AppContainer.create(
+        store = AndroidKeyValueStore(context.applicationContext),
+        baseUrl = baseUrl,
+        enableNetworkDiagnostics = enableNetworkDiagnostics,
+    )
 }

@@ -7,5 +7,6 @@ sealed interface AppResult<out T> {
         val message: String,
         val code: Int? = null,
         val isUnauthorized: Boolean = false,
+        val debugDetails: String? = null,
     ) : AppResult<Nothing>
 }

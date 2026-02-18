@@ -24,13 +24,51 @@ class AppContainer private constructor(
         fun create(
             store: KeyValueStore,
             baseUrl: String = defaultBaseUrl,
+            enableNetworkDiagnostics: Boolean = false,
+            httpClient: HttpClient? = null,
         ): AppContainer {
             val json = Json {
                 ignoreUnknownKeys = true
                 isLenient = true
                 explicitNulls = false
             }
-            val httpClient = HttpClient {
+            val sharedHttpClient = httpClient ?: createDefaultHttpClient(
+                json = json,
+                enableNetworkDiagnostics = enableNetworkDiagnostics,
+            )
+            val instrumentedApiClient = ApiClient(
+                httpClient = sharedHttpClient,
+                baseUrl = baseUrl,
+                enableDiagnostics = enableNetworkDiagnostics,
+            )
+            val sessionStore = SessionStore(store = store, json = json)
+            val authRepository = AuthRepository(apiClient = instrumentedApiClient, sessionStore = sessionStore)
+            return AppContainer(
+                authRepository = authRepository,
+                dashboardRepository = DashboardRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
+                patientRepository = PatientRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
+                themeRepository = ThemePreferenceRepository(store = store),
+            )
+        }
+
+        fun createInMemory(
+            baseUrl: String = defaultBaseUrl,
+            enableNetworkDiagnostics: Boolean = false,
+            httpClient: HttpClient? = null,
+        ): AppContainer {
+            return create(
+                store = InMemoryKeyValueStore(),
+                baseUrl = baseUrl,
+                enableNetworkDiagnostics = enableNetworkDiagnostics,
+                httpClient = httpClient,
+            )
+        }
+
+        private fun createDefaultHttpClient(
+            json: Json,
+            enableNetworkDiagnostics: Boolean,
+        ): HttpClient {
+            return HttpClient {
                 install(ContentNegotiation) {
                     json(json)
                 }
@@ -40,22 +78,9 @@ class AppContainer private constructor(
                             // Keep network logging opt-in and non-crashing across targets.
                         }
                     }
-                    level = LogLevel.NONE
+                    level = if (enableNetworkDiagnostics) LogLevel.HEADERS else LogLevel.NONE
                 }
             }
-            val apiClient = ApiClient(httpClient = httpClient, baseUrl = baseUrl)
-            val sessionStore = SessionStore(store = store, json = json)
-            val authRepository = AuthRepository(apiClient = apiClient, sessionStore = sessionStore)
-            return AppContainer(
-                authRepository = authRepository,
-                dashboardRepository = DashboardRepository(apiClient = apiClient, authRepository = authRepository),
-                patientRepository = PatientRepository(apiClient = apiClient, authRepository = authRepository),
-                themeRepository = ThemePreferenceRepository(store = store),
-            )
-        }
-
-        fun createInMemory(baseUrl: String = defaultBaseUrl): AppContainer {
-            return create(store = InMemoryKeyValueStore(), baseUrl = baseUrl)
         }
     }
 }

@@ -116,3 +116,11 @@ data class CreatePatientRequest(
     @SerialName("id_card") val idCard: String,
     val address: String,
 )
+
+@Serializable
+data class HealthData(
+    val status: String? = null,
+    val timestamp: String? = null,
+    val version: String? = null,
+    val environment: String? = null,
+)
