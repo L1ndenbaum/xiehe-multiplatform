@@ -11,6 +11,12 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
+val allowCleartextTraffic = providers
+    .gradleProperty("allowCleartextTraffic")
+    .orNull
+    ?.toBooleanStrictOrNull()
+    ?: false
+
 kotlin {
     androidTarget {
         compilerOptions {
@@ -91,6 +97,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        manifestPlaceholders["usesCleartextTraffic"] = allowCleartextTraffic.toString()
     }
     packaging {
         resources {

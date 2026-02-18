@@ -1,9 +1,9 @@
-name: Android Release APK
+name: Android Dev Release APK
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*_dev'
   workflow_dispatch:
 
 permissions:
@@ -26,8 +26,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Debug APK
-        run: ./gradlew :composeApp:assembleDebug --stacktrace
+      - name: Build Debug APK (dev allows HTTP cleartext)
+        run: ./gradlew :composeApp:assembleDebug -PallowCleartextTraffic=true --stacktrace
+
+      - name: Normalize APK name
+        shell: bash
+        run: |
+          APK_PATH=$(ls composeApp/build/outputs/apk/debug/*.apk | head -n1)
+          cp "$APK_PATH" xiehe-spine.apk
 
       - name: Compute Release Metadata
         id: meta
@@ -35,15 +41,13 @@ jobs:
         run: |
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-            echo "name=Android APK ${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "name=Android Dev APK ${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           else
             SHORT_SHA="${GITHUB_SHA::7}"
             DATE="$(date +'%Y%m%d-%H%M')"
-            TAG="manual-${DATE}-${SHORT_SHA}"
+            TAG="dev-${DATE}-${SHORT_SHA}"
             echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-            echo "name=Android APK ${TAG}" >> "$GITHUB_OUTPUT"
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "name=Android Dev APK ${TAG}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Publish APK to GitHub Release
@@ -51,6 +55,6 @@ jobs:
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
           name: ${{ steps.meta.outputs.name }}
-          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
-          files: composeApp/build/outputs/apk/debug/*.apk
+          prerelease: true
+          files: xiehe-spine.apk
           fail_on_unmatched_files: true
