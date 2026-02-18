@@ -11,11 +11,10 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
-val allowCleartextTraffic = providers
+val allowCleartextTrafficOverride = providers
     .gradleProperty("allowCleartextTraffic")
     .orNull
     ?.toBooleanStrictOrNull()
-    ?: false
 
 kotlin {
     androidTarget {
@@ -97,7 +96,6 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
-        manifestPlaceholders["usesCleartextTraffic"] = allowCleartextTraffic.toString()
     }
     packaging {
         resources {
@@ -105,8 +103,14 @@ android {
         }
     }
     buildTypes {
+        getByName("debug") {
+            manifestPlaceholders["usesCleartextTraffic"] =
+                (allowCleartextTrafficOverride ?: true).toString()
+        }
         getByName("release") {
             isMinifyEnabled = false
+            manifestPlaceholders["usesCleartextTraffic"] =
+                (allowCleartextTrafficOverride ?: false).toString()
         }
     }
     compileOptions {
