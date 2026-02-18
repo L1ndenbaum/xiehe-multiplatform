@@ -10,10 +10,33 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+enum class GenderFilter(
+    val label: String,
+    val queryValue: String?,
+) {
+    ALL("全部性别", null),
+    MALE("男", "male"),
+    FEMALE("女", "female"),
+}
+
+enum class AgeFilter(
+    val label: String,
+    val min: Int?,
+    val max: Int?,
+) {
+    ALL("全部年龄", null, null),
+    AGE_0_18("0-18岁", 0, 18),
+    AGE_19_40("19-40岁", 19, 40),
+    AGE_41_60("41-60岁", 41, 60),
+    AGE_60_PLUS("60岁以上", 61, null),
+}
+
 data class PatientsUiState(
     val loading: Boolean = false,
     val loadingMore: Boolean = false,
     val search: String = "",
+    val genderFilter: GenderFilter = GenderFilter.ALL,
+    val ageFilter: AgeFilter = AgeFilter.ALL,
     val items: List<PatientSummary> = emptyList(),
     val page: Int = 1,
     val totalPages: Int = 1,
@@ -26,6 +49,14 @@ class PatientsViewModel : BaseViewModel() {
 
     fun updateSearch(value: String) {
         _state.update { it.copy(search = value) }
+    }
+
+    fun updateGenderFilter(value: GenderFilter) {
+        _state.update { it.copy(genderFilter = value) }
+    }
+
+    fun updateAgeFilter(value: AgeFilter) {
+        _state.update { it.copy(ageFilter = value) }
     }
 
     fun refresh(
@@ -76,12 +107,18 @@ class PatientsViewModel : BaseViewModel() {
                 )
             }
             val search = _state.value.search
+            val gender = _state.value.genderFilter.queryValue
+            val ageMin = _state.value.ageFilter.min
+            val ageMax = _state.value.ageFilter.max
             when (
                 val result = repository.loadPatients(
                     session = session,
                     page = page,
                     pageSize = 10,
                     search = search,
+                    gender = gender,
+                    ageMin = ageMin,
+                    ageMax = ageMax,
                 )
             ) {
                 is AppResult.Success -> {

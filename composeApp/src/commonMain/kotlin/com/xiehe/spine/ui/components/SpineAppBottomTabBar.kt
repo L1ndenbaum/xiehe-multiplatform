@@ -1,7 +1,6 @@
 package com.xiehe.spine.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
@@ -50,10 +50,10 @@ fun SpineBottomTabBar(
                 animationSpec = tween(durationMillis = 180),
                 label = "tab_tone",
             )
-            val markerScale by animateFloatAsState(
-                targetValue = if (selected) 1f else 0.55f,
+            val markerWidth by androidx.compose.animation.core.animateDpAsState(
+                targetValue = if (selected) 22.dp else 0.dp,
                 animationSpec = tween(durationMillis = 180),
-                label = "tab_marker",
+                label = "tab_indicator_width",
             )
             Column(
                 modifier = Modifier
@@ -66,10 +66,10 @@ fun SpineBottomTabBar(
             ) {
                 Box(
                     modifier = Modifier
-                        .width((18 * markerScale).dp)
-                        .height((4 * markerScale).dp)
+                        .width(markerWidth)
+                        .height(4.dp)
                         .clip(RoundedCornerShape(SpineTheme.radius.full))
-                        .background(if (selected) activeColor else mutedColor.copy(alpha = 0.35f)),
+                        .background(if (selected) activeColor else Color.Transparent),
                 )
                 SpineGlyphIcon(
                     glyph = icons.getOrNull(index) ?: SpineGlyph.DASHBOARD,

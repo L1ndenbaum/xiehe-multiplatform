@@ -1,28 +1,42 @@
 package com.xiehe.spine.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.PatientRepository
 import com.xiehe.spine.ui.components.SpineButton
+import com.xiehe.spine.ui.components.SpineDatePickerField
+import com.xiehe.spine.ui.components.SpineFilterSelector
 import com.xiehe.spine.ui.components.SpineGlyph
-import com.xiehe.spine.ui.components.SpineSelectablePill
 import com.xiehe.spine.ui.components.SpineText
 import com.xiehe.spine.ui.components.SpineTextField
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
+
+private data class GenderOption(
+    val label: String,
+    val value: String,
+)
 
 @Composable
 fun PatientFormScreen(
@@ -34,6 +48,12 @@ fun PatientFormScreen(
 ) {
     val state by vm.state.collectAsState()
     val scroll = rememberScrollState()
+    var genderPickerVisible by remember { mutableStateOf(false) }
+
+    val options = listOf(
+        GenderOption("男", "male"),
+        GenderOption("女", "female"),
+    )
 
     Column(
         modifier = Modifier
@@ -43,20 +63,39 @@ fun PatientFormScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        SpineTextField(value = state.name, onValueChange = vm::updateName, placeholder = "患者姓名")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SpineSelectablePill(text = "男", selected = state.gender == "男", onClick = { vm.updateGender("男") })
-            SpineSelectablePill(text = "女", selected = state.gender == "女", onClick = { vm.updateGender("女") })
-        }
-        SpineTextField(value = state.birthDate, onValueChange = vm::updateBirthDate, placeholder = "出生日期(yyyy-MM-dd)")
-        SpineTextField(value = state.phone, onValueChange = vm::updatePhone, placeholder = "手机号")
-        SpineTextField(value = state.idCard, onValueChange = vm::updateIdCard, placeholder = "身份证号")
-        SpineTextField(value = state.address, onValueChange = vm::updateAddress, placeholder = "联系地址")
+        SpineTextField(value = state.name, onValueChange = vm::updateName, placeholder = "请输入患者姓名")
+
+        SpineFilterSelector(
+            text = options.firstOrNull { it.value == state.gender }?.label ?: "请选择患者性别",
+            modifier = Modifier.fillMaxWidth(),
+            leadingGlyph = SpineGlyph.PROFILE,
+            onClick = { genderPickerVisible = true },
+        )
+
+        SpineDatePickerField(
+            value = state.birthDate,
+            onValueChange = vm::updateBirthDate,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        SpineTextField(value = state.idCard, onValueChange = vm::updateIdCard, placeholder = "请输入18位身份证号")
+        SpineTextField(value = state.phone, onValueChange = vm::updatePhone, placeholder = "+8613800138000")
+        SpineTextField(value = state.email, onValueChange = vm::updateEmail, placeholder = "请输入邮箱(可选)")
+        SpineTextField(value = state.address, onValueChange = vm::updateAddress, placeholder = "请输入家庭地址")
+        SpineTextField(
+            value = state.medicalHistory,
+            onValueChange = vm::updateMedicalHistory,
+            placeholder = "请输入病史备注",
+            singleLine = false,
+            modifier = Modifier.fillMaxWidth().height(120.dp),
+        )
+
         state.errorMessage?.let {
             SpineText(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
         }
+
         SpineButton(
-            text = if (state.loading) "提交中..." else "保存患者",
+            text = if (state.loading) "提交中..." else "创建患者",
             onClick = {
                 vm.submit(
                     session = session,
@@ -69,5 +108,48 @@ fun PatientFormScreen(
             modifier = Modifier.fillMaxWidth(),
             leadingGlyph = SpineGlyph.CHECK,
         )
+    }
+
+    if (genderPickerVisible) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.22f))
+                .clickable { genderPickerVisible = false },
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 40.dp)
+                    .background(SpineTheme.colors.surface, RoundedCornerShape(SpineTheme.radius.lg))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                SpineText(text = "请选择患者性别", style = SpineTheme.typography.title)
+                options.forEach { option ->
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = if (state.gender == option.value) SpineTheme.colors.primaryMuted else SpineTheme.colors.surface,
+                                shape = RoundedCornerShape(SpineTheme.radius.md),
+                            )
+                            .clickable {
+                                vm.updateGender(option.value)
+                                genderPickerVisible = false
+                            }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SpineText(option.label)
+                        if (state.gender == option.value) {
+                            SpineText("✓", color = SpineTheme.colors.primary)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

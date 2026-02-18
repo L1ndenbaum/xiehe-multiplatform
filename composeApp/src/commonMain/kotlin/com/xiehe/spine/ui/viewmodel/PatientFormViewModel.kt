@@ -13,11 +13,15 @@ import kotlinx.coroutines.launch
 data class PatientFormUiState(
     val patientId: String = generatedPatientId(),
     val name: String = "",
-    val gender: String = "男",
+    val gender: String = "male",
     val birthDate: String = "1990-01-01",
-    val phone: String = "",
+    val phone: String = "+86",
+    val email: String = "",
     val idCard: String = "",
     val address: String = "",
+    val emergencyContactName: String = "",
+    val emergencyContactPhone: String = "",
+    val medicalHistory: String = "",
     val loading: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -29,9 +33,13 @@ class PatientFormViewModel : BaseViewModel() {
     fun updateName(value: String) = _state.update { it.copy(name = value) }
     fun updateGender(value: String) = _state.update { it.copy(gender = value) }
     fun updateBirthDate(value: String) = _state.update { it.copy(birthDate = value) }
-    fun updatePhone(value: String) = _state.update { it.copy(phone = value) }
+    fun updatePhone(value: String) = _state.update { it.copy(phone = sanitizePhone(value)) }
+    fun updateEmail(value: String) = _state.update { it.copy(email = value) }
     fun updateIdCard(value: String) = _state.update { it.copy(idCard = value) }
     fun updateAddress(value: String) = _state.update { it.copy(address = value) }
+    fun updateEmergencyContactName(value: String) = _state.update { it.copy(emergencyContactName = value) }
+    fun updateEmergencyContactPhone(value: String) = _state.update { it.copy(emergencyContactPhone = sanitizePhone(value)) }
+    fun updateMedicalHistory(value: String) = _state.update { it.copy(medicalHistory = value) }
 
     fun submit(
         session: UserSession,
@@ -40,19 +48,35 @@ class PatientFormViewModel : BaseViewModel() {
         onSuccess: () -> Unit,
     ) {
         val form = _state.value
-        if (form.name.isBlank() || form.phone.isBlank()) {
-            _state.update { it.copy(errorMessage = "患者姓名与手机号为必填") }
+        if (form.name.trim().length < 2) {
+            _state.update { it.copy(errorMessage = "患者姓名至少2个字符") }
+            return
+        }
+        if (!isValidBirthDate(form.birthDate)) {
+            _state.update { it.copy(errorMessage = "请选择有效的出生日期") }
+            return
+        }
+        if (!PHONE_PATTERN.matches(form.phone)) {
+            _state.update { it.copy(errorMessage = "联系电话需为 +86 开头并包含11位手机号，如 +8613800138000") }
+            return
+        }
+        if (form.idCard.isBlank() || !ID_CARD_PATTERN.matches(form.idCard.trim())) {
+            _state.update { it.copy(errorMessage = "身份证号必须为18位数字或字母") }
             return
         }
 
         val request = CreatePatientRequest(
             patientId = form.patientId,
-            name = form.name,
+            name = form.name.trim(),
             gender = form.gender,
             birthDate = form.birthDate,
             phone = form.phone,
-            idCard = form.idCard,
-            address = form.address,
+            idCard = form.idCard.trim(),
+            email = form.email.trim().ifBlank { null },
+            address = form.address.trim().ifBlank { null },
+            emergencyContactName = form.emergencyContactName.trim().ifBlank { null },
+            emergencyContactPhone = form.emergencyContactPhone.trim().ifBlank { null },
+            medicalHistory = form.medicalHistory.trim().ifBlank { null },
         )
 
         scope.launch {
@@ -69,5 +93,26 @@ class PatientFormViewModel : BaseViewModel() {
                 }
             }
         }
+    }
+
+    private fun sanitizePhone(raw: String): String {
+        val hasPrefix = raw.startsWith("+86")
+        val digits = raw.filter { it.isDigit() }
+        val body = when {
+            hasPrefix -> digits.removePrefix("86")
+            raw.startsWith("+") -> digits
+            digits.startsWith("86") && digits.length > 11 -> digits.removePrefix("86")
+            else -> digits
+        }.take(11)
+        return "+86$body"
+    }
+
+    private fun isValidBirthDate(value: String): Boolean {
+        return value.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$"))
+    }
+
+    private companion object {
+        val PHONE_PATTERN = Regex("^\\+86\\d{11}$")
+        val ID_CARD_PATTERN = Regex("^[0-9A-Za-z]{18}$")
     }
 }

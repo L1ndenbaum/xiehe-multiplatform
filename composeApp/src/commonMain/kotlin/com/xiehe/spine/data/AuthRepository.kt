@@ -4,6 +4,11 @@ import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.SessionStore
 import com.xiehe.spine.core.store.UserSession
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class AuthRepository(
     private val apiClient: ApiClient,
@@ -20,7 +25,12 @@ class AuthRepository(
         if (loaded.accessTokenExpiresAtEpochSeconds != null) {
             return loaded
         }
-        val patched = loaded.copy(accessTokenExpiresAtEpochSeconds = currentEpochSeconds() + 300L)
+        val patched = loaded.copy(
+            accessTokenExpiresAtEpochSeconds = resolveAccessTokenExpiry(
+                accessToken = loaded.accessToken,
+                expiresIn = null,
+            ) ?: (currentEpochSeconds() + 300L),
+        )
         sessionStore.save(patched)
         return patched
     }
@@ -41,7 +51,10 @@ class AuthRepository(
                     username = payload.user.username,
                     email = payload.user.email,
                     fullName = payload.user.fullName,
-                    accessTokenExpiresAtEpochSeconds = currentEpochSeconds() + payload.expiresIn.toLong(),
+                    accessTokenExpiresAtEpochSeconds = resolveAccessTokenExpiry(
+                        accessToken = payload.accessToken,
+                        expiresIn = payload.expiresIn,
+                    ),
                 )
                 sessionStore.save(session)
                 AppResult.Success(session)
@@ -53,17 +66,20 @@ class AuthRepository(
 
     suspend fun refreshToken(session: UserSession): AppResult<UserSession> {
         return when (
-            val result = apiClient.post<LoginData, RefreshRequest>(
+            val result = apiClient.post<RefreshData, RefreshRequest>(
                 path = "/auth/refresh",
                 body = RefreshRequest(refreshToken = session.refreshToken),
             )
         ) {
             is AppResult.Success -> {
-                val payload = result.data
+                val payload = result.data.tokens
                 val next = session.copy(
                     accessToken = payload.accessToken,
                     refreshToken = payload.refreshToken,
-                    accessTokenExpiresAtEpochSeconds = currentEpochSeconds() + payload.expiresIn.toLong(),
+                    accessTokenExpiresAtEpochSeconds = resolveAccessTokenExpiry(
+                        accessToken = payload.accessToken,
+                        expiresIn = payload.expiresIn,
+                    ),
                 )
                 sessionStore.save(next)
                 AppResult.Success(next)
@@ -75,6 +91,32 @@ class AuthRepository(
                 }
                 result
             }
+        }
+    }
+
+    suspend fun register(
+        username: String,
+        email: String,
+        password: String,
+        confirmPassword: String,
+        fullName: String,
+        phone: String?,
+    ): AppResult<UserDto> {
+        return when (
+            val result = apiClient.post<RegisterData, RegisterRequest>(
+                path = "/auth/register",
+                body = RegisterRequest(
+                    username = username,
+                    email = email,
+                    password = password,
+                    confirmPassword = confirmPassword,
+                    fullName = fullName,
+                    phone = phone,
+                ),
+            )
+        ) {
+            is AppResult.Success -> AppResult.Success(result.data.user)
+            is AppResult.Failure -> result
         }
     }
 
@@ -90,5 +132,31 @@ class AuthRepository(
 
     fun logout() {
         sessionStore.clear()
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun resolveAccessTokenExpiry(
+        accessToken: String,
+        expiresIn: Int?,
+    ): Long? {
+        if (expiresIn != null && expiresIn > 0) {
+            return currentEpochSeconds() + expiresIn.toLong()
+        }
+        val payload = accessToken.split('.').getOrNull(1) ?: return null
+        val padded = payload
+            .replace('-', '+')
+            .replace('_', '/')
+            .let {
+                val padLen = (4 - (it.length % 4)) % 4
+                it + "=".repeat(padLen)
+            }
+        val decodedJson = runCatching { Base64.decode(padded).decodeToString() }.getOrNull() ?: return null
+        return runCatching {
+            Json.parseToJsonElement(decodedJson)
+                .jsonObject["exp"]
+                ?.jsonPrimitive
+                ?.content
+                ?.toLong()
+        }.getOrNull()
     }
 }

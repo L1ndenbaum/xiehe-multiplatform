@@ -6,8 +6,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -16,7 +18,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.SpineButton
 import com.xiehe.spine.ui.components.SpineGlyph
@@ -31,10 +38,12 @@ fun LoginScreen(
     onLogin: () -> Unit,
     onHealthCheck: () -> Unit,
     showNetworkDiagnostics: Boolean,
+    onOpenRegister: () -> Unit,
 ) {
     val state by vm.state.collectAsState()
     val spacing = SpineTheme.spacing
     val colors = SpineTheme.colors
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -49,20 +58,34 @@ fun LoginScreen(
             SpineText(text = "协和医疗", style = SpineTheme.typography.display)
             SpineText(text = "登录医疗影像诊断系统", style = SpineTheme.typography.subhead)
         }
+
         Column(verticalArrangement = Arrangement.spacedBy(spacing.base)) {
+            SpineText(text = "用户名或邮箱", style = SpineTheme.typography.subhead)
             SpineTextField(
                 value = state.username,
                 onValueChange = vm::updateUsername,
-                placeholder = "用户名",
+                placeholder = "请输入用户名或邮箱",
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            SpineText(text = "密码", style = SpineTheme.typography.subhead)
             SpineTextField(
                 value = state.password,
                 onValueChange = vm::updatePassword,
-                placeholder = "密码",
-                password = true,
+                placeholder = "请输入密码",
+                password = !passwordVisible,
                 modifier = Modifier.fillMaxWidth(),
+                trailingGlyph = if (passwordVisible) SpineGlyph.EYE_OFF else SpineGlyph.EYE,
+                onTrailingClick = { passwordVisible = !passwordVisible },
             )
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                SpineText(
+                    text = "忘记密码?",
+                    style = SpineTheme.typography.subhead.copy(color = colors.primary, fontWeight = FontWeight.SemiBold),
+                )
+            }
+
             AnimatedVisibility(
                 visible = state.errorMessage != null,
                 enter = fadeIn() + slideInVertically { -it / 3 },
@@ -73,19 +96,34 @@ fun LoginScreen(
                     style = SpineTheme.typography.subhead.copy(color = colors.error),
                 )
             }
+
             state.errorDetails?.let {
                 SpineText(
                     text = it,
                     style = SpineTheme.typography.caption.copy(color = colors.textSecondary),
                 )
             }
+
             SpineButton(
                 text = if (state.loading) "登录中..." else "登录",
                 onClick = onLogin,
                 enabled = !state.loading,
                 modifier = Modifier.fillMaxWidth(),
-                leadingGlyph = SpineGlyph.PROFILE,
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SpineText(text = "还没有账号?", style = SpineTheme.typography.subhead)
+                SpineText(
+                    text = " 立即注册",
+                    style = SpineTheme.typography.subhead.copy(color = colors.primary, fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier.clickable(onClick = onOpenRegister),
+                )
+            }
+
             if (showNetworkDiagnostics) {
                 SpineButton(
                     text = if (state.healthChecking) "检测中..." else "连接自检(/health)",

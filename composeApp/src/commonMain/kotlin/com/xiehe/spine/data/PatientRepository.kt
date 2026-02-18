@@ -2,6 +2,7 @@ package com.xiehe.spine.data
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.json.JsonObject
 
 class PatientRepository(
@@ -13,6 +14,9 @@ class PatientRepository(
         page: Int,
         pageSize: Int,
         search: String,
+        gender: String? = null,
+        ageMin: Int? = null,
+        ageMax: Int? = null,
     ): AppResult<Pair<UserSession, PatientPageData>> {
         val path = buildString {
             append("/patients/?page=")
@@ -21,7 +25,19 @@ class PatientRepository(
             append(pageSize)
             if (search.isNotBlank()) {
                 append("&search=")
-                append(search)
+                append(search.encodeURLParameter())
+            }
+            if (!gender.isNullOrBlank()) {
+                append("&gender=")
+                append(gender)
+            }
+            if (ageMin != null) {
+                append("&age_min=")
+                append(ageMin)
+            }
+            if (ageMax != null) {
+                append("&age_max=")
+                append(ageMax)
             }
         }
         return withRefresh(session) { activeSession ->

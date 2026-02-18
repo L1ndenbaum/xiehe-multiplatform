@@ -51,6 +51,10 @@ data class CreatePatientRequest(
     val gender: String,
     @SerialName("birth_date") val birthDate: String,
     val phone: String,
-    @SerialName("id_card") val idCard: String,
-    val address: String,
+    @SerialName("id_card") val idCard: String? = null,
+    val email: String? = null,
+    val address: String? = null,
+    @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
+    @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
+    @SerialName("medical_history") val medicalHistory: String? = null,
 )

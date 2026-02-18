@@ -70,9 +70,11 @@ class ApiClient(
             val envelope = response.body<ApiEnvelope<T>>()
             val payload = envelope.data
             if (payload == null) {
+                val unauthorizedByEnvelope = envelope.code == HttpStatusCode.Unauthorized.value
                 val result = AppResult.Failure(
                     message = envelope.message,
                     code = envelope.code,
+                    isUnauthorized = unauthorizedByEnvelope,
                     debugDetails = "[$requestName] $requestUrl data is null; envelopeCode=${envelope.code}",
                 )
                 logDone(mark, requestName, requestUrl, "failure(code=${envelope.code})")

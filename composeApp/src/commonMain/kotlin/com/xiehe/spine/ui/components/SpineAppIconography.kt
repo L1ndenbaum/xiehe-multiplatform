@@ -8,12 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +29,7 @@ enum class SpineGlyph {
     DASHBOARD,
     PATIENTS,
     IMAGES,
+    MESSAGE,
     PROFILE,
     BACK,
     ADD,
@@ -40,6 +38,11 @@ enum class SpineGlyph {
     HOURGLASS,
     CHECK,
     IMAGE,
+    SEARCH,
+    CALENDAR,
+    CHEVRON_DOWN,
+    EYE,
+    EYE_OFF,
 }
 
 @Composable
@@ -212,6 +215,111 @@ fun SpineGlyphIcon(
                     strokeWidth = stroke.width,
                     cap = StrokeCap.Round,
                 )
+            }
+
+            SpineGlyph.SEARCH -> {
+                drawCircle(
+                    color = tint,
+                    radius = size.minDimension * 0.24f,
+                    center = Offset(size.width * 0.42f, size.height * 0.42f),
+                    style = stroke,
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.58f, size.height * 0.58f),
+                    end = Offset(size.width * 0.82f, size.height * 0.82f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+            }
+
+            SpineGlyph.CALENDAR -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.12f, size.height * 0.20f),
+                    size = Size(size.width * 0.76f, size.height * 0.66f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.08f),
+                    style = stroke,
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.12f, size.height * 0.36f),
+                    end = Offset(size.width * 0.88f, size.height * 0.36f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.30f, size.height * 0.14f),
+                    end = Offset(size.width * 0.30f, size.height * 0.28f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.70f, size.height * 0.14f),
+                    end = Offset(size.width * 0.70f, size.height * 0.28f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+            }
+
+            SpineGlyph.CHEVRON_DOWN -> {
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.26f, size.height * 0.38f),
+                    end = Offset(size.width * 0.50f, size.height * 0.62f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.74f, size.height * 0.38f),
+                    end = Offset(size.width * 0.50f, size.height * 0.62f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+            }
+
+            SpineGlyph.EYE, SpineGlyph.EYE_OFF -> {
+                val eye = Path().apply {
+                    moveTo(size.width * 0.12f, size.height * 0.50f)
+                    quadraticTo(size.width * 0.50f, size.height * 0.16f, size.width * 0.88f, size.height * 0.50f)
+                    quadraticTo(size.width * 0.50f, size.height * 0.84f, size.width * 0.12f, size.height * 0.50f)
+                    close()
+                }
+                drawPath(eye, tint, style = stroke)
+                drawCircle(
+                    color = tint,
+                    radius = size.minDimension * 0.12f,
+                    center = Offset(size.width * 0.50f, size.height * 0.50f),
+                    style = stroke,
+                )
+                if (glyph == SpineGlyph.EYE_OFF) {
+                    drawLine(
+                        color = tint,
+                        start = Offset(size.width * 0.18f, size.height * 0.82f),
+                        end = Offset(size.width * 0.82f, size.height * 0.18f),
+                        strokeWidth = stroke.width,
+                        cap = StrokeCap.Round,
+                    )
+                }
+            }
+
+            SpineGlyph.MESSAGE -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.12f, size.height * 0.18f),
+                    size = Size(size.width * 0.76f, size.height * 0.56f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.10f),
+                    style = stroke,
+                )
+                val tail = Path().apply {
+                    moveTo(size.width * 0.34f, size.height * 0.74f)
+                    lineTo(size.width * 0.26f, size.height * 0.90f)
+                    lineTo(size.width * 0.46f, size.height * 0.78f)
+                }
+                drawPath(tail, tint, style = stroke)
             }
         }
     }
