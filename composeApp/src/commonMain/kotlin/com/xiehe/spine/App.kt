@@ -36,10 +36,12 @@ import com.xiehe.spine.ui.viewmodel.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.PatientsViewModel
+import kotlinx.coroutines.delay
 
 private sealed interface OverlayRoute {
     data class PatientDetail(val patientId: Int) : OverlayRoute
     data object PatientForm : OverlayRoute
+    data class PatientEdit(val patientId: Int) : OverlayRoute
     data object Appearance : OverlayRoute
     data object PersonalInfo : OverlayRoute
     data object ChangePassword : OverlayRoute
@@ -95,6 +97,37 @@ fun App(
             return@SpineTheme
         }
 
+        PlatformBackHandler(enabled = route != null) {
+            route = null
+        }
+
+        LaunchedEffect(session?.refreshToken, session?.accessTokenExpiresAtEpochSeconds) {
+            while (true) {
+                val active = session ?: break
+                val expiresAt = active.accessTokenExpiresAtEpochSeconds ?: break
+                val waitSeconds = (expiresAt - currentEpochSeconds() - 120L).coerceAtLeast(30L)
+                delay(waitSeconds * 1000L)
+                val current = session ?: break
+                when (val result = appContainer.authRepository.ensureFreshSession(current)) {
+                    is com.xiehe.spine.core.model.AppResult.Success -> {
+                        if (result.data != current) {
+                            session = result.data
+                        }
+                    }
+
+                    is com.xiehe.spine.core.model.AppResult.Failure -> {
+                        if (result.isUnauthorized) {
+                            appContainer.authRepository.logout()
+                            session = null
+                            route = null
+                            selectedTab = 0
+                            break
+                        }
+                    }
+                }
+            }
+        }
+
         val activeSession = session!!
         val scene = remember(selectedTab, route) { AppScene(tab = selectedTab, route = route) }
         AnimatedContent(
@@ -136,6 +169,7 @@ fun App(
                             onSessionUpdated = { session = it },
                             onAddPatient = { route = OverlayRoute.PatientForm },
                             onOpenPatient = { route = OverlayRoute.PatientDetail(it) },
+                            onEditPatient = { route = OverlayRoute.PatientEdit(it) },
                         )
                     }
 
@@ -218,6 +252,20 @@ fun App(
                             onBack = { route = null },
                         ) {
                             AppearanceScreen(vm = appearanceVm)
+                        }
+                    }
+
+                    is OverlayRoute.PatientEdit -> {
+                        MobileShell(
+                            title = "编辑患者",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            PlaceholderScreen(
+                                title = "编辑接口待完善",
+                                description = "患者ID: ${current.patientId}。页面入口已接好，后端编辑接口可用后直接接入。",
+                            )
                         }
                     }
 

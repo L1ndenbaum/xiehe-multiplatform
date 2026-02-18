@@ -7,22 +7,22 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import com.xiehe.spine.currentHour24
 
-private val LocalSpineColors = compositionLocalOf { lightPalette(ThemeBrand.GREEN) }
+private val LocalSpineColors = compositionLocalOf { lightPalette(AppThemeBrandColor.GREEN) }
 private val LocalSpineTypography = compositionLocalOf { defaultTypography() }
-private val LocalSpineSpacing = compositionLocalOf { DefaultSpineSpacing }
-private val LocalSpineRadius = compositionLocalOf { DefaultSpineRadius }
+private val LocalSpineSpacing = compositionLocalOf { DefaultSpineAppSpacing }
+private val LocalSpineRadius = compositionLocalOf { DefaultSpineAppRadius }
 
 object SpineTheme {
-    val colors: SpineColors
+    val colors: SpineAppColors
         @Composable get() = LocalSpineColors.current
 
-    val typography: SpineTypography
+    val typography: SpineAppTypography
         @Composable get() = LocalSpineTypography.current
 
-    val spacing: SpineSpacing
+    val spacing: SpineAppSpacing
         @Composable get() = LocalSpineSpacing.current
 
-    val radius: SpineRadius
+    val radius: SpineAppRadius
         @Composable get() = LocalSpineRadius.current
 }
 
@@ -48,8 +48,8 @@ fun SpineTheme(
     CompositionLocalProvider(
         LocalSpineColors provides colors,
         LocalSpineTypography provides defaultTypography(),
-        LocalSpineSpacing provides DefaultSpineSpacing,
-        LocalSpineRadius provides DefaultSpineRadius,
+        LocalSpineSpacing provides DefaultSpineAppSpacing,
+        LocalSpineRadius provides DefaultSpineAppRadius,
         content = content,
     )
 }

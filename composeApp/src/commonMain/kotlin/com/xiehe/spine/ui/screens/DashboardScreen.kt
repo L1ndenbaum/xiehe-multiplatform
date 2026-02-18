@@ -101,7 +101,7 @@ fun DashboardScreen(
                         overview.imagesToday.toFloat(),
                         (overview.imagesWeek / 7f),
                     ),
-                    labels = listOf("今患", "周均患", "今影", "周均影"),
+                    labels = listOf("今日患者", "周均患者", "今日影像", "周均影像"),
                 )
             }
         }

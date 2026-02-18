@@ -50,6 +50,7 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {

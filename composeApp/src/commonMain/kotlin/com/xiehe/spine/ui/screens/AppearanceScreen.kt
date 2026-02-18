@@ -16,7 +16,7 @@ import com.xiehe.spine.ui.components.SpineCard
 import com.xiehe.spine.ui.components.SpineSelectablePill
 import com.xiehe.spine.ui.components.SpineText
 import com.xiehe.spine.ui.theme.SpineTheme
-import com.xiehe.spine.ui.theme.ThemeBrand
+import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.ThemeMode
 import com.xiehe.spine.ui.viewmodel.AppearanceViewModel
 
@@ -36,13 +36,13 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SpineSelectablePill(
                     text = "绿色",
-                    selected = preference.brand == ThemeBrand.GREEN,
-                    onClick = { vm.updateBrand(ThemeBrand.GREEN) },
+                    selected = preference.brand == AppThemeBrandColor.GREEN,
+                    onClick = { vm.updateBrand(AppThemeBrandColor.GREEN) },
                 )
                 SpineSelectablePill(
                     text = "蓝色",
-                    selected = preference.brand == ThemeBrand.BLUE,
-                    onClick = { vm.updateBrand(ThemeBrand.BLUE) },
+                    selected = preference.brand == AppThemeBrandColor.BLUE,
+                    onClick = { vm.updateBrand(AppThemeBrandColor.BLUE) },
                 )
             }
         }

@@ -11,6 +11,7 @@ data class UserSession(
     val username: String,
     val email: String? = null,
     val fullName: String? = null,
+    val accessTokenExpiresAtEpochSeconds: Long? = null,
 )
 
 class SessionStore(

@@ -5,9 +5,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-internal fun defaultTypography(): SpineTypography {
+internal fun defaultTypography(): SpineAppTypography {
     val family = FontFamily.SansSerif
-    return SpineTypography(
+    return SpineAppTypography(
         display = TextStyle(fontFamily = family, fontWeight = FontWeight.Bold, fontSize = 32.sp),
         title = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 18.sp),
         body = TextStyle(fontFamily = family, fontWeight = FontWeight.Normal, fontSize = 15.sp),

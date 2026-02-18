@@ -2,7 +2,7 @@ package com.xiehe.spine.ui.theme
 
 import androidx.compose.ui.unit.dp
 
-internal val DefaultSpineSpacing = SpineSpacing(
+internal val DefaultSpineAppSpacing = SpineAppSpacing(
     xs = 2.dp,
     sm = 4.dp,
     md = 8.dp,
@@ -13,7 +13,7 @@ internal val DefaultSpineSpacing = SpineSpacing(
     x3l = 24.dp,
 )
 
-internal val DefaultSpineRadius = SpineRadius(
+internal val DefaultSpineAppRadius = SpineAppRadius(
     xs = 4.dp,
     sm = 8.dp,
     md = 12.dp,

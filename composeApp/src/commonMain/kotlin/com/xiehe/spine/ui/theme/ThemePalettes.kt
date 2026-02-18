@@ -2,9 +2,9 @@ package com.xiehe.spine.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-internal fun lightPalette(brand: ThemeBrand): SpineColors {
+internal fun lightPalette(brand: AppThemeBrandColor): SpineAppColors {
     return when (brand) {
-        ThemeBrand.GREEN -> SpineColors(
+        AppThemeBrandColor.GREEN -> SpineAppColors(
             primary = Color(0xFF3D8A5A),
             onPrimary = Color(0xFFFFFFFF),
             primaryMuted = Color(0xFFC8F0D8),
@@ -24,7 +24,7 @@ internal fun lightPalette(brand: ThemeBrand): SpineColors {
             tabInactive = Color(0xFFA8A7A5),
         )
 
-        ThemeBrand.BLUE -> SpineColors(
+        AppThemeBrandColor.BLUE -> SpineAppColors(
             primary = Color(0xFF2F6EA8),
             onPrimary = Color(0xFFFFFFFF),
             primaryMuted = Color(0xFFD0E7FF),
@@ -46,9 +46,9 @@ internal fun lightPalette(brand: ThemeBrand): SpineColors {
     }
 }
 
-internal fun darkPalette(brand: ThemeBrand): SpineColors {
+internal fun darkPalette(brand: AppThemeBrandColor): SpineAppColors {
     return when (brand) {
-        ThemeBrand.GREEN -> SpineColors(
+        AppThemeBrandColor.GREEN -> SpineAppColors(
             primary = Color(0xFF69B885),
             onPrimary = Color(0xFF102016),
             primaryMuted = Color(0xFF1F3A2A),
@@ -68,7 +68,7 @@ internal fun darkPalette(brand: ThemeBrand): SpineColors {
             tabInactive = Color(0xFF7E8B83),
         )
 
-        ThemeBrand.BLUE -> SpineColors(
+        AppThemeBrandColor.BLUE -> SpineAppColors(
             primary = Color(0xFF73A9E0),
             onPrimary = Color(0xFF0E1A27),
             primaryMuted = Color(0xFF1A3045),

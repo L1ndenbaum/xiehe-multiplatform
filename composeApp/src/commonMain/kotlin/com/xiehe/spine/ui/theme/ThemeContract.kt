@@ -6,7 +6,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 
 @Immutable
-enum class ThemeBrand {
+enum class AppThemeBrandColor {
     GREEN,
     BLUE,
 }
@@ -21,12 +21,12 @@ enum class ThemeMode {
 
 @Immutable
 data class ThemePreference(
-    val brand: ThemeBrand = ThemeBrand.GREEN,
+    val brand: AppThemeBrandColor = AppThemeBrandColor.GREEN,
     val mode: ThemeMode = ThemeMode.SYSTEM,
 )
 
 @Immutable
-data class SpineColors(
+data class SpineAppColors(
     val primary: Color,
     val onPrimary: Color,
     val primaryMuted: Color,
@@ -47,7 +47,7 @@ data class SpineColors(
 )
 
 @Immutable
-data class SpineTypography(
+data class SpineAppTypography(
     val display: TextStyle,
     val title: TextStyle,
     val body: TextStyle,
@@ -56,7 +56,7 @@ data class SpineTypography(
 )
 
 @Immutable
-data class SpineSpacing(
+data class SpineAppSpacing(
     val xs: Dp,
     val sm: Dp,
     val md: Dp,
@@ -68,7 +68,7 @@ data class SpineSpacing(
 )
 
 @Immutable
-data class SpineRadius(
+data class SpineAppRadius(
     val xs: Dp,
     val sm: Dp,
     val md: Dp,

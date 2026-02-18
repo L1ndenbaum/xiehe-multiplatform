@@ -1,5 +1,7 @@
 package com.xiehe.spine
 
+import androidx.compose.runtime.Composable
+import platform.Foundation.NSDate
 import platform.UIKit.UIDevice
 
 class IOSPlatform : Platform {
@@ -9,3 +11,12 @@ class IOSPlatform : Platform {
 actual fun getPlatform(): Platform = IOSPlatform()
 
 actual fun currentHour24(): Int = 12
+
+actual fun currentEpochSeconds(): Long = NSDate().timeIntervalSince1970.toLong()
+
+@Composable
+actual fun PlatformBackHandler(
+    enabled: Boolean,
+    onBack: () -> Unit,
+) {
+}

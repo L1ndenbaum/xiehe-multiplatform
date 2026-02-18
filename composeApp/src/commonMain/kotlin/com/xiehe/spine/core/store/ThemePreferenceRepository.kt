@@ -1,6 +1,6 @@
 package com.xiehe.spine.core.store
 
-import com.xiehe.spine.ui.theme.ThemeBrand
+import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.ThemeMode
 import com.xiehe.spine.ui.theme.ThemePreference
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ class ThemePreferenceRepository(
     private val _preference = MutableStateFlow(loadPreference())
     val preference: StateFlow<ThemePreference> = _preference.asStateFlow()
 
-    fun updateBrand(brand: ThemeBrand) {
+    fun updateBrand(brand: AppThemeBrandColor) {
         val next = _preference.value.copy(brand = brand)
         persist(next)
     }
@@ -33,7 +33,7 @@ class ThemePreferenceRepository(
     private fun loadPreference(): ThemePreference {
         val raw = store.getString(preferenceKey) ?: return ThemePreference()
         val parts = raw.split('|')
-        val brand = ThemeBrand.entries.firstOrNull { it.name == parts.getOrNull(0) } ?: ThemeBrand.GREEN
+        val brand = AppThemeBrandColor.entries.firstOrNull { it.name == parts.getOrNull(0) } ?: AppThemeBrandColor.GREEN
         val mode = ThemeMode.entries.firstOrNull { it.name == parts.getOrNull(1) } ?: ThemeMode.SYSTEM
         return ThemePreference(brand = brand, mode = mode)
     }

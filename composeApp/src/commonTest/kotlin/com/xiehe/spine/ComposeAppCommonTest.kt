@@ -4,7 +4,7 @@ import com.xiehe.spine.core.store.InMemoryKeyValueStore
 import com.xiehe.spine.core.store.SessionStore
 import com.xiehe.spine.core.store.ThemePreferenceRepository
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.ui.theme.ThemeBrand
+import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.ThemeMode
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -19,11 +19,11 @@ class ComposeAppCommonTest {
         val store = InMemoryKeyValueStore()
         val repository = ThemePreferenceRepository(store)
 
-        repository.updateBrand(ThemeBrand.BLUE)
+        repository.updateBrand(AppThemeBrandColor.BLUE)
         repository.updateMode(ThemeMode.DARK)
 
         val reloaded = ThemePreferenceRepository(store)
-        assertEquals(ThemeBrand.BLUE, reloaded.preference.value.brand)
+        assertEquals(AppThemeBrandColor.BLUE, reloaded.preference.value.brand)
         assertEquals(ThemeMode.DARK, reloaded.preference.value.mode)
     }
 
@@ -33,7 +33,7 @@ class ComposeAppCommonTest {
         store.putString("theme_preference", "INVALID|INVALID")
 
         val repository = ThemePreferenceRepository(store)
-        assertEquals(ThemeBrand.GREEN, repository.preference.value.brand)
+        assertEquals(AppThemeBrandColor.GREEN, repository.preference.value.brand)
         assertEquals(ThemeMode.SYSTEM, repository.preference.value.mode)
     }
 

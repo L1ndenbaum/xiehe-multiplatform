@@ -15,12 +15,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.PatientRepository
+import com.xiehe.spine.ui.components.SpineAvatar
 import com.xiehe.spine.ui.components.SpineButton
 import com.xiehe.spine.ui.components.SpineCard
+import com.xiehe.spine.ui.components.SpineCompactButton
 import com.xiehe.spine.ui.components.SpineGlyph
 import com.xiehe.spine.ui.components.SpineText
 import com.xiehe.spine.ui.components.SpineTextField
@@ -35,6 +38,7 @@ fun PatientsScreen(
     onSessionUpdated: (UserSession) -> Unit,
     onAddPatient: () -> Unit,
     onOpenPatient: (Int) -> Unit,
+    onEditPatient: (Int) -> Unit,
 ) {
     val state by vm.state.collectAsState()
     val listState = rememberLazyListState()
@@ -85,24 +89,35 @@ fun PatientsScreen(
             state = listState,
         ) {
             items(state.items, key = { it.id }) { patient ->
-                SpineCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(SpineTheme.colors.surface)
-                        .padding(0.dp),
-                ) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            SpineText(text = patient.name, style = SpineTheme.typography.title)
-                            SpineText(text = "ID: ${patient.patientId}  |  ${patient.gender}  ${patient.age}岁")
-                            SpineText(text = patient.phone ?: "无手机号")
+                SpineCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SpineAvatar(name = patient.name)
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            SpineText(text = "${patient.name}·${patient.gender}·${patient.age}岁", style = SpineTheme.typography.title)
+                            SpineText(text = patient.patientId, style = SpineTheme.typography.subhead)
+                            SpineText(text = patient.phone ?: "无手机号", style = SpineTheme.typography.subhead)
                         }
-                        SpineButton(
-                            text = "详情",
-                            onClick = { onOpenPatient(patient.id) },
-                            modifier = Modifier.width(72.dp),
-                            leadingGlyph = SpineGlyph.PROFILE,
-                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            SpineCompactButton(
+                                text = "编辑",
+                                onClick = { onEditPatient(patient.id) },
+                                containerColor = SpineTheme.colors.warning,
+                                contentColor = SpineTheme.colors.onPrimary,
+                            )
+                            SpineCompactButton(
+                                text = "查看",
+                                onClick = { onOpenPatient(patient.id) },
+                                containerColor = SpineTheme.colors.primary,
+                                contentColor = SpineTheme.colors.onPrimary,
+                            )
+                        }
                     }
                 }
             }
