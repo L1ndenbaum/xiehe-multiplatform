@@ -1,5 +1,14 @@
 package com.xiehe.spine
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,6 +57,11 @@ private sealed interface OverlayRoute {
     data object ChangePassword : OverlayRoute
     data object Messages : OverlayRoute
 }
+
+private data class AppScene(
+    val tab: Int,
+    val route: OverlayRoute?,
+)
 
 @Composable
 @Preview
@@ -144,173 +158,188 @@ fun App(
         }
 
         val activeSession = session!!
-
-        if (route == null) {
-            when (selectedTab) {
-                0 -> MobileShell(
-                    title = "工作台",
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                    rightActionGlyph = SpineGlyph.BELL,
-                    onRightAction = { route = OverlayRoute.Messages },
-                ) {
-                    DashboardScreen(
-                        vm = dashboardVm,
-                        session = activeSession,
-                        repository = appContainer.dashboardRepository,
-                        onSessionUpdated = { session = it },
-                    )
+        val scene = remember(selectedTab, route) { AppScene(tab = selectedTab, route = route) }
+        AnimatedContent(
+            targetState = scene,
+            transitionSpec = {
+                val tabSwitchWithoutOverlay = initialState.route == null && targetState.route == null
+                if (tabSwitchWithoutOverlay) {
+                    EnterTransition.None togetherWith ExitTransition.None
+                } else {
+                    (fadeIn(animationSpec = tween(220)) + slideInHorizontally(animationSpec = tween(220)) { it / 6 })
+                        .togetherWith(fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(180)) { -it / 7 })
                 }
-
-                1 -> MobileShell(
-                    title = "患者中心",
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                    rightActionGlyph = SpineGlyph.ADD,
-                    onRightAction = { route = OverlayRoute.PatientForm },
-                ) {
-                    PatientsScreen(
-                        vm = patientsVm,
-                        session = activeSession,
-                        repository = appContainer.patientRepository,
-                        onSessionUpdated = { session = it },
-                        onOpenPatient = { route = OverlayRoute.PatientDetail(it) },
-                        onEditPatient = { route = OverlayRoute.PatientEdit(it) },
-                    )
-                }
-
-                2 -> MobileShell(
-                    title = "影像中心",
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                    rightActionGlyph = SpineGlyph.ADD,
-                ) {
-                    PlaceholderScreen(
-                        title = "影像模块建设中",
-                        description = "当前后端上传与测量接口尚不稳定，已预留页面路由与架构扩展点。",
-                    )
-                }
-
-                else -> MobileShell(
-                    title = "个人中心",
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                ) {
-                    ProfileScreen(
-                        session = activeSession,
-                        onOpenAppearance = { route = OverlayRoute.Appearance },
-                        onOpenPersonalInfo = { route = OverlayRoute.PersonalInfo },
-                        onOpenChangePassword = { route = OverlayRoute.ChangePassword },
-                        onLogout = {
-                            appContainer.authRepository.logout()
-                            session = null
-                            route = null
-                            selectedTab = 0
-                            authRoute = AuthRoute.LOGIN
-                        },
-                    )
-                }
-            }
-        } else {
-            when (val current = route!!) {
-                is OverlayRoute.PatientDetail -> {
-                    MobileShell(
-                        title = "患者信息",
+            },
+            label = "scene_transition",
+        ) { currentScene ->
+            if (currentScene.route == null) {
+                when (currentScene.tab) {
+                    0 -> MobileShell(
+                        title = "工作台",
                         selectedTab = selectedTab,
                         onTabSelected = onTabSelected,
-                        onBack = { route = null },
+                        rightActionGlyph = SpineGlyph.BELL,
+                        onRightAction = { route = OverlayRoute.Messages },
                     ) {
-                        PatientDetailScreen(
-                            patientId = current.patientId,
-                            vm = patientDetailVm,
+                        DashboardScreen(
+                            vm = dashboardVm,
                             session = activeSession,
-                            repository = appContainer.patientRepository,
+                            repository = appContainer.dashboardRepository,
                             onSessionUpdated = { session = it },
                         )
                     }
-                }
 
-                OverlayRoute.PatientForm -> {
-                    MobileShell(
-                        title = "添加患者",
+                    1 -> MobileShell(
+                        title = "患者中心",
                         selectedTab = selectedTab,
                         onTabSelected = onTabSelected,
-                        onBack = { route = null },
+                        rightActionGlyph = SpineGlyph.ADD,
+                        onRightAction = { route = OverlayRoute.PatientForm },
                     ) {
-                        PatientFormScreen(
-                            vm = patientFormVm,
+                        PatientsScreen(
+                            vm = patientsVm,
                             session = activeSession,
                             repository = appContainer.patientRepository,
                             onSessionUpdated = { session = it },
-                            onSubmitSuccess = {
+                            onOpenPatient = { route = OverlayRoute.PatientDetail(it) },
+                            onEditPatient = { route = OverlayRoute.PatientEdit(it) },
+                        )
+                    }
+
+                    2 -> MobileShell(
+                        title = "影像中心",
+                        selectedTab = selectedTab,
+                        onTabSelected = onTabSelected,
+                        rightActionGlyph = SpineGlyph.ADD,
+                    ) {
+                        PlaceholderScreen(
+                            title = "影像模块建设中",
+                            description = "当前后端上传与测量接口尚不稳定，已预留页面路由与架构扩展点。",
+                        )
+                    }
+
+                    else -> MobileShell(
+                        title = "个人中心",
+                        selectedTab = selectedTab,
+                        onTabSelected = onTabSelected,
+                    ) {
+                        ProfileScreen(
+                            session = activeSession,
+                            onOpenAppearance = { route = OverlayRoute.Appearance },
+                            onOpenPersonalInfo = { route = OverlayRoute.PersonalInfo },
+                            onOpenChangePassword = { route = OverlayRoute.ChangePassword },
+                            onLogout = {
+                                appContainer.authRepository.logout()
+                                session = null
                                 route = null
-                                selectedTab = 1
+                                selectedTab = 0
+                                authRoute = AuthRoute.LOGIN
                             },
                         )
                     }
                 }
-
-                is OverlayRoute.PatientEdit -> {
-                    MobileShell(
-                        title = "编辑患者",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        onBack = { route = null },
-                    ) {
-                        PlaceholderScreen(
-                            title = "编辑接口待完善",
-                            description = "患者ID: ${current.patientId}。页面入口已接好，后端编辑接口可用后直接接入。",
-                        )
+            } else {
+                val current = requireNotNull(currentScene.route)
+                when (current) {
+                    is OverlayRoute.PatientDetail -> {
+                        MobileShell(
+                            title = "患者信息",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            PatientDetailScreen(
+                                patientId = current.patientId,
+                                vm = patientDetailVm,
+                                session = activeSession,
+                                repository = appContainer.patientRepository,
+                                onSessionUpdated = { session = it },
+                            )
+                        }
                     }
-                }
 
-                OverlayRoute.Appearance -> {
-                    MobileShell(
-                        title = "外观设置",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        onBack = { route = null },
-                    ) {
-                        AppearanceScreen(vm = appearanceVm)
+                    OverlayRoute.PatientForm -> {
+                        MobileShell(
+                            title = "添加患者",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            PatientFormScreen(
+                                vm = patientFormVm,
+                                session = activeSession,
+                                repository = appContainer.patientRepository,
+                                onSessionUpdated = { session = it },
+                                onSubmitSuccess = {
+                                    route = null
+                                    selectedTab = 1
+                                },
+                            )
+                        }
                     }
-                }
 
-                OverlayRoute.PersonalInfo -> {
-                    MobileShell(
-                        title = "个人信息",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        onBack = { route = null },
-                    ) {
-                        PlaceholderScreen(
-                            title = "个人信息接口待完善",
-                            description = "页面已就绪，等后端接口稳定后可直接接入。",
-                        )
+                    is OverlayRoute.PatientEdit -> {
+                        MobileShell(
+                            title = "编辑患者",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            PlaceholderScreen(
+                                title = "编辑接口待完善",
+                                description = "患者ID: ${current.patientId}。页面入口已接好，后端编辑接口可用后直接接入。",
+                            )
+                        }
                     }
-                }
 
-                OverlayRoute.ChangePassword -> {
-                    MobileShell(
-                        title = "修改密码",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        onBack = { route = null },
-                    ) {
-                        PlaceholderScreen(
-                            title = "修改密码接口待完善",
-                            description = "架构与导航已预留，后续可在不改路由的情况下直接接入。",
-                        )
+                    OverlayRoute.Appearance -> {
+                        MobileShell(
+                            title = "外观设置",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            AppearanceScreen(vm = appearanceVm)
+                        }
                     }
-                }
 
-                OverlayRoute.Messages -> {
-                    MobileShell(
-                        title = "消息中心",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        onBack = { route = null },
-                    ) {
-                        MessagesScreen()
+                    OverlayRoute.PersonalInfo -> {
+                        MobileShell(
+                            title = "个人信息",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            PlaceholderScreen(
+                                title = "个人信息接口待完善",
+                                description = "页面已就绪，等后端接口稳定后可直接接入。",
+                            )
+                        }
+                    }
+
+                    OverlayRoute.ChangePassword -> {
+                        MobileShell(
+                            title = "修改密码",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            PlaceholderScreen(
+                                title = "修改密码接口待完善",
+                                description = "架构与导航已预留，后续可在不改路由的情况下直接接入。",
+                            )
+                        }
+                    }
+
+                    OverlayRoute.Messages -> {
+                        MobileShell(
+                            title = "消息中心",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            MessagesScreen()
+                        }
                     }
                 }
             }

@@ -30,6 +30,8 @@ fun SpineButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     leadingGlyph: SpineGlyph? = null,
+    customContainerColor: androidx.compose.ui.graphics.Color? = null,
+    customContentColor: androidx.compose.ui.graphics.Color? = null,
 ) {
     val colors = SpineTheme.colors
     val interaction = remember { MutableInteractionSource() }
@@ -47,7 +49,7 @@ fun SpineButton(
                 scaleY = scale
             }
             .clip(RoundedCornerShape(SpineTheme.radius.md))
-            .background(if (enabled) colors.primary else colors.surfaceMuted)
+            .background(if (enabled) (customContainerColor ?: colors.primary) else colors.surfaceMuted)
             .clickable(enabled = enabled, interactionSource = interaction, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -59,13 +61,13 @@ fun SpineButton(
                 SpineGlyphIcon(
                     glyph = leadingGlyph,
                     modifier = Modifier.size(16.dp),
-                    tint = if (enabled) colors.onPrimary else colors.textTertiary,
+                    tint = if (enabled) (customContentColor ?: colors.onPrimary) else colors.textTertiary,
                 )
             }
             BasicText(
                 text = text,
                 style = SpineTheme.typography.body.copy(
-                    color = if (enabled) colors.onPrimary else colors.textTertiary,
+                    color = if (enabled) (customContentColor ?: colors.onPrimary) else colors.textTertiary,
                 ),
             )
         }

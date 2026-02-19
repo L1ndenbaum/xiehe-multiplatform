@@ -40,7 +40,10 @@ enum class SpineGlyph {
     IMAGE,
     SEARCH,
     CALENDAR,
+    LOCK,
+    SETTINGS,
     CHEVRON_DOWN,
+    CHEVRON_RIGHT,
     EYE,
     EYE_OFF,
 }
@@ -264,6 +267,53 @@ fun SpineGlyphIcon(
                 )
             }
 
+            SpineGlyph.LOCK -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.22f, size.height * 0.42f),
+                    size = Size(size.width * 0.56f, size.height * 0.42f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.08f),
+                    style = stroke,
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = 200f,
+                    sweepAngle = 140f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.28f, size.height * 0.16f),
+                    size = Size(size.width * 0.44f, size.height * 0.42f),
+                    style = stroke,
+                )
+            }
+
+            SpineGlyph.SETTINGS -> {
+                drawCircle(
+                    color = tint,
+                    radius = size.minDimension * 0.16f,
+                    center = center,
+                    style = stroke,
+                )
+                drawCircle(
+                    color = tint,
+                    radius = size.minDimension * 0.04f,
+                    center = center,
+                )
+                val rOuter = size.minDimension * 0.43f
+                val rInner = size.minDimension * 0.30f
+                repeat(8) { step ->
+                    val angle = Math.toRadians((step * 45.0))
+                    val cos = kotlin.math.cos(angle).toFloat()
+                    val sin = kotlin.math.sin(angle).toFloat()
+                    drawLine(
+                        color = tint,
+                        start = Offset(center.x + cos * rInner, center.y + sin * rInner),
+                        end = Offset(center.x + cos * rOuter, center.y + sin * rOuter),
+                        strokeWidth = stroke.width,
+                        cap = StrokeCap.Round,
+                    )
+                }
+            }
+
             SpineGlyph.CHEVRON_DOWN -> {
                 drawLine(
                     color = tint,
@@ -276,6 +326,23 @@ fun SpineGlyphIcon(
                     color = tint,
                     start = Offset(size.width * 0.74f, size.height * 0.38f),
                     end = Offset(size.width * 0.50f, size.height * 0.62f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+            }
+
+            SpineGlyph.CHEVRON_RIGHT -> {
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.38f, size.height * 0.26f),
+                    end = Offset(size.width * 0.62f, size.height * 0.50f),
+                    strokeWidth = stroke.width,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.38f, size.height * 0.74f),
+                    end = Offset(size.width * 0.62f, size.height * 0.50f),
                     strokeWidth = stroke.width,
                     cap = StrokeCap.Round,
                 )
