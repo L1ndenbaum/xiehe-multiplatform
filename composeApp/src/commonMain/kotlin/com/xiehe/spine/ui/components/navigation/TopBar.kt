@@ -24,11 +24,11 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
-fun SpineTopBar(
+fun TopBar(
     title: String,
     modifier: Modifier = Modifier,
-    leftGlyph: SpineGlyph? = null,
-    rightGlyph: SpineGlyph? = null,
+    leftGlyph: IconToken? = null,
+    rightGlyph: IconToken? = null,
     onLeftClick: (() -> Unit)? = null,
     onRightClick: (() -> Unit)? = null,
 ) {
@@ -59,7 +59,7 @@ fun SpineTopBar(
 
 @Composable
 private fun TopActionChip(
-    glyph: SpineGlyph?,
+    glyph: IconToken?,
     onClick: (() -> Unit)?,
 ) {
     val colors = SpineTheme.colors
@@ -84,7 +84,7 @@ private fun TopActionChip(
         contentAlignment = Alignment.Center,
     ) {
         if (glyph != null) {
-            SpineGlyphIcon(glyph = glyph, modifier = Modifier.size(16.dp), tint = colors.onPrimary)
+            AppIcon(glyph = glyph, modifier = Modifier.size(16.dp), tint = colors.onPrimary)
         }
     }
 }

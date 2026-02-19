@@ -12,9 +12,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.ui.components.SpineCard
-import com.xiehe.spine.ui.components.SpineSelectablePill
-import com.xiehe.spine.ui.components.SpineText
+import com.xiehe.spine.ui.components.Card
+import com.xiehe.spine.ui.components.SelectablePill
+import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.ThemeMode
@@ -31,15 +31,15 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        SpineCard(modifier = Modifier.fillMaxWidth()) {
-            SpineText(text = "主色体系", style = SpineTheme.typography.title)
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "主色体系", style = SpineTheme.typography.title)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SpineSelectablePill(
+                SelectablePill(
                     text = "绿色",
                     selected = preference.brand == AppThemeBrandColor.GREEN,
                     onClick = { vm.updateBrand(AppThemeBrandColor.GREEN) },
                 )
-                SpineSelectablePill(
+                SelectablePill(
                     text = "蓝色",
                     selected = preference.brand == AppThemeBrandColor.BLUE,
                     onClick = { vm.updateBrand(AppThemeBrandColor.BLUE) },
@@ -47,25 +47,25 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
             }
         }
 
-        SpineCard(modifier = Modifier.fillMaxWidth()) {
-            SpineText(text = "深浅模式", style = SpineTheme.typography.title)
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "深浅模式", style = SpineTheme.typography.title)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SpineSelectablePill(
+                SelectablePill(
                     text = "跟随系统",
                     selected = preference.mode == ThemeMode.SYSTEM,
                     onClick = { vm.updateMode(ThemeMode.SYSTEM) },
                 )
-                SpineSelectablePill(
+                SelectablePill(
                     text = "按时间",
                     selected = preference.mode == ThemeMode.AUTO_TIME,
                     onClick = { vm.updateMode(ThemeMode.AUTO_TIME) },
                 )
-                SpineSelectablePill(
+                SelectablePill(
                     text = "浅色",
                     selected = preference.mode == ThemeMode.LIGHT,
                     onClick = { vm.updateMode(ThemeMode.LIGHT) },
                 )
-                SpineSelectablePill(
+                SelectablePill(
                     text = "深色",
                     selected = preference.mode == ThemeMode.DARK,
                     onClick = { vm.updateMode(ThemeMode.DARK) },

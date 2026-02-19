@@ -9,17 +9,17 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.xiehe.spine.ui.components.SpineGlyph
-import com.xiehe.spine.ui.components.SpineNavBar
-import com.xiehe.spine.ui.components.SpineNavItem
-import com.xiehe.spine.ui.components.SpineTopBar
+import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.NavBar
+import com.xiehe.spine.ui.components.NavItem
+import com.xiehe.spine.ui.components.TopBar
 import com.xiehe.spine.ui.theme.SpineTheme
 
 private val defaultNavItems = listOf(
-    SpineNavItem(label = "工作台", glyph = SpineGlyph.DASHBOARD),
-    SpineNavItem(label = "患者中心", glyph = SpineGlyph.PATIENTS),
-    SpineNavItem(label = "影像中心", glyph = SpineGlyph.IMAGES),
-    SpineNavItem(label = "个人中心", glyph = SpineGlyph.PROFILE),
+    NavItem(label = "工作台", glyph = IconToken.DASHBOARD),
+    NavItem(label = "患者中心", glyph = IconToken.PATIENTS),
+    NavItem(label = "影像中心", glyph = IconToken.IMAGES),
+    NavItem(label = "个人中心", glyph = IconToken.PROFILE),
 )
 
 @Composable
@@ -28,7 +28,7 @@ fun MobileShell(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onBack: (() -> Unit)? = null,
-    rightActionGlyph: SpineGlyph? = null,
+    rightActionGlyph: IconToken? = null,
     onRightAction: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -38,10 +38,10 @@ fun MobileShell(
             .fillMaxSize()
             .background(SpineTheme.colors.background),
     ) {
-        SpineTopBar(
+        TopBar(
             title = title,
             modifier = Modifier.statusBarsPadding(),
-            leftGlyph = if (onBack != null) SpineGlyph.BACK else null,
+            leftGlyph = if (onBack != null) IconToken.BACK else null,
             rightGlyph = rightActionGlyph,
             onLeftClick = onBack,
             onRightClick = onRightAction,
@@ -49,7 +49,7 @@ fun MobileShell(
         Box(modifier = Modifier.weight(1f)) {
             content()
         }
-        SpineNavBar(
+        NavBar(
             items = navItems,
             selectedIndex = selectedTab,
             onSelect = onTabSelected,

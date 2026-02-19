@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
-fun SpineCard(
+fun Card(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {

@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
-fun SpineBottomTabBar(
+fun BottomTabBar(
     tabs: List<String>,
-    icons: List<SpineGlyph>,
+    icons: List<IconToken>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -71,8 +71,8 @@ fun SpineBottomTabBar(
                         .clip(RoundedCornerShape(SpineTheme.radius.full))
                         .background(if (selected) activeColor else Color.Transparent),
                 )
-                SpineGlyphIcon(
-                    glyph = icons.getOrNull(index) ?: SpineGlyph.DASHBOARD,
+                AppIcon(
+                    glyph = icons.getOrNull(index) ?: IconToken.DASHBOARD,
                     modifier = Modifier.height(16.dp).width(16.dp),
                     tint = tone,
                 )

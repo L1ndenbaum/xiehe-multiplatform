@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
-fun SpineTextField(
+fun TextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
@@ -32,8 +32,8 @@ fun SpineTextField(
     password: Boolean = false,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
-    leadingGlyph: SpineGlyph? = null,
-    trailingGlyph: SpineGlyph? = null,
+    leadingGlyph: IconToken? = null,
+    trailingGlyph: IconToken? = null,
     onTrailingClick: (() -> Unit)? = null,
 ) {
     val colors = SpineTheme.colors
@@ -49,7 +49,7 @@ fun SpineTextField(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leadingGlyph != null) {
-            SpineGlyphIcon(
+            AppIcon(
                 glyph = leadingGlyph,
                 modifier = Modifier.size(16.dp).padding(end = 6.dp),
                 tint = colors.textTertiary,
@@ -75,7 +75,7 @@ fun SpineTextField(
             )
         }
         if (trailingGlyph != null) {
-            SpineGlyphIcon(
+            AppIcon(
                 glyph = trailingGlyph,
                 modifier = Modifier
                     .size(16.dp)

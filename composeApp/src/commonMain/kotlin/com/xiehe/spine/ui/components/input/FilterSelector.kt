@@ -5,20 +5,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun SpineFilterSelector(
+fun FilterSelector(
     text: String,
     modifier: Modifier = Modifier,
-    leadingGlyph: SpineGlyph,
+    leadingGlyph: IconToken,
     onClick: () -> Unit,
 ) {
-    SpineTextField(
+    TextField(
         value = text,
         onValueChange = {},
         placeholder = text,
         modifier = modifier.clickable(onClick = onClick),
         readOnly = true,
         leadingGlyph = leadingGlyph,
-        trailingGlyph = SpineGlyph.CHEVRON_DOWN,
+        trailingGlyph = IconToken.CHEVRON_DOWN,
         onTrailingClick = onClick,
     )
 }

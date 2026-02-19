@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
 @Composable
-fun SpineWheelPickerColumn(
+fun WheelPickerColumn(
     options: List<String>,
     selectedIndex: Int,
     onSelectedIndexChange: (Int) -> Unit,
@@ -93,7 +93,7 @@ fun SpineWheelPickerColumn(
                         .height(rowHeight),
                     contentAlignment = Alignment.Center,
                 ) {
-                    SpineText(
+                    Text(
                         text = label,
                         style = if (distance == 0) {
                             SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold)

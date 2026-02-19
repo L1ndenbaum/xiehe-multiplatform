@@ -24,12 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.DashboardRepository
-import com.xiehe.spine.ui.components.SpineCard
-import com.xiehe.spine.ui.components.SpineGlyph
-import com.xiehe.spine.ui.components.SpineGlyphIcon
-import com.xiehe.spine.ui.components.SpineMiniBarChart
-import com.xiehe.spine.ui.components.SpineProgressRing
-import com.xiehe.spine.ui.components.SpineText
+import com.xiehe.spine.ui.components.Card
+import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.AppIcon
+import com.xiehe.spine.ui.components.MiniBarChart
+import com.xiehe.spine.ui.components.ProgressRing
+import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.DashboardViewModel
 
@@ -59,8 +59,8 @@ fun DashboardScreen(
             enter = fadeIn() + slideInVertically { it / 2 },
             exit = fadeOut(),
         ) {
-            SpineCard(modifier = Modifier.fillMaxWidth()) {
-                SpineText(
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Text(
                     text = state.errorMessage ?: "",
                     style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error),
                 )
@@ -69,32 +69,32 @@ fun DashboardScreen(
 
         val overview = state.data
         if (overview == null) {
-            SpineCard(modifier = Modifier.fillMaxWidth()) {
-                SpineText(text = if (state.loading) "加载工作台数据中..." else "暂无数据")
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Text(text = if (state.loading) "加载工作台数据中..." else "暂无数据")
             }
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                StatCard("累计患者", overview.totalPatients.toString(), SpineGlyph.USERS, modifier = Modifier.weight(1f))
-                StatCard("待处理影像", overview.pendingImages.toString(), SpineGlyph.HOURGLASS, modifier = Modifier.weight(1f))
+                StatCard("累计患者", overview.totalPatients.toString(), IconToken.USERS, modifier = Modifier.weight(1f))
+                StatCard("待处理影像", overview.pendingImages.toString(), IconToken.HOURGLASS, modifier = Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                StatCard("已完成影像", overview.processedImages.toString(), SpineGlyph.CHECK, modifier = Modifier.weight(1f))
-                StatCard("累计影像", overview.totalImages.toString(), SpineGlyph.IMAGE, modifier = Modifier.weight(1f))
+                StatCard("已完成影像", overview.processedImages.toString(), IconToken.CHECK, modifier = Modifier.weight(1f))
+                StatCard("累计影像", overview.totalImages.toString(), IconToken.IMAGE, modifier = Modifier.weight(1f))
             }
-            SpineCard(modifier = Modifier.fillMaxWidth()) {
+            Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        SpineText("完成率 ${overview.completionRate}%", style = SpineTheme.typography.title)
-                        SpineText("平均处理时长 ${overview.averageProcessingTime} 小时")
-                        SpineText("系统提醒 ${overview.systemAlerts}")
+                        Text("完成率 ${overview.completionRate}%", style = SpineTheme.typography.title)
+                        Text("平均处理时长 ${overview.averageProcessingTime} 小时")
+                        Text("系统提醒 ${overview.systemAlerts}")
                     }
-                    SpineProgressRing(progress = (overview.completionRate / 100f).toFloat())
+                    ProgressRing(progress = (overview.completionRate / 100f).toFloat())
                 }
-                SpineMiniBarChart(
+                MiniBarChart(
                     values = listOf(
                         overview.newPatientsToday.toFloat(),
                         (overview.newPatientsWeek / 7f),
@@ -112,16 +112,16 @@ fun DashboardScreen(
 private fun StatCard(
     title: String,
     value: String,
-    glyph: SpineGlyph,
+    glyph: IconToken,
     modifier: Modifier = Modifier,
 ) {
-    SpineCard(modifier = modifier) {
+    Card(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SpineText(text = title, style = SpineTheme.typography.subhead)
+            Text(text = title, style = SpineTheme.typography.subhead)
             Box(
                 modifier = Modifier
                     .width(34.dp)
@@ -132,13 +132,13 @@ private fun StatCard(
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                SpineGlyphIcon(
+                AppIcon(
                     glyph = glyph,
                     tint = SpineTheme.colors.primary,
                     modifier = Modifier.width(16.dp).height(16.dp),
                 )
             }
         }
-        SpineText(text = value, style = SpineTheme.typography.display.copy(fontSize = 38.sp))
+        Text(text = value, style = SpineTheme.typography.display.copy(fontSize = 38.sp))
     }
 }

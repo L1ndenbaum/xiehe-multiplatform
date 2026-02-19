@@ -25,6 +25,8 @@ data class PatientSummary(
     val gender: String,
     val age: Int,
     val phone: String? = null,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
+    @SerialName("avatar") val avatar: String? = null,
     val status: String? = null,
 )
 
@@ -38,6 +40,8 @@ data class PatientDetail(
     val age: Int,
     val phone: String? = null,
     val email: String? = null,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
+    @SerialName("avatar") val avatar: String? = null,
     val address: String? = null,
     @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
     @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,

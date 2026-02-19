@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -8,17 +9,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.painter.Painter
 import com.xiehe.spine.ui.theme.SpineTheme
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun SpineAvatar(
+fun Avatar(
     name: String,
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
+    avatarPainter: Painter? = null,
+    avatarResource: DrawableResource? = null,
 ) {
+    val resolvedPainter = avatarPainter ?: avatarResource?.let { painterResource(it) }
+
     Box(
         modifier = modifier
             .size(size)
@@ -26,13 +35,22 @@ fun SpineAvatar(
             .background(SpineTheme.colors.primaryMuted),
         contentAlignment = Alignment.Center,
     ) {
-        SpineText(
-            text = avatarInitials(name),
-            style = SpineTheme.typography.subhead.copy(
-                color = SpineTheme.colors.primary,
-                fontWeight = FontWeight.SemiBold,
-            ),
-        )
+        if (resolvedPainter != null) {
+            Image(
+                painter = resolvedPainter,
+                contentDescription = "avatar_${name.ifBlank { "unknown" }}",
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Text(
+                text = avatarInitials(name),
+                style = SpineTheme.typography.subhead.copy(
+                    color = SpineTheme.colors.primary,
+                    fontWeight = FontWeight.SemiBold,
+                ),
+            )
+        }
     }
 }
 

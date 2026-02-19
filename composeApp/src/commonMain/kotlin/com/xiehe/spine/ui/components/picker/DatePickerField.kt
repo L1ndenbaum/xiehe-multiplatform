@@ -16,39 +16,36 @@ import androidx.compose.ui.text.font.FontWeight
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
-fun SpineDatePickerField(
+fun DatePickerField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showing by remember { mutableStateOf(false) }
 
-    SpineTextField(
+    TextField(
         value = value,
         onValueChange = {},
         placeholder = "请选择出生日期",
         modifier = modifier.clickable { showing = true },
         readOnly = true,
-        trailingGlyph = SpineGlyph.CALENDAR,
+        trailingGlyph = IconToken.CALENDAR,
         onTrailingClick = { showing = true },
     )
 
     if (showing) {
-        SpineDateWheelPickerDialog(
+        DateWheelPickerDialog(
             initialValue = value,
-            onCancel = { showing = false },
-            onConfirm = {
-                onValueChange(it)
-                showing = false
-            },
+            onDismissRequest = { showing = false },
+            onConfirm = { onValueChange(it) },
         )
     }
 }
 
 @Composable
-fun SpineDateWheelPickerDialog(
+fun DateWheelPickerDialog(
     initialValue: String,
-    onCancel: () -> Unit,
+    onDismissRequest: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
     val parsed = parseDate(initialValue)
@@ -69,15 +66,15 @@ fun SpineDateWheelPickerDialog(
 
     val title = "${currentYear}年${currentMonth}月"
 
-    SpinePickerDialogContainer(
+    PickerDialog(
         title = "",
-        onCancel = onCancel,
+        onDismissRequest = onDismissRequest,
         onConfirm = {
             val result = formatDate(currentYear, currentMonth, dayIdx + 1)
             onConfirm(result)
         },
     ) {
-        SpineText(
+        Text(
             text = "$title ▲",
             modifier = Modifier.fillMaxWidth(),
             style = SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
@@ -88,17 +85,17 @@ fun SpineDateWheelPickerDialog(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SpineWheelPickerColumn(
+            WheelPickerColumn(
                 options = years,
                 selectedIndex = yearIdx,
                 onSelectedIndexChange = { yearIdx = it },
             )
-            SpineWheelPickerColumn(
+            WheelPickerColumn(
                 options = months,
                 selectedIndex = monthIdx,
                 onSelectedIndexChange = { monthIdx = it },
             )
-            SpineWheelPickerColumn(
+            WheelPickerColumn(
                 options = days,
                 selectedIndex = dayIdx,
                 onSelectedIndexChange = { dayIdx = it },

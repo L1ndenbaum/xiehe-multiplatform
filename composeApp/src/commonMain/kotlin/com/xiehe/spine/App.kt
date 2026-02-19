@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
-import com.xiehe.spine.ui.components.SpineGlyph
+import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.screens.AppearanceScreen
 import com.xiehe.spine.ui.screens.DashboardScreen
 import com.xiehe.spine.ui.screens.LoginScreen
@@ -178,7 +178,7 @@ fun App(
                         title = "工作台",
                         selectedTab = selectedTab,
                         onTabSelected = onTabSelected,
-                        rightActionGlyph = SpineGlyph.BELL,
+                        rightActionGlyph = IconToken.BELL,
                         onRightAction = { route = OverlayRoute.Messages },
                     ) {
                         DashboardScreen(
@@ -193,7 +193,7 @@ fun App(
                         title = "患者中心",
                         selectedTab = selectedTab,
                         onTabSelected = onTabSelected,
-                        rightActionGlyph = SpineGlyph.ADD,
+                        rightActionGlyph = IconToken.ADD,
                         onRightAction = { route = OverlayRoute.PatientForm },
                     ) {
                         PatientsScreen(
@@ -210,7 +210,7 @@ fun App(
                         title = "影像中心",
                         selectedTab = selectedTab,
                         onTabSelected = onTabSelected,
-                        rightActionGlyph = SpineGlyph.ADD,
+                        rightActionGlyph = IconToken.ADD,
                     ) {
                         PlaceholderScreen(
                             title = "影像模块建设中",

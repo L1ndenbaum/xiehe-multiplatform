@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.ui.components.SpineText
+import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
@@ -22,8 +22,8 @@ fun PlaceholderScreen(title: String, description: String) {
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SpineText(text = title, style = SpineTheme.typography.title)
-            SpineText(
+            Text(text = title, style = SpineTheme.typography.title)
+            Text(
                 text = description,
                 style = SpineTheme.typography.subhead,
                 modifier = Modifier.padding(horizontal = 24.dp),

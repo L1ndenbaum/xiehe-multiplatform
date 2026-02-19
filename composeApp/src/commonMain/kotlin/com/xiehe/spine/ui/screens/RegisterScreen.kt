@@ -26,10 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.data.AuthRepository
-import com.xiehe.spine.ui.components.SpineButton
-import com.xiehe.spine.ui.components.SpineGlyph
-import com.xiehe.spine.ui.components.SpineText
-import com.xiehe.spine.ui.components.SpineTextField
+import com.xiehe.spine.ui.components.Button
+import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.Text
+import com.xiehe.spine.ui.components.TextField
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.RegisterViewModel
 
@@ -59,55 +59,55 @@ fun RegisterScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SpineText(
+            Text(
                 text = "返回",
                 style = SpineTheme.typography.subhead.copy(color = colors.primary, fontWeight = FontWeight.SemiBold),
                 modifier = Modifier.clickable(onClick = onBackToLogin),
             )
-            SpineText(text = "账号注册", style = SpineTheme.typography.title)
+            Text(text = "账号注册", style = SpineTheme.typography.title)
         }
 
-        SpineTextField(
+        TextField(
             value = state.username,
             onValueChange = vm::updateUsername,
             placeholder = "用户名(至少3位)",
             modifier = Modifier.fillMaxWidth(),
         )
-        SpineTextField(
+        TextField(
             value = state.fullName,
             onValueChange = vm::updateFullName,
             placeholder = "姓名(至少2位)",
             modifier = Modifier.fillMaxWidth(),
         )
-        SpineTextField(
+        TextField(
             value = state.email,
             onValueChange = vm::updateEmail,
             placeholder = "邮箱",
             modifier = Modifier.fillMaxWidth(),
         )
-        SpineTextField(
+        TextField(
             value = state.phone,
             onValueChange = vm::updatePhone,
             placeholder = "手机号(可选,+86开头)",
             modifier = Modifier.fillMaxWidth(),
-            leadingGlyph = SpineGlyph.PROFILE,
+            leadingGlyph = IconToken.PROFILE,
         )
-        SpineTextField(
+        TextField(
             value = state.password,
             onValueChange = vm::updatePassword,
             placeholder = "密码(至少6位)",
             password = !passwordVisible,
             modifier = Modifier.fillMaxWidth(),
-            trailingGlyph = if (passwordVisible) SpineGlyph.EYE_OFF else SpineGlyph.EYE,
+            trailingGlyph = if (passwordVisible) IconToken.EYE_OFF else IconToken.EYE,
             onTrailingClick = { passwordVisible = !passwordVisible },
         )
-        SpineTextField(
+        TextField(
             value = state.confirmPassword,
             onValueChange = vm::updateConfirmPassword,
             placeholder = "确认密码",
             password = !confirmVisible,
             modifier = Modifier.fillMaxWidth(),
-            trailingGlyph = if (confirmVisible) SpineGlyph.EYE_OFF else SpineGlyph.EYE,
+            trailingGlyph = if (confirmVisible) IconToken.EYE_OFF else IconToken.EYE,
             onTrailingClick = { confirmVisible = !confirmVisible },
         )
 
@@ -116,20 +116,20 @@ fun RegisterScreen(
             enter = fadeIn() + slideInVertically { -it / 2 },
             exit = fadeOut() + slideOutVertically { -it / 2 },
         ) {
-            SpineText(
+            Text(
                 text = state.errorMessage ?: "",
                 style = SpineTheme.typography.subhead.copy(color = colors.error),
             )
         }
 
         state.successMessage?.let {
-            SpineText(
+            Text(
                 text = it,
                 style = SpineTheme.typography.subhead.copy(color = colors.success),
             )
         }
 
-        SpineButton(
+        Button(
             text = if (state.loading) "注册中..." else "立即注册",
             onClick = {
                 vm.submit(

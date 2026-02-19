@@ -5,19 +5,19 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 
 @Immutable
-data class SpineNavItem(
+data class NavItem(
     val label: String,
-    val glyph: SpineGlyph,
+    val glyph: IconToken,
 )
 
 @Composable
-fun SpineNavBar(
-    items: List<SpineNavItem>,
+fun NavBar(
+    items: List<NavItem>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SpineBottomTabBar(
+    BottomTabBar(
         tabs = items.map { it.label },
         icons = items.map { it.glyph },
         selectedIndex = selectedIndex,

@@ -51,6 +51,8 @@ class AuthRepository(
                     username = payload.user.username,
                     email = payload.user.email,
                     fullName = payload.user.fullName,
+                    avatarUrl = payload.user.avatarUrl,
+                    avatar = payload.user.avatar,
                     accessTokenExpiresAtEpochSeconds = resolveAccessTokenExpiry(
                         accessToken = payload.accessToken,
                         expiresIn = payload.expiresIn,

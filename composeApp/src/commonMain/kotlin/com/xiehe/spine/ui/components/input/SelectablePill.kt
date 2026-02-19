@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
-fun SpineSelectablePill(
+fun SelectablePill(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,

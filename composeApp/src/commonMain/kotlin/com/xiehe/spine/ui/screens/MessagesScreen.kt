@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.ui.components.SpineCard
-import com.xiehe.spine.ui.components.SpineText
+import com.xiehe.spine.ui.components.Card
+import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 
 private data class MessageItem(
@@ -43,15 +43,15 @@ fun MessagesScreen() {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         messages.forEach { item ->
-            SpineCard(modifier = Modifier.fillMaxWidth()) {
+            Card(modifier = Modifier.fillMaxWidth()) {
                 androidx.compose.foundation.layout.Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    SpineText(text = item.title, style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold))
-                    SpineText(text = item.timeText, style = SpineTheme.typography.caption, color = SpineTheme.colors.textTertiary)
+                    Text(text = item.title, style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold))
+                    Text(text = item.timeText, style = SpineTheme.typography.caption, color = SpineTheme.colors.textTertiary)
                 }
-                SpineText(text = item.content, style = SpineTheme.typography.subhead, color = SpineTheme.colors.textSecondary)
+                Text(text = item.content, style = SpineTheme.typography.subhead, color = SpineTheme.colors.textSecondary)
             }
         }
     }

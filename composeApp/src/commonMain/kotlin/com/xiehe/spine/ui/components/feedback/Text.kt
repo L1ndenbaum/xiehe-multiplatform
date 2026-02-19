@@ -9,7 +9,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
-fun SpineText(
+fun Text(
     text: String,
     modifier: Modifier = Modifier,
     style: TextStyle = SpineTheme.typography.body,

@@ -11,6 +11,8 @@ data class UserSession(
     val username: String,
     val email: String? = null,
     val fullName: String? = null,
+    val avatarUrl: String? = null,
+    val avatar: String? = null,
     val accessTokenExpiresAtEpochSeconds: Long? = null,
 )
 
