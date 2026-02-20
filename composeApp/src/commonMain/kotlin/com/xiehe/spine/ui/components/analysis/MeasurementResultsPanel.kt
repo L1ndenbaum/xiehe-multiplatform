@@ -13,8 +13,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
@@ -33,6 +36,13 @@ fun MeasurementResultsPanel(
     modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
+    val hasHiddenItems = hiddenKeys.isNotEmpty()
+    val chevronRotation = animateFloatAsState(
+        targetValue = if (expanded) -90f else 90f,
+        animationSpec = tween(durationMillis = 180),
+        label = "analysis_results_collapse_rotation",
+    )
+
     Column(
         modifier = modifier
             .width(210.dp)
@@ -47,41 +57,29 @@ fun MeasurementResultsPanel(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AppIcon(glyph = IconToken.EYE, tint = colors.textSecondary)
+            AppIcon(
+                glyph = if (hasHiddenItems) IconToken.EYE_OFF else IconToken.EYE,
+                tint = colors.textSecondary,
+                modifier = Modifier.clickable {
+                    if (hasHiddenItems) onShowAll() else onHideAll()
+                },
+            )
             Text(
                 text = "测量结果",
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier.weight(1f).padding(start = 6.dp),
                 color = colors.textPrimary,
             )
-            Text(
-                text = if (expanded) "▴" else "▾",
-                style = SpineTheme.typography.body,
-                color = colors.textSecondary,
-                modifier = Modifier.clickable(onClick = onToggleExpanded),
+            AppIcon(
+                glyph = IconToken.BACK,
+                tint = colors.textSecondary,
+                modifier = Modifier
+                    .graphicsLayer { rotationZ = chevronRotation.value }
+                    .clickable(onClick = onToggleExpanded),
             )
         }
 
         if (expanded) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "显示",
-                    style = SpineTheme.typography.caption,
-                    color = colors.textSecondary,
-                    modifier = Modifier.clickable(onClick = onShowAll),
-                )
-                Text(
-                    text = "隐藏",
-                    style = SpineTheme.typography.caption,
-                    color = colors.textSecondary,
-                    modifier = Modifier.clickable(onClick = onHideAll),
-                )
-            }
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
