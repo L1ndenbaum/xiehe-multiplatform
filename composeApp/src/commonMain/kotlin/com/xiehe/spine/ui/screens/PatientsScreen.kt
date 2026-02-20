@@ -3,6 +3,7 @@ package com.xiehe.spine.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import com.xiehe.spine.ui.components.Card
 import com.xiehe.spine.ui.components.CompactButton
 import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.PickerDialog
 import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.components.TextField
@@ -67,13 +69,17 @@ fun PatientsScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background)
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .background(SpineTheme.colors.background),
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             TextField(
                 value = state.search,
                 onValueChange = vm::updateSearch,
@@ -104,55 +110,61 @@ fun PatientsScreen(
                 Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
             }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            state = listState,
-        ) {
-            items(state.items, key = { it.id }) { patient ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Avatar(name = patient.name)
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                state = listState,
+            ) {
+                items(state.items, key = { it.id }) { patient ->
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(text = "${patient.name}·${patient.gender}·${patient.age}岁", style = SpineTheme.typography.title)
-                            Text(text = patient.patientId, style = SpineTheme.typography.subhead)
-                            Text(text = patient.phone ?: "无手机号", style = SpineTheme.typography.subhead)
-                        }
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            CompactButton(
-                                text = "编辑",
-                                onClick = { onEditPatient(patient.id) },
-                                containerColor = SpineTheme.colors.warning,
-                                contentColor = SpineTheme.colors.onPrimary,
-                            )
-                            CompactButton(
-                                text = "查看",
-                                onClick = { onOpenPatient(patient.id) },
-                                containerColor = SpineTheme.colors.primary,
-                                contentColor = SpineTheme.colors.onPrimary,
-                            )
+                            Avatar(name = patient.name)
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(text = "${patient.name}·${patient.gender}·${patient.age}岁", style = SpineTheme.typography.title)
+                                Text(text = patient.patientId, style = SpineTheme.typography.subhead)
+                                Text(text = patient.phone ?: "无手机号", style = SpineTheme.typography.subhead)
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                CompactButton(
+                                    text = "编辑",
+                                    onClick = { onEditPatient(patient.id) },
+                                    containerColor = SpineTheme.colors.warning,
+                                    contentColor = SpineTheme.colors.onPrimary,
+                                )
+                                CompactButton(
+                                    text = "查看",
+                                    onClick = { onOpenPatient(patient.id) },
+                                    containerColor = SpineTheme.colors.primary,
+                                    contentColor = SpineTheme.colors.onPrimary,
+                                )
+                            }
                         }
                     }
                 }
-            }
-            item {
-                if (state.loading || state.loadingMore) {
-                    Text(
-                        text = "加载中...",
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        style = SpineTheme.typography.subhead,
-                    )
+
+                item {
+                    if (state.loading || state.loadingMore) {
+                        Text(
+                            text = "加载中...",
+                            modifier = Modifier.fillMaxWidth().padding(8.dp),
+                            style = SpineTheme.typography.subhead,
+                        )
+                    }
                 }
             }
+        }
+
+        if (state.loading && state.items.isEmpty()) {
+            LoadingOverlay(message = "...正在加载中")
         }
     }
 

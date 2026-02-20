@@ -27,6 +27,7 @@ import com.xiehe.spine.data.DashboardRepository
 import com.xiehe.spine.ui.components.Card
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.components.AppIcon
+import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.MiniBarChart
 import com.xiehe.spine.ui.components.ProgressRing
 import com.xiehe.spine.ui.components.Text
@@ -47,63 +48,72 @@ fun DashboardScreen(
         vm.load(session, repository, onSessionUpdated)
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(spacing.xl),
+            .background(SpineTheme.colors.background),
     ) {
-        AnimatedVisibility(
-            visible = state.errorMessage != null,
-            enter = fadeIn() + slideInVertically { it / 2 },
-            exit = fadeOut(),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(spacing.xl),
         ) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = state.errorMessage ?: "",
-                    style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error),
-                )
+            AnimatedVisibility(
+                visible = state.errorMessage != null,
+                enter = fadeIn() + slideInVertically { it / 2 },
+                exit = fadeOut(),
+            ) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = state.errorMessage ?: "",
+                        style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error),
+                    )
+                }
+            }
+
+            val overview = state.data
+            if (overview == null) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text(text = if (state.loading) "加载工作台数据中..." else "暂无数据")
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
+                    StatCard("累计患者", overview.totalPatients.toString(), IconToken.USERS, modifier = Modifier.weight(1f))
+                    StatCard("待处理影像", overview.pendingImages.toString(), IconToken.HOURGLASS, modifier = Modifier.weight(1f))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
+                    StatCard("已完成影像", overview.processedImages.toString(), IconToken.CHECK, modifier = Modifier.weight(1f))
+                    StatCard("累计影像", overview.totalImages.toString(), IconToken.IMAGE, modifier = Modifier.weight(1f))
+                }
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text("完成率 ${overview.completionRate}%", style = SpineTheme.typography.title)
+                            Text("平均处理时长 ${overview.averageProcessingTime} 小时")
+                            Text("系统提醒 ${overview.systemAlerts}")
+                        }
+                        ProgressRing(progress = (overview.completionRate / 100f).toFloat())
+                    }
+                    MiniBarChart(
+                        values = listOf(
+                            overview.newPatientsToday.toFloat(),
+                            (overview.newPatientsWeek / 7f),
+                            overview.imagesToday.toFloat(),
+                            (overview.imagesWeek / 7f),
+                        ),
+                        labels = listOf("今日患者", "周均患者", "今日影像", "周均影像"),
+                    )
+                }
             }
         }
 
-        val overview = state.data
-        if (overview == null) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Text(text = if (state.loading) "加载工作台数据中..." else "暂无数据")
-            }
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                StatCard("累计患者", overview.totalPatients.toString(), IconToken.USERS, modifier = Modifier.weight(1f))
-                StatCard("待处理影像", overview.pendingImages.toString(), IconToken.HOURGLASS, modifier = Modifier.weight(1f))
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                StatCard("已完成影像", overview.processedImages.toString(), IconToken.CHECK, modifier = Modifier.weight(1f))
-                StatCard("累计影像", overview.totalImages.toString(), IconToken.IMAGE, modifier = Modifier.weight(1f))
-            }
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("完成率 ${overview.completionRate}%", style = SpineTheme.typography.title)
-                        Text("平均处理时长 ${overview.averageProcessingTime} 小时")
-                        Text("系统提醒 ${overview.systemAlerts}")
-                    }
-                    ProgressRing(progress = (overview.completionRate / 100f).toFloat())
-                }
-                MiniBarChart(
-                    values = listOf(
-                        overview.newPatientsToday.toFloat(),
-                        (overview.newPatientsWeek / 7f),
-                        overview.imagesToday.toFloat(),
-                        (overview.imagesWeek / 7f),
-                    ),
-                    labels = listOf("今日患者", "周均患者", "今日影像", "周均影像"),
-                )
-            }
+        if (state.loading) {
+            LoadingOverlay(message = "...正在加载中")
         }
     }
 }

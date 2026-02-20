@@ -28,6 +28,7 @@ import com.xiehe.spine.ui.components.AnalysisBottomBar
 import com.xiehe.spine.ui.components.AnalysisSettingsPanel
 import com.xiehe.spine.ui.components.AnalysisTopBar
 import com.xiehe.spine.ui.components.ImageViewport
+import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.MeasureToolPanel
 import com.xiehe.spine.ui.components.MeasurementResultsPanel
 import com.xiehe.spine.ui.components.PickerDialog
@@ -122,24 +123,9 @@ fun ImageAnalysisScreen(
             )
 
             if (state.loading) {
-                Text(
-                    text = "加载标注数据中...",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .background(SpineTheme.colors.surface, RoundedCornerShape(10.dp))
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    style = SpineTheme.typography.body,
-                )
-            }
-            if (state.aiRunning) {
-                Text(
-                    text = state.aiRunningLabel ?: "AI处理中...",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .background(SpineTheme.colors.surface, RoundedCornerShape(10.dp))
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    style = SpineTheme.typography.body,
-                )
+                LoadingOverlay(message = "...正在加载中")
+            } else if (state.aiRunning) {
+                LoadingOverlay(message = state.aiRunningLabel ?: "...正在加载中")
             }
 
             state.errorMessage?.let {

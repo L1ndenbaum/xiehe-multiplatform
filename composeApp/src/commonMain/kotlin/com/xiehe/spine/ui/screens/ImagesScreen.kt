@@ -39,6 +39,7 @@ import com.xiehe.spine.ui.components.AppIcon
 import com.xiehe.spine.ui.components.Card
 import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.PickerDialog
 import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.components.TextField
@@ -68,75 +69,84 @@ fun ImagesScreen(
         vm.refresh(session, repository, onSessionUpdated)
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background)
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .background(SpineTheme.colors.background),
     ) {
-        TextField(
-            value = state.search,
-            onValueChange = vm::updateSearch,
-            placeholder = "搜索患者姓名、检查类型或文件名...",
-            modifier = Modifier.fillMaxWidth(),
-            leadingGlyph = IconToken.SEARCH,
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            FilterSelector(
-                text = state.typeFilter.label,
-                modifier = Modifier.weight(1f),
-                leadingGlyph = IconToken.IMAGE,
-                onClick = { picker = ImagesPicker.TYPE },
-            )
-            FilterSelector(
-                text = state.statusFilter.label,
-                modifier = Modifier.weight(1f),
-                leadingGlyph = IconToken.HOURGLASS,
-                onClick = { picker = ImagesPicker.STATUS },
-            )
-        }
-
-        state.errorMessage?.let {
-            Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
-        }
-
-        LazyColumn(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(state.filteredItems, key = { it.id }) { file ->
-                ImageFileCard(
-                    item = file,
-                    session = session,
-                    repository = repository,
-                    onSessionUpdated = onSessionUpdated,
-                    onOpenAnalysis = onOpenAnalysis,
+            TextField(
+                value = state.search,
+                onValueChange = vm::updateSearch,
+                placeholder = "搜索患者姓名、检查类型或文件名...",
+                modifier = Modifier.fillMaxWidth(),
+                leadingGlyph = IconToken.SEARCH,
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilterSelector(
+                    text = state.typeFilter.label,
+                    modifier = Modifier.weight(1f),
+                    leadingGlyph = IconToken.IMAGE,
+                    onClick = { picker = ImagesPicker.TYPE },
+                )
+                FilterSelector(
+                    text = state.statusFilter.label,
+                    modifier = Modifier.weight(1f),
+                    leadingGlyph = IconToken.HOURGLASS,
+                    onClick = { picker = ImagesPicker.STATUS },
                 )
             }
 
-            item {
-                if (state.loading) {
-                    Text(
-                        text = "加载中...",
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        style = SpineTheme.typography.subhead,
-                    )
-                } else if (state.filteredItems.isEmpty() && state.errorMessage == null) {
-                    Text(
-                        text = "暂无影像数据",
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        style = SpineTheme.typography.subhead,
-                        color = SpineTheme.colors.textSecondary,
+            state.errorMessage?.let {
+                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(state.filteredItems, key = { it.id }) { file ->
+                    ImageFileCard(
+                        item = file,
+                        session = session,
+                        repository = repository,
+                        onSessionUpdated = onSessionUpdated,
+                        onOpenAnalysis = onOpenAnalysis,
                     )
                 }
+
+                item {
+                    if (state.loading) {
+                        Text(
+                            text = "加载中...",
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            style = SpineTheme.typography.subhead,
+                        )
+                    } else if (state.filteredItems.isEmpty() && state.errorMessage == null) {
+                        Text(
+                            text = "暂无影像数据",
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            style = SpineTheme.typography.subhead,
+                            color = SpineTheme.colors.textSecondary,
+                        )
+                    }
+                }
             }
+        }
+
+        if (state.loading && state.filteredItems.isEmpty()) {
+            LoadingOverlay(message = "...正在加载中")
         }
     }
 

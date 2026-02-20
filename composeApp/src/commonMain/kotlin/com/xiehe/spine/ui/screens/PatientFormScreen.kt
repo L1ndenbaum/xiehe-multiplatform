@@ -3,6 +3,7 @@ package com.xiehe.spine.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +27,7 @@ import com.xiehe.spine.ui.components.Button
 import com.xiehe.spine.ui.components.DatePickerField
 import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.PickerDialog
 import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.components.TextField
@@ -54,59 +56,68 @@ fun PatientFormScreen(
         GenderOption("女", "female"),
     )
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background)
-            .verticalScroll(scroll)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .background(SpineTheme.colors.background),
     ) {
-        TextField(value = state.name, onValueChange = vm::updateName, placeholder = "请输入患者姓名")
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scroll)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            TextField(value = state.name, onValueChange = vm::updateName, placeholder = "请输入患者姓名")
 
-        FilterSelector(
-            text = options.firstOrNull { it.value == state.gender }?.label ?: "请选择患者性别",
-            modifier = Modifier.fillMaxWidth(),
-            leadingGlyph = IconToken.PROFILE,
-            onClick = { genderPickerVisible = true },
-        )
+            FilterSelector(
+                text = options.firstOrNull { it.value == state.gender }?.label ?: "请选择患者性别",
+                modifier = Modifier.fillMaxWidth(),
+                leadingGlyph = IconToken.PROFILE,
+                onClick = { genderPickerVisible = true },
+            )
 
-        DatePickerField(
-            value = state.birthDate,
-            onValueChange = vm::updateBirthDate,
-            modifier = Modifier.fillMaxWidth(),
-        )
+            DatePickerField(
+                value = state.birthDate,
+                onValueChange = vm::updateBirthDate,
+                modifier = Modifier.fillMaxWidth(),
+            )
 
-        TextField(value = state.idCard, onValueChange = vm::updateIdCard, placeholder = "请输入18位身份证号")
-        TextField(value = state.phone, onValueChange = vm::updatePhone, placeholder = "+8613800138000")
-        TextField(value = state.email, onValueChange = vm::updateEmail, placeholder = "请输入邮箱(可选)")
-        TextField(value = state.address, onValueChange = vm::updateAddress, placeholder = "请输入家庭地址")
-        TextField(
-            value = state.medicalHistory,
-            onValueChange = vm::updateMedicalHistory,
-            placeholder = "请输入病史备注",
-            singleLine = false,
-            modifier = Modifier.fillMaxWidth().height(120.dp),
-        )
+            TextField(value = state.idCard, onValueChange = vm::updateIdCard, placeholder = "请输入18位身份证号")
+            TextField(value = state.phone, onValueChange = vm::updatePhone, placeholder = "+8613800138000")
+            TextField(value = state.email, onValueChange = vm::updateEmail, placeholder = "请输入邮箱(可选)")
+            TextField(value = state.address, onValueChange = vm::updateAddress, placeholder = "请输入家庭地址")
+            TextField(
+                value = state.medicalHistory,
+                onValueChange = vm::updateMedicalHistory,
+                placeholder = "请输入病史备注",
+                singleLine = false,
+                modifier = Modifier.fillMaxWidth().height(120.dp),
+            )
 
-        state.errorMessage?.let {
-            Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+            state.errorMessage?.let {
+                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+            }
+
+            Button(
+                text = if (state.loading) "提交中..." else "创建患者",
+                onClick = {
+                    vm.submit(
+                        session = session,
+                        repository = repository,
+                        onSessionUpdated = onSessionUpdated,
+                        onSuccess = onSubmitSuccess,
+                    )
+                },
+                enabled = !state.loading,
+                modifier = Modifier.fillMaxWidth(),
+                leadingGlyph = IconToken.CHECK,
+            )
         }
 
-        Button(
-            text = if (state.loading) "提交中..." else "创建患者",
-            onClick = {
-                vm.submit(
-                    session = session,
-                    repository = repository,
-                    onSessionUpdated = onSessionUpdated,
-                    onSuccess = onSubmitSuccess,
-                )
-            },
-            enabled = !state.loading,
-            modifier = Modifier.fillMaxWidth(),
-            leadingGlyph = IconToken.CHECK,
-        )
+        if (state.loading) {
+            LoadingOverlay(message = "...正在加载中")
+        }
     }
 
     if (genderPickerVisible) {

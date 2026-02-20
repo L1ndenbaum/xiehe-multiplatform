@@ -13,6 +13,7 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.client.statement.bodyAsText
 
 private const val defaultAiBaseUrl = "http://115.190.121.59:8001"
 
@@ -34,6 +35,7 @@ class AiInferenceRepository(
         bytes: ByteArray,
     ): AppResult<T> {
         val requestUrl = "$aiBaseUrl$path"
+        println("SpineAI START path=$path bytes=${bytes.size} file=$fileName")
         return try {
             val response = httpClient.post(requestUrl) {
                 setBody(
@@ -43,7 +45,10 @@ class AiInferenceRepository(
                                 key = "file",
                                 value = bytes,
                                 headers = Headers.build {
-                                    append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "form-data; name=\"file\"; filename=\"$fileName\"",
+                                    )
                                     append(HttpHeaders.ContentType, ContentType.Application.OctetStream.toString())
                                 },
                             )
@@ -52,9 +57,12 @@ class AiInferenceRepository(
                 )
                 contentType(ContentType.MultiPart.FormData)
             }
+            println("SpineAI END path=$path status=${response.status.value} success=true")
             AppResult.Success(response.body<T>())
         } catch (e: ClientRequestException) {
             val status = e.response.status
+            val responseText = runCatching { e.response.bodyAsText() }.getOrNull()
+            println("SpineAI END path=$path status=${status.value} success=false body=${responseText ?: "N/A"}")
             AppResult.Failure(
                 message = when (status) {
                     HttpStatusCode.UnprocessableEntity -> "AI服务请求参数缺失（file）"
@@ -63,9 +71,10 @@ class AiInferenceRepository(
                 },
                 code = status.value,
                 isUnauthorized = false,
-                debugDetails = "[POST] $requestUrl status=${status.value}",
+                debugDetails = "[POST] $requestUrl status=${status.value} body=${responseText ?: "N/A"}",
             )
         } catch (e: Exception) {
+            println("SpineAI END path=$path success=false exception=${e::class.simpleName} msg=${e.message}")
             AppResult.Failure(
                 message = "AI服务不可用：${e.message ?: "unknown"}",
                 debugDetails = "[POST] $requestUrl message=${e.message ?: "N/A"}",
