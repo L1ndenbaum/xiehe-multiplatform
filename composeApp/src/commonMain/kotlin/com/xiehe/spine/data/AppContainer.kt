@@ -18,6 +18,8 @@ class AppContainer private constructor(
     val authRepository: AuthRepository,
     val dashboardRepository: DashboardRepository,
     val patientRepository: PatientRepository,
+    val imageFileRepository: ImageFileRepository,
+    val measurementRepository: MeasurementRepository,
     val themeRepository: ThemePreferenceRepository,
 ) {
     companion object {
@@ -47,6 +49,8 @@ class AppContainer private constructor(
                 authRepository = authRepository,
                 dashboardRepository = DashboardRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
                 patientRepository = PatientRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
+                imageFileRepository = ImageFileRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
+                measurementRepository = MeasurementRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
                 themeRepository = ThemePreferenceRepository(store = store),
             )
         }

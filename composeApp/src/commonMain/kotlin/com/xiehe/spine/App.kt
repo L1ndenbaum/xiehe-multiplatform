@@ -24,6 +24,8 @@ import com.xiehe.spine.data.AppContainer
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.screens.AppearanceScreen
 import com.xiehe.spine.ui.screens.DashboardScreen
+import com.xiehe.spine.ui.screens.ImageAnalysisScreen
+import com.xiehe.spine.ui.screens.ImagesScreen
 import com.xiehe.spine.ui.screens.LoginScreen
 import com.xiehe.spine.ui.screens.MessagesScreen
 import com.xiehe.spine.ui.screens.MobileShell
@@ -36,6 +38,8 @@ import com.xiehe.spine.ui.screens.RegisterScreen
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.AppearanceViewModel
 import com.xiehe.spine.ui.viewmodel.DashboardViewModel
+import com.xiehe.spine.ui.viewmodel.ImagesViewModel
+import com.xiehe.spine.ui.viewmodel.ImageAnalysisViewModel
 import com.xiehe.spine.ui.viewmodel.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
@@ -50,6 +54,7 @@ private enum class AuthRoute {
 
 private sealed interface OverlayRoute {
     data class PatientDetail(val patientId: Int) : OverlayRoute
+    data class ImageAnalysis(val fileId: Int) : OverlayRoute
     data object PatientForm : OverlayRoute
     data class PatientEdit(val patientId: Int) : OverlayRoute
     data object Appearance : OverlayRoute
@@ -57,11 +62,6 @@ private sealed interface OverlayRoute {
     data object ChangePassword : OverlayRoute
     data object Messages : OverlayRoute
 }
-
-private data class AppScene(
-    val tab: Int,
-    val route: OverlayRoute?,
-)
 
 @Composable
 @Preview
@@ -73,6 +73,8 @@ fun App(
     val loginVm = remember { LoginViewModel() }
     val registerVm = remember { RegisterViewModel() }
     val dashboardVm = remember { DashboardViewModel() }
+    val imagesVm = remember { ImagesViewModel() }
+    val imageAnalysisVm = remember { ImageAnalysisViewModel() }
     val patientsVm = remember { PatientsViewModel() }
     val patientDetailVm = remember { PatientDetailViewModel() }
     val patientFormVm = remember { PatientFormViewModel() }
@@ -158,12 +160,11 @@ fun App(
         }
 
         val activeSession = session!!
-        val scene = remember(selectedTab, route) { AppScene(tab = selectedTab, route = route) }
         AnimatedContent(
-            targetState = scene,
+            targetState = route,
             transitionSpec = {
-                val tabSwitchWithoutOverlay = initialState.route == null && targetState.route == null
-                if (tabSwitchWithoutOverlay) {
+                val noOverlayTransition = initialState == null && targetState == null
+                if (noOverlayTransition) {
                     EnterTransition.None togetherWith ExitTransition.None
                 } else {
                     (fadeIn(animationSpec = tween(220)) + slideInHorizontally(animationSpec = tween(220)) { it / 6 })
@@ -171,75 +172,90 @@ fun App(
                 }
             },
             label = "scene_transition",
-        ) { currentScene ->
-            if (currentScene.route == null) {
-                when (currentScene.tab) {
-                    0 -> MobileShell(
-                        title = "工作台",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        rightActionGlyph = IconToken.BELL,
-                        onRightAction = { route = OverlayRoute.Messages },
-                    ) {
-                        DashboardScreen(
-                            vm = dashboardVm,
-                            session = activeSession,
-                            repository = appContainer.dashboardRepository,
-                            onSessionUpdated = { session = it },
-                        )
-                    }
+        ) { currentRoute ->
+            if (currentRoute == null) {
+                val shellTitle = when (selectedTab) {
+                    0 -> "工作台"
+                    1 -> "患者中心"
+                    2 -> "影像中心"
+                    else -> "个人中心"
+                }
+                val rightGlyph = when (selectedTab) {
+                    0 -> IconToken.BELL
+                    1 -> IconToken.ADD
+                    2 -> IconToken.ADD
+                    else -> null
+                }
+                val onRightAction: (() -> Unit)? = when (selectedTab) {
+                    0 -> ({ route = OverlayRoute.Messages })
+                    1 -> ({ route = OverlayRoute.PatientForm })
+                    else -> null
+                }
 
-                    1 -> MobileShell(
-                        title = "患者中心",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        rightActionGlyph = IconToken.ADD,
-                        onRightAction = { route = OverlayRoute.PatientForm },
-                    ) {
-                        PatientsScreen(
-                            vm = patientsVm,
-                            session = activeSession,
-                            repository = appContainer.patientRepository,
-                            onSessionUpdated = { session = it },
-                            onOpenPatient = { route = OverlayRoute.PatientDetail(it) },
-                            onEditPatient = { route = OverlayRoute.PatientEdit(it) },
-                        )
-                    }
+                MobileShell(
+                    title = shellTitle,
+                    selectedTab = selectedTab,
+                    onTabSelected = onTabSelected,
+                    rightActionGlyph = rightGlyph,
+                    onRightAction = onRightAction,
+                ) {
+                    AnimatedContent(
+                        targetState = selectedTab,
+                        transitionSpec = {
+                            val direction = if (targetState >= initialState) 1 else -1
+                            (fadeIn(animationSpec = tween(240)) + slideInHorizontally(animationSpec = tween(260)) { full ->
+                                direction * full / 6
+                            }).togetherWith(
+                                fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(200)) { full ->
+                                    -direction * full / 7
+                                },
+                            )
+                        },
+                        label = "main_tab_content_transition",
+                    ) { tab ->
+                        when (tab) {
+                            0 -> DashboardScreen(
+                                vm = dashboardVm,
+                                session = activeSession,
+                                repository = appContainer.dashboardRepository,
+                                onSessionUpdated = { session = it },
+                            )
 
-                    2 -> MobileShell(
-                        title = "影像中心",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                        rightActionGlyph = IconToken.ADD,
-                    ) {
-                        PlaceholderScreen(
-                            title = "影像模块建设中",
-                            description = "当前后端上传与测量接口尚不稳定，已预留页面路由与架构扩展点。",
-                        )
-                    }
+                            1 -> PatientsScreen(
+                                vm = patientsVm,
+                                session = activeSession,
+                                repository = appContainer.patientRepository,
+                                onSessionUpdated = { session = it },
+                                onOpenPatient = { route = OverlayRoute.PatientDetail(it) },
+                                onEditPatient = { route = OverlayRoute.PatientEdit(it) },
+                            )
 
-                    else -> MobileShell(
-                        title = "个人中心",
-                        selectedTab = selectedTab,
-                        onTabSelected = onTabSelected,
-                    ) {
-                        ProfileScreen(
-                            session = activeSession,
-                            onOpenAppearance = { route = OverlayRoute.Appearance },
-                            onOpenPersonalInfo = { route = OverlayRoute.PersonalInfo },
-                            onOpenChangePassword = { route = OverlayRoute.ChangePassword },
-                            onLogout = {
-                                appContainer.authRepository.logout()
-                                session = null
-                                route = null
-                                selectedTab = 0
-                                authRoute = AuthRoute.LOGIN
-                            },
-                        )
+                            2 -> ImagesScreen(
+                                vm = imagesVm,
+                                session = activeSession,
+                                repository = appContainer.imageFileRepository,
+                                onSessionUpdated = { session = it },
+                                onOpenAnalysis = { route = OverlayRoute.ImageAnalysis(it) },
+                            )
+
+                            else -> ProfileScreen(
+                                session = activeSession,
+                                onOpenAppearance = { route = OverlayRoute.Appearance },
+                                onOpenPersonalInfo = { route = OverlayRoute.PersonalInfo },
+                                onOpenChangePassword = { route = OverlayRoute.ChangePassword },
+                                onLogout = {
+                                    appContainer.authRepository.logout()
+                                    session = null
+                                    route = null
+                                    selectedTab = 0
+                                    authRoute = AuthRoute.LOGIN
+                                },
+                            )
+                        }
                     }
                 }
             } else {
-                val current = requireNotNull(currentScene.route)
+                val current = requireNotNull(currentRoute)
                 when (current) {
                     is OverlayRoute.PatientDetail -> {
                         MobileShell(
@@ -256,6 +272,18 @@ fun App(
                                 onSessionUpdated = { session = it },
                             )
                         }
+                    }
+
+                    is OverlayRoute.ImageAnalysis -> {
+                        ImageAnalysisScreen(
+                            fileId = current.fileId,
+                            vm = imageAnalysisVm,
+                            session = activeSession,
+                            imageRepository = appContainer.imageFileRepository,
+                            measurementRepository = appContainer.measurementRepository,
+                            onSessionUpdated = { session = it },
+                            onBack = { route = null },
+                        )
                     }
 
                     OverlayRoute.PatientForm -> {
