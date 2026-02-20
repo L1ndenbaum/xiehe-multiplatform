@@ -9,10 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -25,7 +24,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.key
 import com.xiehe.spine.ui.theme.SpineTheme
-import kotlin.math.min
 import kotlin.math.roundToInt
 import com.xiehe.spine.ui.viewmodel.AnalysisMeasurementKind
 
@@ -57,7 +55,7 @@ fun ImageViewport(
         BoxWithConstraints(
             modifier = modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(14.dp))
+                .clipToBounds()
                 .background(Color(0xFF0B1622))
                 .pointerInput(bitmap) {
                     detectTransformGestures { _, pan, zoom, _ ->
@@ -82,7 +80,6 @@ fun ImageViewport(
                     bitmapWidth = bitmap.width,
                     bitmapHeight = bitmap.height,
                     maxWidth = constraints.maxWidth,
-                    maxHeight = constraints.maxHeight,
                     density = density,
                 )
             }
@@ -168,17 +165,15 @@ fun ImageViewport(
                         val y = (point.y * sy).toFloat()
                         Text(
                             text = pointLabel,
-                            style = SpineTheme.typography.caption,
-                            color = Color(0xFFE8F5E9),
+                            style = SpineTheme.typography.caption.copy(fontSize = 8.sp),
+                            color = Color(0xFF37B24D),
                             modifier = Modifier
                                 .offset {
                                     IntOffset(
                                         x = (x + 6f).roundToInt(),
                                         y = (y - 17f).roundToInt(),
                                     )
-                                }
-                                .background(Color(0xCC1B5E20), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                                },
                             maxLines = 1,
                         )
                     }
@@ -192,10 +187,9 @@ private fun computeFitSize(
     bitmapWidth: Int,
     bitmapHeight: Int,
     maxWidth: Int,
-    maxHeight: Int,
     density: Density,
 ): DpSize {
-    val scale = min(maxWidth / bitmapWidth.toFloat(), maxHeight / bitmapHeight.toFloat())
+    val scale = maxWidth / bitmapWidth.toFloat()
     return with(density) {
         DpSize(
             width = (bitmapWidth * scale).toDp(),

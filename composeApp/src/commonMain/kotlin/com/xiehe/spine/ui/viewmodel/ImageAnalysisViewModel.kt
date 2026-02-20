@@ -7,8 +7,6 @@ import com.xiehe.spine.data.AiDetectResponse
 import com.xiehe.spine.data.AiInferenceRepository
 import com.xiehe.spine.data.AiPointNode
 import com.xiehe.spine.data.AiPredictResponse
-import com.xiehe.spine.data.GenerateReportMeasurementItem
-import com.xiehe.spine.data.GenerateReportRequest
 import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.AiVertebraCorners
 import com.xiehe.spine.data.ImageMeasurementItem
@@ -35,6 +33,12 @@ enum class AnalysisMeasurementKind {
     DETECTED,
 }
 
+private const val DEFAULT_STANDARD_DISTANCE_MM = 100.0
+private val DEFAULT_STANDARD_DISTANCE_POINTS = listOf(
+    MeasurementPoint(x = 0.0, y = 0.0),
+    MeasurementPoint(x = 200.0, y = 0.0),
+)
+
 data class ImageAnalysisMeasurement(
     val key: String,
     val type: String,
@@ -43,6 +47,7 @@ data class ImageAnalysisMeasurement(
     val description: String? = null,
     val kind: AnalysisMeasurementKind = AnalysisMeasurementKind.COMPUTED,
     val pointLabel: String? = null,
+    val confidence: Double? = null,
     val panelVisible: Boolean = true,
 )
 
@@ -54,8 +59,9 @@ data class ImageAnalysisUiState(
     val fileId: Int? = null,
     val imageBytes: ByteArray? = null,
     val measurements: List<ImageAnalysisMeasurement> = emptyList(),
-    val standardDistanceMm: Double? = null,
-    val standardDistancePoints: List<MeasurementPoint> = emptyList(),
+    val standardDistanceMm: Double? = DEFAULT_STANDARD_DISTANCE_MM,
+    val standardDistancePoints: List<MeasurementPoint> = DEFAULT_STANDARD_DISTANCE_POINTS,
+    val standardDistanceInput: String = "100",
     val hiddenMeasurementKeys: Set<String> = emptySet(),
     val reportText: String = "",
     val standardDistanceLabel: String = "标准距离 100mm",
@@ -95,8 +101,9 @@ class ImageAnalysisViewModel : BaseViewModel() {
                     errorMessage = null,
                     bannerMessage = null,
                     measurements = emptyList(),
-                    standardDistanceMm = null,
-                    standardDistancePoints = emptyList(),
+                    standardDistanceMm = DEFAULT_STANDARD_DISTANCE_MM,
+                    standardDistancePoints = DEFAULT_STANDARD_DISTANCE_POINTS,
+                    standardDistanceInput = formatStandardDistanceInput(DEFAULT_STANDARD_DISTANCE_MM),
                     hiddenMeasurementKeys = emptySet(),
                     imageBytes = null,
                 )
@@ -106,9 +113,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
             var imageBytes: ByteArray? = null
             var items: List<ImageAnalysisMeasurement> = emptyList()
             var reportText = ""
-            var standardDistanceLabel = "标准距离 100mm"
-            var standardDistanceMm: Double? = null
-            var standardDistancePoints: List<MeasurementPoint> = emptyList()
+            var standardDistanceMm: Double? = DEFAULT_STANDARD_DISTANCE_MM
+            var standardDistancePoints: List<MeasurementPoint> = DEFAULT_STANDARD_DISTANCE_POINTS
             val errors = mutableListOf<String>()
 
             when (val measurementsResult = measurementRepository.loadMeasurements(activeSession, fileId)) {
@@ -120,11 +126,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
                         measurement.toUiMeasurement(index)
                     }
                     reportText = payload.reportText.orEmpty()
-                    standardDistanceMm = payload.standardDistance
-                    standardDistancePoints = payload.standardDistancePoints
-                    standardDistanceLabel = payload.standardDistance
-                        ?.let { "标准距离 ${it.roundToInt()}mm" }
-                        ?: standardDistanceLabel
+                    standardDistanceMm = payload.standardDistance?.takeIf { it > 0.0 } ?: standardDistanceMm
+                    standardDistancePoints = payload.standardDistancePoints.takeIf { it.size >= 2 } ?: standardDistancePoints
                 }
 
                 is AppResult.Failure -> {
@@ -154,9 +157,10 @@ class ImageAnalysisViewModel : BaseViewModel() {
                     measurements = items,
                     standardDistanceMm = standardDistanceMm,
                     standardDistancePoints = standardDistancePoints,
+                    standardDistanceInput = formatStandardDistanceInput(standardDistanceMm ?: DEFAULT_STANDARD_DISTANCE_MM),
                     hiddenMeasurementKeys = emptySet(),
                     reportText = reportText,
-                    standardDistanceLabel = standardDistanceLabel,
+                    standardDistanceLabel = buildStandardDistanceLabel(standardDistanceMm ?: DEFAULT_STANDARD_DISTANCE_MM),
                     errorMessage = errors.firstOrNull(),
                     bannerMessage = if (errors.size > 1) errors.joinToString("；") else null,
                 )
@@ -176,8 +180,10 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 fileId = null,
                 imageBytes = null,
                 measurements = emptyList(),
-                standardDistanceMm = null,
-                standardDistancePoints = emptyList(),
+                standardDistanceMm = DEFAULT_STANDARD_DISTANCE_MM,
+                standardDistancePoints = DEFAULT_STANDARD_DISTANCE_POINTS,
+                standardDistanceInput = formatStandardDistanceInput(DEFAULT_STANDARD_DISTANCE_MM),
+                standardDistanceLabel = buildStandardDistanceLabel(DEFAULT_STANDARD_DISTANCE_MM),
                 hiddenMeasurementKeys = emptySet(),
             )
         }
@@ -252,6 +258,24 @@ class ImageAnalysisViewModel : BaseViewModel() {
         _state.update { it.copy(bannerMessage = message) }
     }
 
+    fun updateStandardDistanceInput(value: String) {
+        val sanitized = value.filterIndexed { index, char ->
+            char.isDigit() || (char == '.' && index > 0 && '.' !in value.take(index))
+        }
+        _state.update { current ->
+            val parsed = sanitized.toDoubleOrNull()
+            if (parsed != null && parsed > 0.0) {
+                current.copy(
+                    standardDistanceInput = sanitized,
+                    standardDistanceMm = parsed,
+                    standardDistanceLabel = buildStandardDistanceLabel(parsed),
+                )
+            } else {
+                current.copy(standardDistanceInput = sanitized)
+            }
+        }
+    }
+
     fun runAiDetect(
         fileId: Int,
         repository: AiInferenceRepository,
@@ -316,8 +340,16 @@ class ImageAnalysisViewModel : BaseViewModel() {
     ) {
         val snapshot = _state.value
         val fileId = snapshot.fileId ?: return
-        val computedMeasurements = snapshot.measurements.filter { it.kind == AnalysisMeasurementKind.COMPUTED }
-        val persistableMeasurements = computedMeasurements.filter { it.points.size >= 2 && it.value != "--" }
+        val computedMeasurements = snapshot.measurements
+            .filter { it.kind == AnalysisMeasurementKind.COMPUTED }
+            .filter { it.points.size >= 2 && it.value != "--" }
+        val detectedKeypoints = snapshot.measurements
+            .filter { it.kind == AnalysisMeasurementKind.DETECTED }
+            .filter { it.points.isNotEmpty() }
+        val persistableMeasurements = buildList {
+            addAll(computedMeasurements)
+            addAll(detectedKeypoints)
+        }
         if (snapshot.saving) {
             return
         }
@@ -329,51 +361,13 @@ class ImageAnalysisViewModel : BaseViewModel() {
         scope.launch {
             _state.update { it.copy(saving = true, bannerMessage = null, errorMessage = null) }
             var activeSession = session
-
-            val reportRequest = GenerateReportRequest(
-                examType = examType,
-                imageId = fileId.toString(),
-                measurements = persistableMeasurements.map { measurement ->
-                    GenerateReportMeasurementItem(
-                        description = measurement.description ?: defaultDescription(measurement.type),
-                        type = measurement.type,
-                        value = measurement.valueForReport(),
-                    )
-                },
-            )
-
-            val reportText = when (val reportResult = repository.generateReport(activeSession, reportRequest)) {
-                is AppResult.Success -> {
-                    activeSession = reportResult.data.first
-                    onSessionUpdated(activeSession)
-                    reportResult.data.second.report
-                }
-
-                is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            saving = false,
-                            errorMessage = reportResult.message,
-                            bannerMessage = reportResult.message,
-                        )
-                    }
-                    return@launch
-                }
-            }
+            val reportText = snapshot.reportText.ifBlank { "" }
 
             val saveRequest = SaveMeasurementsRequest(
                 examType = examType,
                 imageId = fileId.toString(),
                 patientId = patientId?.toString(),
-                measurements = persistableMeasurements.map { measurement ->
-                    SaveMeasurementItem(
-                        id = measurement.key,
-                        type = measurement.type,
-                        value = measurement.value.takeUnless { it == "--" },
-                        points = measurement.points,
-                        description = measurement.description ?: defaultDescription(measurement.type),
-                    )
-                },
+                measurements = persistableMeasurements.map(::toSaveMeasurementItem),
                 reportText = reportText,
                 savedAt = Instant.fromEpochSeconds(currentEpochSeconds()).toString(),
             )
@@ -480,7 +474,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
     private fun buildPosePanelItems(response: AiDetectResponse): List<ImageAnalysisMeasurement> {
         val pose = response.poseKeypoints
         return posePanelOrder.map { name ->
-            val point = pose[name]?.toPoint()
+            val node = pose[name]
+            val point = node?.toPoint()
             ImageAnalysisMeasurement(
                 key = "ai_detect_pose_$name",
                 type = name,
@@ -489,6 +484,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 description = "AI检测-躯干关键点",
                 kind = AnalysisMeasurementKind.DETECTED,
                 pointLabel = name,
+                confidence = node?.confidence ?: node?.conf,
                 panelVisible = true,
             )
         }
@@ -498,22 +494,23 @@ class ImageAnalysisViewModel : BaseViewModel() {
         val output = mutableListOf<ImageAnalysisMeasurement>()
         response.vertebrae.entries.sortedBy { it.key }.forEach { (name, node) ->
             val corners = node.corners ?: return@forEach
-            listOf(
-                "TopLeft" to corners.topLeft,
-                "TopRight" to corners.topRight,
-                "BottomLeft" to corners.bottomLeft,
-                "BottomRight" to corners.bottomRight,
-            ).forEach { (cornerName, cornerPoint) ->
-                val point = cornerPoint?.toPoint() ?: return@forEach
-                val displayName = "$name-$cornerName"
+            listOfNotNull(
+                corners.topLeft?.let { 1 to it },
+                corners.topRight?.let { 2 to it },
+                corners.bottomRight?.let { 3 to it },
+                corners.bottomLeft?.let { 4 to it },
+            ).forEach { (cornerOrder, cornerPoint) ->
+                val point = cornerPoint.toPoint()
+                val displayName = "$name-$cornerOrder"
                 output += ImageAnalysisMeasurement(
-                    key = "ai_detect_corner_${name}_$cornerName",
+                    key = "ai_detect_corner_${name}_$cornerOrder",
                     type = name,
                     value = formatPointValue(point),
                     points = listOf(point),
                     description = "AI检测-$displayName",
                     kind = AnalysisMeasurementKind.DETECTED,
                     pointLabel = displayName,
+                    confidence = cornerPoint.confidence ?: cornerPoint.conf ?: node.confidence,
                     panelVisible = false,
                 )
             }
@@ -825,12 +822,75 @@ class ImageAnalysisViewModel : BaseViewModel() {
         val posePanelOrder = listOf("CR", "CL", "IR", "IL", "SR", "SL")
     }
 
-    private fun ImageAnalysisMeasurement.valueForReport(): String {
-        return value.takeUnless { it.isBlank() || it == "--" } ?: when {
-            points.size >= 2 -> formatAngle(lineAngleDegrees(points[0], points[1]), signed = true)
-            points.size == 1 -> type
-            else -> "--"
+    private fun buildStandardDistanceLabel(valueMm: Double): String {
+        val rounded = ((valueMm * 10.0).roundToInt() / 10.0)
+        val display = if (rounded % 1.0 == 0.0) rounded.toInt().toString() else rounded.toString()
+        return "标准距离 ${display}mm"
+    }
+
+    private fun formatStandardDistanceInput(valueMm: Double): String {
+        val rounded = ((valueMm * 10.0).roundToInt() / 10.0)
+        return if (rounded % 1.0 == 0.0) rounded.toInt().toString() else rounded.toString()
+    }
+
+    private fun toSaveMeasurementItem(measurement: ImageAnalysisMeasurement): SaveMeasurementItem {
+        if (measurement.kind == AnalysisMeasurementKind.COMPUTED) {
+            return SaveMeasurementItem(
+                id = measurement.key,
+                type = measurement.type,
+                value = measurement.value.takeUnless { it == "--" },
+                points = measurement.points,
+                description = measurement.description ?: defaultDescription(measurement.type),
+            )
         }
+
+        val label = measurement.pointLabel ?: measurement.type
+        val vertebraCorner = detectVertebraCornerLabel(label)
+        return if (vertebraCorner != null) {
+            val (vertebra, corner) = vertebraCorner
+            val cornerCn = cornerCnLabel(corner)
+            SaveMeasurementItem(
+                id = "ai-detection-$vertebra-$corner",
+                type = "AI检测-$vertebra-$corner",
+                value = "$vertebra-$corner",
+                points = measurement.points,
+                description = "AI检测-${vertebra}角点${corner}($cornerCn) (置信度: ${formatConfidencePercent(measurement.confidence)})",
+            )
+        } else {
+            SaveMeasurementItem(
+                id = "ai-detection-pose-$label",
+                type = "AI检测-$label",
+                value = label,
+                points = measurement.points,
+                description = "AI检测-躯干关键点 (置信度: ${formatConfidencePercent(measurement.confidence)})",
+            )
+        }
+    }
+
+    private fun detectVertebraCornerLabel(label: String): Pair<String, Int>? {
+        val parts = label.split('-')
+        if (parts.size != 2) return null
+        val vertebra = parts[0]
+        val corner = parts[1].toIntOrNull() ?: return null
+        if (corner !in 1..4) return null
+        return vertebra to corner
+    }
+
+    private fun cornerCnLabel(order: Int): String {
+        return when (order) {
+            1 -> "左上"
+            2 -> "右上"
+            3 -> "右下"
+            4 -> "左下"
+            else -> "-"
+        }
+    }
+
+    private fun formatConfidencePercent(confidence: Double?): String {
+        val value = confidence ?: return "--"
+        val percent = if (value <= 1.0) value * 100.0 else value
+        val rounded = ((percent * 10.0).roundToInt() / 10.0)
+        return "${rounded}%"
     }
 
     private fun defaultDescription(type: String): String {

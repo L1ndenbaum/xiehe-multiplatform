@@ -1,7 +1,6 @@
 package com.xiehe.spine.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,9 +80,9 @@ fun ImageAnalysisScreen(
             it.kind == AnalysisMeasurementKind.COMPUTED && it.panelVisible
         }
     }
-    val detectedPoseFields = remember(state.measurements) {
+    val detectedPointFields = remember(state.measurements) {
         state.measurements.filter {
-            it.kind == AnalysisMeasurementKind.DETECTED && it.panelVisible
+            it.kind == AnalysisMeasurementKind.DETECTED
         }
     }
 
@@ -115,8 +114,7 @@ fun ImageAnalysisScreen(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 10.dp),
+                .fillMaxWidth(),
         ) {
             ImageViewport(
                 bitmap = imageBitmap,
@@ -132,15 +130,14 @@ fun ImageAnalysisScreen(
                 standardDistanceLabel = state.standardDistanceLabel,
                 expanded = state.resultsExpanded,
                 computedMeasurements = computedMeasurements,
-                detectedPoseFields = detectedPoseFields,
+                detectedPoseFields = detectedPointFields,
                 hiddenKeys = state.hiddenMeasurementKeys,
                 onToggleExpanded = vm::toggleResultsExpanded,
                 onToggleItemVisibility = vm::toggleMeasurementVisibility,
                 onShowAll = { vm.setAllMeasurementsVisible(true) },
                 onHideAll = { vm.setAllMeasurementsVisible(false) },
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 8.dp, end = 8.dp),
+                    .align(Alignment.TopEnd),
             )
 
             if (state.loading) {
@@ -187,7 +184,6 @@ fun ImageAnalysisScreen(
                         fileId = fileId,
                         repository = aiRepository,
                     )
-                    AnalysisBottomAction.AI_MEASURE -> vm.notifyActionUnavailable("AI测量已合并到 AI检测")
                     AnalysisBottomAction.REPORT -> vm.notifyActionUnavailable("报告生成接口待接入")
                     AnalysisBottomAction.TOOLKIT -> vm.openToolsPanel()
                     AnalysisBottomAction.SETTINGS -> vm.openSettingsPanel()
@@ -224,20 +220,14 @@ fun ImageAnalysisScreen(
                     zoomPercent = state.zoomPercent,
                     contrast = state.contrast,
                     brightness = state.brightness,
+                    standardDistanceInput = state.standardDistanceInput,
                     onClearAll = {
                         vm.clearMeasurements()
                     },
                     onZoomChange = vm::adjustZoom,
                     onContrastChange = vm::adjustContrast,
                     onBrightnessChange = vm::adjustBrightness,
-                )
-                Text(
-                    text = "完成",
-                    style = SpineTheme.typography.body,
-                    color = SpineTheme.colors.primary,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .clickable { dismiss() },
+                    onStandardDistanceChange = vm::updateStandardDistanceInput,
                 )
             }
         }

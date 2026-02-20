@@ -46,7 +46,7 @@ fun MeasurementResultsPanel(
 
     Column(
         modifier = modifier
-            .width(238.dp)
+            .width(196.dp)
             .background(
                 color = colors.backgroundElevated.copy(alpha = 0.92f),
                 shape = RoundedCornerShape(14.dp),
@@ -128,7 +128,7 @@ fun MeasurementResultsPanel(
                 items(detectedPoseFields, key = { it.key }) { item ->
                     val hidden = hiddenKeys.contains(item.key)
                     MeasurementRow(
-                        title = item.type,
+                        title = item.pointLabel ?: item.type,
                         value = item.value,
                         hidden = hidden,
                         valueColor = colors.primary,

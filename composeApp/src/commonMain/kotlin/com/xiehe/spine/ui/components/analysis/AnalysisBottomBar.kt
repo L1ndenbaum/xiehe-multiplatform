@@ -22,7 +22,6 @@ import com.xiehe.spine.ui.theme.SpineTheme
 
 enum class AnalysisBottomAction {
     AI_DETECT,
-    AI_MEASURE,
     REPORT,
     TOOLKIT,
     SETTINGS,
@@ -48,12 +47,6 @@ fun AnalysisBottomBar(
             icon = IconToken.AI_DETECT,
             modifier = Modifier.weight(1f),
             onClick = { onAction(AnalysisBottomAction.AI_DETECT) },
-        )
-        AnalysisBottomItem(
-            label = "AI测量",
-            icon = IconToken.AI_MEASURE,
-            modifier = Modifier.weight(1f),
-            onClick = { onAction(AnalysisBottomAction.AI_MEASURE) },
         )
         AnalysisBottomItem(
             label = "报告",

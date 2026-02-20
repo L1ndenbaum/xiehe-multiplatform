@@ -22,14 +22,16 @@ fun AnalysisSettingsPanel(
     zoomPercent: Int,
     contrast: Int,
     brightness: Int,
+    standardDistanceInput: String,
     onClearAll: () -> Unit,
     onZoomChange: (Int) -> Unit,
     onContrastChange: (Int) -> Unit,
     onBrightnessChange: (Int) -> Unit,
+    onStandardDistanceChange: (String) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Button(
-            text = "清空全部",
+            text = "清空全部测量结果",
             onClick = onClearAll,
             modifier = Modifier.fillMaxWidth(),
             customContainerColor = Color(0xFFD93444),
@@ -55,6 +57,20 @@ fun AnalysisSettingsPanel(
             onMinus = { onBrightnessChange(-5) },
             onPlus = { onBrightnessChange(5) },
         )
+
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = "标准距离 (mm)",
+                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+                color = SpineTheme.colors.textPrimary,
+            )
+            TextField(
+                value = standardDistanceInput,
+                onValueChange = onStandardDistanceChange,
+                placeholder = "输入标准距离，默认100",
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
