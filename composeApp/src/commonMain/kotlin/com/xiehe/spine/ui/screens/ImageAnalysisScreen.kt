@@ -83,11 +83,7 @@ fun ImageAnalysisScreen(
             patientId = null,
             onBack = onBack,
             onSave = {
-                vm.saveMeasurements(
-                    session = session,
-                    repository = measurementRepository,
-                    onSessionUpdated = onSessionUpdated,
-                )
+                vm.notifyActionUnavailable("保存接口暂未开放，当前仅支持读取测量结果")
             },
             onImportJson = { vm.notifyActionUnavailable("导入JSON：后端接口可用后接入") },
             onExportJson = { vm.notifyActionUnavailable("导出JSON：后端接口可用后接入") },
