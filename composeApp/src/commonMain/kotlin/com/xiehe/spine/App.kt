@@ -54,7 +54,11 @@ private enum class AuthRoute {
 
 private sealed interface OverlayRoute {
     data class PatientDetail(val patientId: Int) : OverlayRoute
-    data class ImageAnalysis(val fileId: Int) : OverlayRoute
+    data class ImageAnalysis(
+        val fileId: Int,
+        val patientId: Int?,
+        val examType: String,
+    ) : OverlayRoute
     data object PatientForm : OverlayRoute
     data class PatientEdit(val patientId: Int) : OverlayRoute
     data object Appearance : OverlayRoute
@@ -235,7 +239,13 @@ fun App(
                                 session = activeSession,
                                 repository = appContainer.imageFileRepository,
                                 onSessionUpdated = { session = it },
-                                onOpenAnalysis = { route = OverlayRoute.ImageAnalysis(it) },
+                                onOpenAnalysis = { fileId, patientId, examType ->
+                                    route = OverlayRoute.ImageAnalysis(
+                                        fileId = fileId,
+                                        patientId = patientId,
+                                        examType = examType,
+                                    )
+                                },
                             )
 
                             else -> ProfileScreen(
@@ -277,6 +287,8 @@ fun App(
                     is OverlayRoute.ImageAnalysis -> {
                         ImageAnalysisScreen(
                             fileId = current.fileId,
+                            patientId = current.patientId,
+                            examType = current.examType,
                             vm = imageAnalysisVm,
                             session = activeSession,
                             imageRepository = appContainer.imageFileRepository,

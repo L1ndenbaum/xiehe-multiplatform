@@ -41,6 +41,8 @@ import org.jetbrains.compose.resources.decodeToImageBitmap
 @Composable
 fun ImageAnalysisScreen(
     fileId: Int,
+    patientId: Int?,
+    examType: String,
     vm: ImageAnalysisViewModel,
     session: UserSession,
     imageRepository: ImageFileRepository,
@@ -82,11 +84,18 @@ fun ImageAnalysisScreen(
         AnalysisTopBar(
             modifier = Modifier.statusBarsPadding(),
             doctorName = session.username,
+            examType = examType,
             fileId = fileId,
-            patientId = null,
+            patientId = patientId,
             onBack = onBack,
             onSave = {
-                vm.notifyActionUnavailable("保存接口暂未开放，当前仅支持读取测量结果")
+                vm.saveMeasurements(
+                    session = session,
+                    repository = measurementRepository,
+                    examType = examType,
+                    patientId = patientId,
+                    onSessionUpdated = onSessionUpdated,
+                )
             },
             onImportJson = { vm.notifyActionUnavailable("导入JSON：后端接口可用后接入") },
             onExportJson = { vm.notifyActionUnavailable("导出JSON：后端接口可用后接入") },
@@ -126,6 +135,8 @@ fun ImageAnalysisScreen(
                 LoadingOverlay(message = "...正在加载中")
             } else if (state.aiRunning) {
                 LoadingOverlay(message = state.aiRunningLabel ?: "...正在加载中")
+            } else if (state.saving) {
+                LoadingOverlay(message = "...正在保存标注")
             }
 
             state.errorMessage?.let {

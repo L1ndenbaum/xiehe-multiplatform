@@ -1,11 +1,14 @@
 package com.xiehe.spine.ui.viewmodel
 
+import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AiDetectResponse
 import com.xiehe.spine.data.AiInferenceRepository
 import com.xiehe.spine.data.AiPointNode
 import com.xiehe.spine.data.AiPredictResponse
+import com.xiehe.spine.data.GenerateReportMeasurementItem
+import com.xiehe.spine.data.GenerateReportRequest
 import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.ImageMeasurementItem
 import com.xiehe.spine.data.MeasurementPoint
@@ -15,6 +18,7 @@ import com.xiehe.spine.data.SaveMeasurementsRequest
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.roundToInt
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +32,7 @@ data class ImageAnalysisMeasurement(
     val type: String,
     val value: String,
     val points: List<MeasurementPoint>,
+    val description: String? = null,
 )
 
 data class ImageAnalysisUiState(
@@ -305,10 +310,15 @@ class ImageAnalysisViewModel : BaseViewModel() {
     fun saveMeasurements(
         session: UserSession,
         repository: MeasurementRepository,
+        examType: String,
+        patientId: Int?,
         onSessionUpdated: (UserSession) -> Unit,
     ) {
         val snapshot = _state.value
         val fileId = snapshot.fileId ?: return
+        if (snapshot.saving) {
+            return
+        }
         if (snapshot.measurements.isEmpty()) {
             _state.update { it.copy(bannerMessage = "暂无可保存的标注数据") }
             return
@@ -316,24 +326,63 @@ class ImageAnalysisViewModel : BaseViewModel() {
 
         scope.launch {
             _state.update { it.copy(saving = true, bannerMessage = null, errorMessage = null) }
-            val request = SaveMeasurementsRequest(
+            var activeSession = session
+
+            val reportRequest = GenerateReportRequest(
+                examType = examType,
                 imageId = fileId.toString(),
-                measurements = snapshot.measurements.map {
-                    SaveMeasurementItem(
-                        type = it.type,
-                        value = it.value.takeIf { value -> value != "--" },
-                        points = it.points,
-                        description = null,
+                measurements = snapshot.measurements.map { measurement ->
+                    GenerateReportMeasurementItem(
+                        description = measurement.description ?: defaultDescription(measurement.type),
+                        type = measurement.type,
+                        value = measurement.valueForReport(),
                     )
                 },
-                reportText = snapshot.reportText.ifBlank { null },
             )
-            when (val result = repository.saveMeasurements(session, request)) {
+
+            val reportText = when (val reportResult = repository.generateReport(activeSession, reportRequest)) {
+                is AppResult.Success -> {
+                    activeSession = reportResult.data.first
+                    onSessionUpdated(activeSession)
+                    reportResult.data.second.report
+                }
+
+                is AppResult.Failure -> {
+                    _state.update {
+                        it.copy(
+                            saving = false,
+                            errorMessage = reportResult.message,
+                            bannerMessage = reportResult.message,
+                        )
+                    }
+                    return@launch
+                }
+            }
+
+            val saveRequest = SaveMeasurementsRequest(
+                examType = examType,
+                imageId = fileId.toString(),
+                patientId = patientId?.toString(),
+                measurements = snapshot.measurements.map { measurement ->
+                    SaveMeasurementItem(
+                        id = measurement.key,
+                        type = measurement.type,
+                        value = measurement.value.takeUnless { it == "--" },
+                        points = measurement.points,
+                        description = measurement.description ?: defaultDescription(measurement.type),
+                    )
+                },
+                reportText = reportText,
+                savedAt = Instant.fromEpochSeconds(currentEpochSeconds()).toString(),
+            )
+
+            when (val result = repository.saveMeasurements(activeSession, fileId, saveRequest)) {
                 is AppResult.Success -> {
                     onSessionUpdated(result.data.first)
                     _state.update {
                         it.copy(
                             saving = false,
+                            reportText = reportText,
                             bannerMessage = "标注保存成功",
                             errorMessage = null,
                         )
@@ -368,6 +417,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
             type = type,
             value = valueLabel,
             points = points,
+            description = description,
         )
     }
 
@@ -409,6 +459,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 type = item.type,
                 value = value,
                 points = item.points,
+                description = "${item.type}测量",
             )
         }
     }
@@ -432,6 +483,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
                     type = type,
                     value = formatLineAngle(points),
                     points = points,
+                    description = "${type}测量",
                 )
             }
         }
@@ -440,8 +492,9 @@ class ImageAnalysisViewModel : BaseViewModel() {
             output += ImageAnalysisMeasurement(
                 key = "ai_detect_pose_point_${name}_$index",
                 type = name,
-                value = "--",
+                value = name,
                 points = listOf(node.toPoint()),
+                description = "AI检测-躯干关键点",
             )
         }
 
@@ -464,6 +517,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
                         type = type,
                         value = formatLineAngle(points),
                         points = points,
+                        description = "AI检测-$name 测量线",
                     )
                 }
             }
@@ -483,5 +537,20 @@ class ImageAnalysisViewModel : BaseViewModel() {
 
     private fun AiPointNode.toPoint(): MeasurementPoint {
         return MeasurementPoint(x = x, y = y)
+    }
+
+    private fun ImageAnalysisMeasurement.valueForReport(): String {
+        return value.takeUnless { it.isBlank() || it == "--" } ?: when {
+            points.size >= 2 -> formatLineAngle(points)
+            points.size == 1 -> type
+            else -> "--"
+        }
+    }
+
+    private fun defaultDescription(type: String): String {
+        return when {
+            type.startsWith("AI检测", ignoreCase = true) -> "$type 自动检测结果"
+            else -> "$type 测量"
+        }
     }
 }

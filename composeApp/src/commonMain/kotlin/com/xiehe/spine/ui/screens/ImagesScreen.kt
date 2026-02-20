@@ -60,7 +60,7 @@ fun ImagesScreen(
     session: UserSession,
     repository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
-    onOpenAnalysis: (Int) -> Unit = {},
+    onOpenAnalysis: (Int, Int?, String) -> Unit = { _, _, _ -> },
 ) {
     val state by vm.state.collectAsState()
     var picker by remember { mutableStateOf<ImagesPicker?>(null) }
@@ -183,7 +183,7 @@ private fun ImageFileCard(
     session: UserSession,
     repository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
-    onOpenAnalysis: (Int) -> Unit,
+    onOpenAnalysis: (Int, Int?, String) -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -249,7 +249,13 @@ private fun ImageFileCard(
                     glyph = IconToken.EYE,
                     style = ImageActionStyle.PRIMARY,
                     modifier = Modifier.weight(1f),
-                    onClick = { onOpenAnalysis(item.id) },
+                    onClick = {
+                        onOpenAnalysis(
+                            item.id,
+                            item.patientId,
+                            inferExamType(item),
+                        )
+                    },
                 )
                 ImageActionButton(
                     text = "下载",
@@ -267,6 +273,15 @@ private fun ImageFileCard(
                 )
             }
         }
+    }
+}
+
+private fun inferExamType(item: ImageFileSummary): String {
+    return when (item.modality?.uppercase()) {
+        "XR", "X-RAY", "X_RAY" -> "正位X光片"
+        "CT" -> "CT"
+        "MRI", "MR" -> "MRI"
+        else -> "正位X光片"
     }
 }
 

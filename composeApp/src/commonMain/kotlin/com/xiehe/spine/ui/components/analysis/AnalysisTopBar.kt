@@ -25,6 +25,7 @@ import com.xiehe.spine.ui.theme.SpineTheme
 fun AnalysisTopBar(
     modifier: Modifier = Modifier,
     doctorName: String,
+    examType: String,
     fileId: Int,
     patientId: Int?,
     onBack: () -> Unit,
@@ -66,7 +67,7 @@ fun AnalysisTopBar(
             verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             Text(
-                text = "$doctorName · 正位X光片",
+                text = "$doctorName · $examType",
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
                 color = colors.onPrimary,
                 maxLines = 1,

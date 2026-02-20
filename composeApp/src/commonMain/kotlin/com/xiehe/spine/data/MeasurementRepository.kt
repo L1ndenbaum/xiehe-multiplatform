@@ -18,10 +18,20 @@ class MeasurementRepository(
 
     suspend fun saveMeasurements(
         session: UserSession,
+        imageId: Int,
         request: SaveMeasurementsRequest,
     ): AppResult<Pair<UserSession, SaveMeasurementsResult>> {
         return withRefresh(session) { activeSession ->
-            apiClient.post(path = "/measurements/", body = request, accessToken = activeSession.accessToken)
+            apiClient.post(path = "/measurements/$imageId", body = request, accessToken = activeSession.accessToken)
+        }
+    }
+
+    suspend fun generateReport(
+        session: UserSession,
+        request: GenerateReportRequest,
+    ): AppResult<Pair<UserSession, GenerateReportResult>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.post(path = "/report-generation/generate", body = request, accessToken = activeSession.accessToken)
         }
     }
 
