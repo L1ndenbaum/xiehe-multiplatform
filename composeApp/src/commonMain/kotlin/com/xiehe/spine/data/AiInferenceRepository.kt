@@ -4,6 +4,7 @@ import com.xiehe.spine.core.model.AppResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.statement.bodyAsText
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.post
@@ -12,8 +13,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.client.statement.bodyAsText
 
 private const val defaultAiBaseUrl = "http://115.190.121.59:8001"
 
@@ -49,16 +48,27 @@ class AiInferenceRepository(
                                         HttpHeaders.ContentDisposition,
                                         "form-data; name=\"file\"; filename=\"$fileName\"",
                                     )
-                                    append(HttpHeaders.ContentType, ContentType.Application.OctetStream.toString())
+                                    append(HttpHeaders.ContentType, ContentType.Image.PNG.toString())
                                 },
                             )
                         },
                     ),
                 )
-                contentType(ContentType.MultiPart.FormData)
             }
-            println("SpineAI END path=$path status=${response.status.value} success=true")
-            AppResult.Success(response.body<T>())
+            val status = response.status
+            if (status.value !in 200..299) {
+                val bodyText = runCatching { response.bodyAsText() }.getOrNull()
+                println("SpineAI END path=$path status=${status.value} success=false body=${bodyText ?: "N/A"}")
+                AppResult.Failure(
+                    message = "AI服务返回错误(${status.value})",
+                    code = status.value,
+                    isUnauthorized = false,
+                    debugDetails = "[POST] $requestUrl status=${status.value} body=${bodyText ?: "N/A"}",
+                )
+            } else {
+                println("SpineAI END path=$path status=${status.value} success=true")
+                AppResult.Success(response.body<T>())
+            }
         } catch (e: ClientRequestException) {
             val status = e.response.status
             val responseText = runCatching { e.response.bodyAsText() }.getOrNull()
