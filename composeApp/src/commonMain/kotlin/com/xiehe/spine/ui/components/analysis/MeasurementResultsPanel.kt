@@ -27,7 +27,8 @@ import com.xiehe.spine.ui.theme.SpineTheme
 fun MeasurementResultsPanel(
     standardDistanceLabel: String,
     expanded: Boolean,
-    measurements: List<com.xiehe.spine.ui.viewmodel.ImageAnalysisMeasurement>,
+    computedMeasurements: List<com.xiehe.spine.ui.viewmodel.ImageAnalysisMeasurement>,
+    detectedPoseFields: List<com.xiehe.spine.ui.viewmodel.ImageAnalysisMeasurement>,
     hiddenKeys: Set<String>,
     onToggleExpanded: () -> Unit,
     onToggleItemVisibility: (String) -> Unit,
@@ -45,7 +46,7 @@ fun MeasurementResultsPanel(
 
     Column(
         modifier = modifier
-            .width(210.dp)
+            .width(238.dp)
             .background(
                 color = colors.backgroundElevated.copy(alpha = 0.92f),
                 shape = RoundedCornerShape(14.dp),
@@ -96,38 +97,91 @@ fun MeasurementResultsPanel(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(176.dp),
+                    .height(216.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                items(measurements, key = { it.key }) { item ->
+                item {
+                    SectionTitle(text = "AI测量结果")
+                }
+                items(computedMeasurements, key = { it.key }) { item ->
                     val hidden = hiddenKeys.contains(item.key)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AppIcon(
-                            glyph = if (hidden) IconToken.EYE_OFF else IconToken.EYE,
-                            tint = if (hidden) colors.textTertiary else colors.textSecondary,
-                            modifier = Modifier
-                                .clickable { onToggleItemVisibility(item.key) },
-                        )
-                        Text(
-                            text = item.type,
-                            style = SpineTheme.typography.subhead,
-                            color = if (hidden) colors.textTertiary else colors.textPrimary,
-                            modifier = Modifier.weight(1f).padding(start = 6.dp),
-                            maxLines = 1,
-                        )
-                        Text(
-                            text = item.value,
-                            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-                            color = if (hidden) colors.textTertiary else ColorTokens.valueYellow,
-                            maxLines = 1,
-                        )
-                    }
+                    MeasurementRow(
+                        title = item.type,
+                        value = item.value,
+                        hidden = hidden,
+                        valueColor = ColorTokens.valueYellow,
+                        onToggle = { onToggleItemVisibility(item.key) },
+                    )
+                }
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp)
+                            .background(colors.borderSubtle, RoundedCornerShape(6.dp))
+                            .height(1.dp),
+                    )
+                }
+                item {
+                    SectionTitle(text = "AI检测关键点")
+                }
+                items(detectedPoseFields, key = { it.key }) { item ->
+                    val hidden = hiddenKeys.contains(item.key)
+                    MeasurementRow(
+                        title = item.type,
+                        value = item.value,
+                        hidden = hidden,
+                        valueColor = colors.primary,
+                        onToggle = { onToggleItemVisibility(item.key) },
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+        color = SpineTheme.colors.textSecondary,
+    )
+}
+
+@Composable
+private fun MeasurementRow(
+    title: String,
+    value: String,
+    hidden: Boolean,
+    valueColor: androidx.compose.ui.graphics.Color,
+    onToggle: () -> Unit,
+) {
+    val colors = SpineTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AppIcon(
+            glyph = if (hidden) IconToken.EYE_OFF else IconToken.EYE,
+            tint = if (hidden) colors.textTertiary else colors.textSecondary,
+            modifier = Modifier.clickable(onClick = onToggle),
+        )
+        Text(
+            text = title,
+            style = SpineTheme.typography.subhead,
+            color = if (hidden) colors.textTertiary else colors.textPrimary,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 6.dp),
+            maxLines = 1,
+        )
+        Text(
+            text = value,
+            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+            color = if (hidden) colors.textTertiary else valueColor,
+            maxLines = 1,
+        )
     }
 }
 

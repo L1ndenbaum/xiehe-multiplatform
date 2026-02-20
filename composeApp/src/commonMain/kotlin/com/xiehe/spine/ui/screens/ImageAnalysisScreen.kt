@@ -34,6 +34,7 @@ import com.xiehe.spine.ui.components.MeasurementResultsPanel
 import com.xiehe.spine.ui.components.PickerDialog
 import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.theme.SpineTheme
+import com.xiehe.spine.ui.viewmodel.AnalysisMeasurementKind
 import com.xiehe.spine.ui.viewmodel.ImageAnalysisViewModel
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.decodeToImageBitmap
@@ -73,6 +74,16 @@ fun ImageAnalysisScreen(
     val imageBitmap = remember(state.imageBytes) {
         state.imageBytes?.let { bytes ->
             runCatching { bytes.decodeToImageBitmap() }.getOrNull()
+        }
+    }
+    val computedMeasurements = remember(state.measurements) {
+        state.measurements.filter {
+            it.kind == AnalysisMeasurementKind.COMPUTED && it.panelVisible
+        }
+    }
+    val detectedPoseFields = remember(state.measurements) {
+        state.measurements.filter {
+            it.kind == AnalysisMeasurementKind.DETECTED && it.panelVisible
         }
     }
 
@@ -120,7 +131,8 @@ fun ImageAnalysisScreen(
             MeasurementResultsPanel(
                 standardDistanceLabel = state.standardDistanceLabel,
                 expanded = state.resultsExpanded,
-                measurements = state.measurements,
+                computedMeasurements = computedMeasurements,
+                detectedPoseFields = detectedPoseFields,
                 hiddenKeys = state.hiddenMeasurementKeys,
                 onToggleExpanded = vm::toggleResultsExpanded,
                 onToggleItemVisibility = vm::toggleMeasurementVisibility,
@@ -175,10 +187,7 @@ fun ImageAnalysisScreen(
                         fileId = fileId,
                         repository = aiRepository,
                     )
-                    AnalysisBottomAction.AI_MEASURE -> vm.runAiMeasure(
-                        fileId = fileId,
-                        repository = aiRepository,
-                    )
+                    AnalysisBottomAction.AI_MEASURE -> vm.notifyActionUnavailable("AI测量已合并到 AI检测")
                     AnalysisBottomAction.REPORT -> vm.notifyActionUnavailable("报告生成接口待接入")
                     AnalysisBottomAction.TOOLKIT -> vm.openToolsPanel()
                     AnalysisBottomAction.SETTINGS -> vm.openSettingsPanel()

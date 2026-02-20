@@ -10,13 +10,16 @@ import com.xiehe.spine.data.AiPredictResponse
 import com.xiehe.spine.data.GenerateReportMeasurementItem
 import com.xiehe.spine.data.GenerateReportRequest
 import com.xiehe.spine.data.ImageFileRepository
+import com.xiehe.spine.data.AiVertebraCorners
 import com.xiehe.spine.data.ImageMeasurementItem
 import com.xiehe.spine.data.MeasurementPoint
 import com.xiehe.spine.data.MeasurementRepository
 import com.xiehe.spine.data.SaveMeasurementItem
 import com.xiehe.spine.data.SaveMeasurementsRequest
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,12 +30,20 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonPrimitive
 
+enum class AnalysisMeasurementKind {
+    COMPUTED,
+    DETECTED,
+}
+
 data class ImageAnalysisMeasurement(
     val key: String,
     val type: String,
     val value: String,
     val points: List<MeasurementPoint>,
     val description: String? = null,
+    val kind: AnalysisMeasurementKind = AnalysisMeasurementKind.COMPUTED,
+    val pointLabel: String? = null,
+    val panelVisible: Boolean = true,
 )
 
 data class ImageAnalysisUiState(
@@ -43,6 +54,8 @@ data class ImageAnalysisUiState(
     val fileId: Int? = null,
     val imageBytes: ByteArray? = null,
     val measurements: List<ImageAnalysisMeasurement> = emptyList(),
+    val standardDistanceMm: Double? = null,
+    val standardDistancePoints: List<MeasurementPoint> = emptyList(),
     val hiddenMeasurementKeys: Set<String> = emptySet(),
     val reportText: String = "",
     val standardDistanceLabel: String = "标准距离 100mm",
@@ -82,6 +95,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
                     errorMessage = null,
                     bannerMessage = null,
                     measurements = emptyList(),
+                    standardDistanceMm = null,
+                    standardDistancePoints = emptyList(),
                     hiddenMeasurementKeys = emptySet(),
                     imageBytes = null,
                 )
@@ -92,6 +107,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
             var items: List<ImageAnalysisMeasurement> = emptyList()
             var reportText = ""
             var standardDistanceLabel = "标准距离 100mm"
+            var standardDistanceMm: Double? = null
+            var standardDistancePoints: List<MeasurementPoint> = emptyList()
             val errors = mutableListOf<String>()
 
             when (val measurementsResult = measurementRepository.loadMeasurements(activeSession, fileId)) {
@@ -103,6 +120,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
                         measurement.toUiMeasurement(index)
                     }
                     reportText = payload.reportText.orEmpty()
+                    standardDistanceMm = payload.standardDistance
+                    standardDistancePoints = payload.standardDistancePoints
                     standardDistanceLabel = payload.standardDistance
                         ?.let { "标准距离 ${it.roundToInt()}mm" }
                         ?: standardDistanceLabel
@@ -133,6 +152,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
                     fileId = fileId,
                     imageBytes = imageBytes,
                     measurements = items,
+                    standardDistanceMm = standardDistanceMm,
+                    standardDistancePoints = standardDistancePoints,
                     hiddenMeasurementKeys = emptySet(),
                     reportText = reportText,
                     standardDistanceLabel = standardDistanceLabel,
@@ -155,6 +176,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 fileId = null,
                 imageBytes = null,
                 measurements = emptyList(),
+                standardDistanceMm = null,
+                standardDistancePoints = emptyList(),
                 hiddenMeasurementKeys = emptySet(),
             )
         }
@@ -233,17 +256,21 @@ class ImageAnalysisViewModel : BaseViewModel() {
         fileId: Int,
         repository: AiInferenceRepository,
     ) {
-        runAiAction(label = "AI检测中...") { bytes ->
+        runAiAction(label = "AI检测与测量中...") { bytes ->
+            val calibration = CalibrationContext(
+                standardDistanceMm = _state.value.standardDistanceMm,
+                standardDistancePoints = _state.value.standardDistancePoints,
+            )
             when (val result = repository.detectKeypoints(fileName = "image_$fileId.png", bytes = bytes)) {
                 is AppResult.Success -> {
-                    val overlay = mapDetectResponse(result.data)
+                    val overlay = mapDetectResponse(result.data, calibration)
                     _state.update {
                         it.copy(
                             aiRunning = false,
                             aiRunningLabel = null,
                             measurements = overlay,
                             hiddenMeasurementKeys = emptySet(),
-                            bannerMessage = "AI检测完成，已覆盖当前标注层",
+                            bannerMessage = "AI检测与测量完成，已覆盖当前标注层",
                             errorMessage = null,
                         )
                     }
@@ -267,34 +294,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
         fileId: Int,
         repository: AiInferenceRepository,
     ) {
-        runAiAction(label = "AI测量中...") { bytes ->
-            when (val result = repository.predict(fileName = "image_$fileId.png", bytes = bytes)) {
-                is AppResult.Success -> {
-                    val overlay = mapPredictResponse(result.data)
-                    _state.update {
-                        it.copy(
-                            aiRunning = false,
-                            aiRunningLabel = null,
-                            measurements = overlay,
-                            hiddenMeasurementKeys = emptySet(),
-                            bannerMessage = "AI测量完成，已覆盖当前标注层",
-                            errorMessage = null,
-                        )
-                    }
-                }
-
-                is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            aiRunning = false,
-                            aiRunningLabel = null,
-                            bannerMessage = result.message,
-                            errorMessage = result.message,
-                        )
-                    }
-                }
-            }
-        }
+        runAiDetect(fileId = fileId, repository = repository)
     }
 
     fun clearMeasurements() {
@@ -316,10 +316,12 @@ class ImageAnalysisViewModel : BaseViewModel() {
     ) {
         val snapshot = _state.value
         val fileId = snapshot.fileId ?: return
+        val computedMeasurements = snapshot.measurements.filter { it.kind == AnalysisMeasurementKind.COMPUTED }
+        val persistableMeasurements = computedMeasurements.filter { it.points.size >= 2 && it.value != "--" }
         if (snapshot.saving) {
             return
         }
-        if (snapshot.measurements.isEmpty()) {
+        if (persistableMeasurements.isEmpty()) {
             _state.update { it.copy(bannerMessage = "暂无可保存的标注数据") }
             return
         }
@@ -331,7 +333,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
             val reportRequest = GenerateReportRequest(
                 examType = examType,
                 imageId = fileId.toString(),
-                measurements = snapshot.measurements.map { measurement ->
+                measurements = persistableMeasurements.map { measurement ->
                     GenerateReportMeasurementItem(
                         description = measurement.description ?: defaultDescription(measurement.type),
                         type = measurement.type,
@@ -363,7 +365,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 examType = examType,
                 imageId = fileId.toString(),
                 patientId = patientId?.toString(),
-                measurements = snapshot.measurements.map { measurement ->
+                measurements = persistableMeasurements.map { measurement ->
                     SaveMeasurementItem(
                         id = measurement.key,
                         type = measurement.type,
@@ -418,6 +420,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
             value = valueLabel,
             points = points,
             description = description,
+            kind = AnalysisMeasurementKind.COMPUTED,
+            panelVisible = true,
         )
     }
 
@@ -450,98 +454,380 @@ class ImageAnalysisViewModel : BaseViewModel() {
 
     private fun mapPredictResponse(response: AiPredictResponse): List<ImageAnalysisMeasurement> {
         return response.measurements.mapIndexed { index, item ->
-            val value = item.angle?.let { angle ->
-                val rounded = ((angle * 10.0).roundToInt() / 10.0)
-                "${rounded}°"
-            } ?: "--"
             ImageAnalysisMeasurement(
                 key = "ai_predict_${item.type}_$index",
                 type = item.type,
-                value = value,
+                value = item.angle?.let { formatAngle(it, signed = false) } ?: "--",
                 points = item.points,
                 description = "${item.type}测量",
+                kind = AnalysisMeasurementKind.COMPUTED,
+                panelVisible = true,
             )
         }
     }
 
-    private fun mapDetectResponse(response: AiDetectResponse): List<ImageAnalysisMeasurement> {
+    private fun mapDetectResponse(
+        response: AiDetectResponse,
+        calibration: CalibrationContext,
+    ): List<ImageAnalysisMeasurement> {
         val output = mutableListOf<ImageAnalysisMeasurement>()
+        output += computeSixMeasurements(response, calibration)
+        output += buildPosePanelItems(response)
+        output += buildVertebraCornerItems(response)
+        return output
+    }
 
+    private fun buildPosePanelItems(response: AiDetectResponse): List<ImageAnalysisMeasurement> {
         val pose = response.poseKeypoints
-        val linePairs = listOf(
-            Triple("CA", "CR", "CL"),
-            Triple("Pelvic", "IR", "IL"),
-            Triple("Sacral", "SR", "SL"),
-        )
-        linePairs.forEachIndexed { index, (type, startKey, endKey) ->
-            val start = pose[startKey]
-            val end = pose[endKey]
-            if (start != null && end != null) {
-                val points = listOf(start.toPoint(), end.toPoint())
+        return posePanelOrder.map { name ->
+            val point = pose[name]?.toPoint()
+            ImageAnalysisMeasurement(
+                key = "ai_detect_pose_$name",
+                type = name,
+                value = point?.let(::formatPointValue) ?: "--",
+                points = point?.let { listOf(it) } ?: emptyList(),
+                description = "AI检测-躯干关键点",
+                kind = AnalysisMeasurementKind.DETECTED,
+                pointLabel = name,
+                panelVisible = true,
+            )
+        }
+    }
+
+    private fun buildVertebraCornerItems(response: AiDetectResponse): List<ImageAnalysisMeasurement> {
+        val output = mutableListOf<ImageAnalysisMeasurement>()
+        response.vertebrae.entries.sortedBy { it.key }.forEach { (name, node) ->
+            val corners = node.corners ?: return@forEach
+            listOf(
+                "TopLeft" to corners.topLeft,
+                "TopRight" to corners.topRight,
+                "BottomLeft" to corners.bottomLeft,
+                "BottomRight" to corners.bottomRight,
+            ).forEach { (cornerName, cornerPoint) ->
+                val point = cornerPoint?.toPoint() ?: return@forEach
+                val displayName = "$name-$cornerName"
                 output += ImageAnalysisMeasurement(
-                    key = "ai_detect_pose_line_${type}_$index",
-                    type = type,
-                    value = formatLineAngle(points),
-                    points = points,
-                    description = "${type}测量",
+                    key = "ai_detect_corner_${name}_$cornerName",
+                    type = name,
+                    value = formatPointValue(point),
+                    points = listOf(point),
+                    description = "AI检测-$displayName",
+                    kind = AnalysisMeasurementKind.DETECTED,
+                    pointLabel = displayName,
+                    panelVisible = false,
                 )
             }
         }
+        return output
+    }
 
-        pose.entries.sortedBy { it.key }.forEachIndexed { index, (name, node) ->
-            output += ImageAnalysisMeasurement(
-                key = "ai_detect_pose_point_${name}_$index",
-                type = name,
-                value = name,
-                points = listOf(node.toPoint()),
-                description = "AI检测-躯干关键点",
+    private fun computeSixMeasurements(
+        response: AiDetectResponse,
+        calibration: CalibrationContext,
+    ): List<ImageAnalysisMeasurement> {
+        val output = mutableListOf<ImageAnalysisMeasurement>()
+        val pose = response.poseKeypoints
+        val vertebrae = response.vertebrae
+        val t1Corners = vertebrae["T1"]?.corners
+
+        output += angleMetricOrPlaceholder(
+            key = "ai_compute_t1_tilt",
+            type = "T1 Tilt",
+            description = "T1椎体倾斜角测量",
+            start = t1Corners?.topLeft?.toPoint(),
+            end = t1Corners?.topRight?.toPoint(),
+            signed = true,
+        )
+
+        output += measurementPlaceholder(
+            key = "ai_compute_ca",
+            type = "CA",
+            description = "Cobb角测量",
+        )
+
+        output += angleMetricOrPlaceholder(
+            key = "ai_compute_pelvic",
+            type = "Pelvic",
+            description = "骨盆倾斜角测量",
+            start = pose["IR"]?.toPoint(),
+            end = pose["IL"]?.toPoint(),
+            signed = true,
+        )
+
+        output += angleMetricOrPlaceholder(
+            key = "ai_compute_sacral",
+            type = "Sacral",
+            description = "骶骨倾斜角测量",
+            start = pose["SR"]?.toPoint(),
+            end = pose["SL"]?.toPoint(),
+            signed = true,
+        )
+
+        val csvlX = run {
+            val sr = pose["SR"]?.toPoint()
+            val sl = pose["SL"]?.toPoint()
+            if (sr != null && sl != null) (sr.x + sl.x) / 2.0 else null
+        }
+        val c7Center = vertebrae["C7"]?.corners.centerPoint()
+        output += if (csvlX != null && c7Center != null) {
+            val y = c7Center.y
+            val left = MeasurementPoint(x = csvlX, y = y)
+            val right = MeasurementPoint(x = c7Center.x, y = y)
+            ImageAnalysisMeasurement(
+                key = "ai_compute_ts",
+                type = "TS",
+                value = formatDistanceValue(abs(c7Center.x - csvlX), calibration),
+                points = listOf(left, right),
+                description = "躯干偏移测量",
+                kind = AnalysisMeasurementKind.COMPUTED,
+                panelVisible = true,
+            )
+        } else {
+            measurementPlaceholder(
+                key = "ai_compute_ts",
+                type = "TS",
+                description = "躯干偏移测量",
             )
         }
 
-        response.vertebrae.entries.sortedBy { it.key }.forEachIndexed { index, (name, vertebra) ->
-            val corners = vertebra.corners
-            if (corners != null) {
-                listOfNotNull(
-                    corners.topLeft?.let { tl ->
-                        corners.topRight?.let { tr -> "${name}-Top" to listOf(tl.toPoint(), tr.toPoint()) }
-                    },
-                    corners.bottomLeft?.let { bl ->
-                        corners.bottomRight?.let { br -> "${name}-Bottom" to listOf(bl.toPoint(), br.toPoint()) }
-                    },
-                    corners.topMid?.let { tm ->
-                        corners.bottomMid?.let { bm -> "${name}-Axis" to listOf(tm.toPoint(), bm.toPoint()) }
-                    },
-                ).forEachIndexed { lineIndex, (type, points) ->
-                    output += ImageAnalysisMeasurement(
-                        key = "ai_detect_vertebra_${name}_${lineIndex}_$index",
-                        type = type,
-                        value = formatLineAngle(points),
-                        points = points,
-                        description = "AI检测-$name 测量线",
+        val vertebraCenters = vertebrae.mapNotNull { (name, node) ->
+            node.corners.centerPoint()?.let { name to it }
+        }
+        output += if (csvlX != null && vertebraCenters.isNotEmpty()) {
+            val apex = vertebraCenters.maxByOrNull { (_, center) -> abs(center.x - csvlX) }
+            if (apex != null) {
+                val center = apex.second
+                val left = MeasurementPoint(x = csvlX, y = center.y)
+                val right = MeasurementPoint(x = center.x, y = center.y)
+                ImageAnalysisMeasurement(
+                    key = "ai_compute_avt",
+                    type = "AVT",
+                    value = formatDistanceValue(abs(center.x - csvlX), calibration),
+                    points = listOf(left, right),
+                    description = "顶椎偏移测量",
+                    kind = AnalysisMeasurementKind.COMPUTED,
+                    panelVisible = true,
+                )
+            } else {
+                measurementPlaceholder(
+                    key = "ai_compute_avt",
+                    type = "AVT",
+                    description = "顶椎偏移测量",
+                )
+            }
+        } else {
+            measurementPlaceholder(
+                key = "ai_compute_avt",
+                type = "AVT",
+                description = "顶椎偏移测量",
+            )
+        }
+
+        val candidates = mutableListOf<LineCandidate>()
+        vertebrae.forEach { (name, node) ->
+            val corners = node.corners ?: return@forEach
+            corners.topLeft?.toPoint()?.let { tl ->
+                corners.topRight?.toPoint()?.let { tr ->
+                    candidates += LineCandidate(
+                        name = "$name-Top",
+                        p1 = tl,
+                        p2 = tr,
+                        angle = lineAngleDegrees(tl, tr),
                     )
                 }
             }
+            corners.bottomLeft?.toPoint()?.let { bl ->
+                corners.bottomRight?.toPoint()?.let { br ->
+                    candidates += LineCandidate(
+                        name = "$name-Bottom",
+                        p1 = bl,
+                        p2 = br,
+                        angle = lineAngleDegrees(bl, br),
+                    )
+                }
+            }
+        }
+        output[1] = if (candidates.size >= 2) {
+            val bestPair = findBestCobbPair(candidates)
+            if (bestPair != null) {
+                val reference = if (abs(bestPair.first.angle) >= abs(bestPair.second.angle)) bestPair.first else bestPair.second
+                ImageAnalysisMeasurement(
+                    key = "ai_compute_ca",
+                    type = "CA",
+                    value = formatAngle(bestPair.third, signed = false),
+                    points = listOf(reference.p1, reference.p2),
+                    description = "Cobb角测量",
+                    kind = AnalysisMeasurementKind.COMPUTED,
+                    panelVisible = true,
+                )
+            } else {
+                measurementPlaceholder(
+                    key = "ai_compute_ca",
+                    type = "CA",
+                    description = "Cobb角测量",
+                )
+            }
+        } else {
+            measurementPlaceholder(
+                key = "ai_compute_ca",
+                type = "CA",
+                description = "Cobb角测量",
+            )
         }
 
         return output
     }
 
-    private fun formatLineAngle(points: List<MeasurementPoint>): String {
-        if (points.size < 2) return "--"
-        val dx = points[1].x - points[0].x
-        val dy = points[1].y - points[0].y
-        val angle = atan2(dy, dx) * 180.0 / PI
-        val rounded = ((angle * 10.0).roundToInt() / 10.0)
-        return "${rounded}°"
+    private fun angleMetricOrPlaceholder(
+        key: String,
+        type: String,
+        description: String,
+        start: MeasurementPoint?,
+        end: MeasurementPoint?,
+        signed: Boolean,
+    ): ImageAnalysisMeasurement {
+        if (start == null || end == null) {
+            return measurementPlaceholder(
+                key = key,
+                type = type,
+                description = description,
+            )
+        }
+        return ImageAnalysisMeasurement(
+            key = key,
+            type = type,
+            value = formatAngle(lineAngleDegrees(start, end), signed = signed),
+            points = listOf(start, end),
+            description = description,
+            kind = AnalysisMeasurementKind.COMPUTED,
+            panelVisible = true,
+        )
     }
 
-    private fun AiPointNode.toPoint(): MeasurementPoint {
-        return MeasurementPoint(x = x, y = y)
+    private fun measurementPlaceholder(
+        key: String,
+        type: String,
+        description: String,
+    ): ImageAnalysisMeasurement {
+        return ImageAnalysisMeasurement(
+            key = key,
+            type = type,
+            value = "--",
+            points = emptyList(),
+            description = description,
+            kind = AnalysisMeasurementKind.COMPUTED,
+            panelVisible = true,
+        )
+    }
+
+    private fun lineAngleDegrees(start: MeasurementPoint, end: MeasurementPoint): Double {
+        val raw = atan2(end.y - start.y, end.x - start.x) * 180.0 / PI
+        var normalized = raw
+        while (normalized <= -90.0) normalized += 180.0
+        while (normalized > 90.0) normalized -= 180.0
+        return normalized
+    }
+
+    private fun findBestCobbPair(candidates: List<LineCandidate>): Triple<LineCandidate, LineCandidate, Double>? {
+        var best: Triple<LineCandidate, LineCandidate, Double>? = null
+        for (i in 0 until candidates.lastIndex) {
+            for (j in i + 1 until candidates.size) {
+                val first = candidates[i]
+                val second = candidates[j]
+                val angle = acuteAngle(first.angle, second.angle)
+                if (best == null || angle > best.third) {
+                    best = Triple(first, second, angle)
+                }
+            }
+        }
+        return best
+    }
+
+    private fun acuteAngle(first: Double, second: Double): Double {
+        var diff = abs(first - second)
+        if (diff > 180.0) diff = 360.0 - diff
+        if (diff > 90.0) diff = 180.0 - diff
+        return diff
+    }
+
+    private fun formatAngle(value: Double, signed: Boolean): String {
+        val rounded = ((value * 10.0).roundToInt() / 10.0)
+        return if (signed) "${rounded}°" else "${abs(rounded)}°"
+    }
+
+    private fun formatDistanceValue(pxDistance: Double, calibration: CalibrationContext): String {
+        val mmPerPx = calibration.mmPerPx()
+        return if (mmPerPx != null) {
+            val value = pxDistance * mmPerPx
+            "${((value * 10.0).roundToInt() / 10.0)}mm"
+        } else {
+            "${((pxDistance * 10.0).roundToInt() / 10.0)}px"
+        }
+    }
+
+    private fun formatPointValue(point: MeasurementPoint): String {
+        val x = ((point.x * 10.0).roundToInt() / 10.0)
+        val y = ((point.y * 10.0).roundToInt() / 10.0)
+        return "($x, $y)"
+    }
+
+    private fun AiPointNode.toPoint(): MeasurementPoint = MeasurementPoint(x = x, y = y)
+
+    private fun AiVertebraCorners?.centerPoint(): MeasurementPoint? {
+        val corners = this ?: return null
+        corners.center?.toPoint()?.let { return it }
+        val fourCorners = listOfNotNull(
+            corners.topLeft?.toPoint(),
+            corners.topRight?.toPoint(),
+            corners.bottomLeft?.toPoint(),
+            corners.bottomRight?.toPoint(),
+        )
+        if (fourCorners.isNotEmpty()) {
+            return MeasurementPoint(
+                x = fourCorners.map { it.x }.average(),
+                y = fourCorners.map { it.y }.average(),
+            )
+        }
+        val topMid = corners.topMid?.toPoint()
+        val bottomMid = corners.bottomMid?.toPoint()
+        if (topMid != null && bottomMid != null) {
+            return MeasurementPoint(
+                x = (topMid.x + bottomMid.x) / 2.0,
+                y = (topMid.y + bottomMid.y) / 2.0,
+            )
+        }
+        return null
+    }
+
+    private data class LineCandidate(
+        val name: String,
+        val p1: MeasurementPoint,
+        val p2: MeasurementPoint,
+        val angle: Double,
+    )
+
+    private data class CalibrationContext(
+        val standardDistanceMm: Double?,
+        val standardDistancePoints: List<MeasurementPoint>,
+    ) {
+        fun mmPerPx(): Double? {
+            val mm = standardDistanceMm ?: return null
+            if (standardDistancePoints.size < 2) return null
+            val a = standardDistancePoints[0]
+            val b = standardDistancePoints[1]
+            val px = hypot(b.x - a.x, b.y - a.y)
+            if (px <= 0.0) return null
+            return mm / px
+        }
+    }
+
+    private companion object {
+        val posePanelOrder = listOf("CR", "CL", "IR", "IL", "SR", "SL")
     }
 
     private fun ImageAnalysisMeasurement.valueForReport(): String {
         return value.takeUnless { it.isBlank() || it == "--" } ?: when {
-            points.size >= 2 -> formatLineAngle(points)
+            points.size >= 2 -> formatAngle(lineAngleDegrees(points[0], points[1]), signed = true)
             points.size == 1 -> type
             else -> "--"
         }

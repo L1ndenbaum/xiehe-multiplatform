@@ -6,6 +6,8 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
@@ -22,6 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
@@ -33,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.key
 import com.xiehe.spine.ui.theme.SpineTheme
 import kotlin.math.min
+import kotlin.math.roundToInt
+import com.xiehe.spine.ui.viewmodel.AnalysisMeasurementKind
 
 @Composable
 fun ImageViewport(
@@ -85,6 +90,16 @@ fun ImageViewport(
             val colorFilter = remember(contrast, brightness) {
                 ColorFilter.colorMatrix(createAdjustMatrix(contrast = contrast, brightness = brightness))
             }
+            val computedMeasurements = remember(measurements) {
+                measurements.filter { it.kind == AnalysisMeasurementKind.COMPUTED }
+            }
+            val detectedPoints = remember(measurements) {
+                measurements.filter { it.kind == AnalysisMeasurementKind.DETECTED }
+            }
+            val imageWidthPx = with(density) { imageSize.width.toPx() }
+            val imageHeightPx = with(density) { imageSize.height.toPx() }
+            val sx = imageWidthPx / bitmap.width
+            val sy = imageHeightPx / bitmap.height
 
             Box(
                 modifier = Modifier
@@ -105,51 +120,67 @@ fun ImageViewport(
                 )
 
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    val palette = listOf(
-                        Color(0xFF4FC3F7),
-                        Color(0xFFAB47BC),
-                        Color(0xFFFFC107),
-                        Color(0xFF66BB6A),
-                        Color(0xFFEF5350),
-                        Color(0xFF42A5F5),
-                    )
-                    val sx = size.width / bitmap.width
-                    val sy = size.height / bitmap.height
-                    measurements.forEachIndexed { index, item ->
-                        if (hiddenKeys.contains(item.key)) return@forEachIndexed
-                        val color = palette[index % palette.size]
+                    computedMeasurements.forEach { item ->
+                        if (hiddenKeys.contains(item.key)) return@forEach
                         val points = item.points.map { point ->
                             Offset(
                                 x = (point.x * sx).toFloat(),
                                 y = (point.y * sy).toFloat(),
                             )
                         }
-                        if (points.isEmpty()) return@forEachIndexed
+                        if (points.isEmpty()) return@forEach
 
-                        when {
-                            points.size == 2 -> {
-                                drawLine(color = color, start = points[0], end = points[1], strokeWidth = 3f)
-                            }
-
-                            points.size >= 4 -> {
-                                drawLine(color = color, start = points[0], end = points[1], strokeWidth = 3f)
-                                drawLine(color = color, start = points[2], end = points[3], strokeWidth = 3f)
-                            }
-
-                            else -> {
-                                points.zipWithNext().forEach { (start, end) ->
-                                    drawLine(color = color, start = start, end = end, strokeWidth = 3f)
-                                }
-                            }
+                        if (points.size >= 2) {
+                            drawLine(
+                                color = Color(0xFFE53935),
+                                start = points[0],
+                                end = points[1],
+                                strokeWidth = 3.2f,
+                            )
                         }
 
                         points.forEach { center ->
                             drawCircle(
-                                color = color,
+                                color = Color(0xFFE53935),
                                 radius = 5f,
                                 center = center,
                             )
                         }
+                    }
+
+                    detectedPoints.forEach { item ->
+                        if (hiddenKeys.contains(item.key)) return@forEach
+                        val point = item.points.firstOrNull() ?: return@forEach
+                        drawCircle(
+                            color = Color(0xFF37B24D),
+                            radius = 4.8f,
+                            center = Offset((point.x * sx).toFloat(), (point.y * sy).toFloat()),
+                        )
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    detectedPoints.forEach { item ->
+                        if (hiddenKeys.contains(item.key)) return@forEach
+                        val point = item.points.firstOrNull() ?: return@forEach
+                        val pointLabel = item.pointLabel ?: return@forEach
+                        val x = (point.x * sx).toFloat()
+                        val y = (point.y * sy).toFloat()
+                        Text(
+                            text = pointLabel,
+                            style = SpineTheme.typography.caption,
+                            color = Color(0xFFE8F5E9),
+                            modifier = Modifier
+                                .offset {
+                                    IntOffset(
+                                        x = (x + 6f).roundToInt(),
+                                        y = (y - 17f).roundToInt(),
+                                    )
+                                }
+                                .background(Color(0xCC1B5E20), RoundedCornerShape(4.dp))
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            maxLines = 1,
+                        )
                     }
                 }
             }
