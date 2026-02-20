@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.AiInferenceRepository
 import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.MeasurementRepository
 import com.xiehe.spine.ui.components.AnalysisBottomAction
@@ -43,6 +44,7 @@ fun ImageAnalysisScreen(
     session: UserSession,
     imageRepository: ImageFileRepository,
     measurementRepository: MeasurementRepository,
+    aiRepository: AiInferenceRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -129,6 +131,16 @@ fun ImageAnalysisScreen(
                     style = SpineTheme.typography.body,
                 )
             }
+            if (state.aiRunning) {
+                Text(
+                    text = state.aiRunningLabel ?: "AI处理中...",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .background(SpineTheme.colors.surface, RoundedCornerShape(10.dp))
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    style = SpineTheme.typography.body,
+                )
+            }
 
             state.errorMessage?.let {
                 Text(
@@ -162,8 +174,14 @@ fun ImageAnalysisScreen(
             modifier = Modifier.navigationBarsPadding(),
             onAction = { action ->
                 when (action) {
-                    AnalysisBottomAction.AI_DETECT -> vm.notifyActionUnavailable("AI检测接口暂不可用")
-                    AnalysisBottomAction.AI_MEASURE -> vm.notifyActionUnavailable("AI测量接口暂不可用")
+                    AnalysisBottomAction.AI_DETECT -> vm.runAiDetect(
+                        fileId = fileId,
+                        repository = aiRepository,
+                    )
+                    AnalysisBottomAction.AI_MEASURE -> vm.runAiMeasure(
+                        fileId = fileId,
+                        repository = aiRepository,
+                    )
                     AnalysisBottomAction.REPORT -> vm.notifyActionUnavailable("报告生成接口待接入")
                     AnalysisBottomAction.TOOLKIT -> vm.openToolsPanel()
                     AnalysisBottomAction.SETTINGS -> vm.openSettingsPanel()

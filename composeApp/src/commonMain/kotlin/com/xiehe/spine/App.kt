@@ -281,6 +281,7 @@ fun App(
                             session = activeSession,
                             imageRepository = appContainer.imageFileRepository,
                             measurementRepository = appContainer.measurementRepository,
+                            aiRepository = appContainer.aiInferenceRepository,
                             onSessionUpdated = { session = it },
                             onBack = { route = null },
                         )

@@ -2,12 +2,18 @@ package com.xiehe.spine.ui.viewmodel
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.AiDetectResponse
+import com.xiehe.spine.data.AiInferenceRepository
+import com.xiehe.spine.data.AiPointNode
+import com.xiehe.spine.data.AiPredictResponse
 import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.ImageMeasurementItem
 import com.xiehe.spine.data.MeasurementPoint
 import com.xiehe.spine.data.MeasurementRepository
 import com.xiehe.spine.data.SaveMeasurementItem
 import com.xiehe.spine.data.SaveMeasurementsRequest
+import kotlin.math.PI
+import kotlin.math.atan2
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +33,8 @@ data class ImageAnalysisMeasurement(
 data class ImageAnalysisUiState(
     val loading: Boolean = false,
     val saving: Boolean = false,
+    val aiRunning: Boolean = false,
+    val aiRunningLabel: String? = null,
     val fileId: Int? = null,
     val imageBytes: ByteArray? = null,
     val measurements: List<ImageAnalysisMeasurement> = emptyList(),
@@ -63,6 +71,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
             _state.update {
                 it.copy(
                     loading = true,
+                    aiRunning = false,
+                    aiRunningLabel = null,
                     fileId = fileId,
                     errorMessage = null,
                     bannerMessage = null,
@@ -113,6 +123,8 @@ class ImageAnalysisViewModel : BaseViewModel() {
             _state.update {
                 it.copy(
                     loading = false,
+                    aiRunning = false,
+                    aiRunningLabel = null,
                     fileId = fileId,
                     imageBytes = imageBytes,
                     measurements = items,
@@ -212,6 +224,74 @@ class ImageAnalysisViewModel : BaseViewModel() {
         _state.update { it.copy(bannerMessage = message) }
     }
 
+    fun runAiDetect(
+        fileId: Int,
+        repository: AiInferenceRepository,
+    ) {
+        runAiAction(label = "AI检测中...") { bytes ->
+            when (val result = repository.detectKeypoints(fileName = "image_$fileId.png", bytes = bytes)) {
+                is AppResult.Success -> {
+                    val overlay = mapDetectResponse(result.data)
+                    _state.update {
+                        it.copy(
+                            aiRunning = false,
+                            aiRunningLabel = null,
+                            measurements = overlay,
+                            hiddenMeasurementKeys = emptySet(),
+                            bannerMessage = "AI检测完成，已覆盖当前标注层",
+                            errorMessage = null,
+                        )
+                    }
+                }
+
+                is AppResult.Failure -> {
+                    _state.update {
+                        it.copy(
+                            aiRunning = false,
+                            aiRunningLabel = null,
+                            bannerMessage = result.message,
+                            errorMessage = result.message,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun runAiMeasure(
+        fileId: Int,
+        repository: AiInferenceRepository,
+    ) {
+        runAiAction(label = "AI测量中...") { bytes ->
+            when (val result = repository.predict(fileName = "image_$fileId.png", bytes = bytes)) {
+                is AppResult.Success -> {
+                    val overlay = mapPredictResponse(result.data)
+                    _state.update {
+                        it.copy(
+                            aiRunning = false,
+                            aiRunningLabel = null,
+                            measurements = overlay,
+                            hiddenMeasurementKeys = emptySet(),
+                            bannerMessage = "AI测量完成，已覆盖当前标注层",
+                            errorMessage = null,
+                        )
+                    }
+                }
+
+                is AppResult.Failure -> {
+                    _state.update {
+                        it.copy(
+                            aiRunning = false,
+                            aiRunningLabel = null,
+                            bannerMessage = result.message,
+                            errorMessage = result.message,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun clearMeasurements() {
         _state.update {
             it.copy(
@@ -294,5 +374,114 @@ class ImageAnalysisViewModel : BaseViewModel() {
     private fun JsonElement?.jsonContent(): String? {
         val primitive = this ?: return null
         return runCatching { primitive.jsonPrimitive.content }.getOrNull()
+    }
+
+    private fun runAiAction(
+        label: String,
+        block: suspend (ByteArray) -> Unit,
+    ) {
+        val bytes = _state.value.imageBytes
+        if (bytes == null) {
+            _state.update { it.copy(bannerMessage = "当前影像尚未加载完成") }
+            return
+        }
+        scope.launch {
+            _state.update {
+                it.copy(
+                    aiRunning = true,
+                    aiRunningLabel = label,
+                    bannerMessage = null,
+                    errorMessage = null,
+                )
+            }
+            block(bytes)
+        }
+    }
+
+    private fun mapPredictResponse(response: AiPredictResponse): List<ImageAnalysisMeasurement> {
+        return response.measurements.mapIndexed { index, item ->
+            val value = item.angle?.let { angle ->
+                val rounded = ((angle * 10.0).roundToInt() / 10.0)
+                "${rounded}°"
+            } ?: "--"
+            ImageAnalysisMeasurement(
+                key = "ai_predict_${item.type}_$index",
+                type = item.type,
+                value = value,
+                points = item.points,
+            )
+        }
+    }
+
+    private fun mapDetectResponse(response: AiDetectResponse): List<ImageAnalysisMeasurement> {
+        val output = mutableListOf<ImageAnalysisMeasurement>()
+
+        val pose = response.poseKeypoints
+        val linePairs = listOf(
+            Triple("CA", "CR", "CL"),
+            Triple("Pelvic", "IR", "IL"),
+            Triple("Sacral", "SR", "SL"),
+        )
+        linePairs.forEachIndexed { index, (type, startKey, endKey) ->
+            val start = pose[startKey]
+            val end = pose[endKey]
+            if (start != null && end != null) {
+                val points = listOf(start.toPoint(), end.toPoint())
+                output += ImageAnalysisMeasurement(
+                    key = "ai_detect_pose_line_${type}_$index",
+                    type = type,
+                    value = formatLineAngle(points),
+                    points = points,
+                )
+            }
+        }
+
+        pose.entries.sortedBy { it.key }.forEachIndexed { index, (name, node) ->
+            output += ImageAnalysisMeasurement(
+                key = "ai_detect_pose_point_${name}_$index",
+                type = name,
+                value = "--",
+                points = listOf(node.toPoint()),
+            )
+        }
+
+        response.vertebrae.entries.sortedBy { it.key }.forEachIndexed { index, (name, vertebra) ->
+            val corners = vertebra.corners
+            if (corners != null) {
+                listOfNotNull(
+                    corners.topLeft?.let { tl ->
+                        corners.topRight?.let { tr -> "${name}-Top" to listOf(tl.toPoint(), tr.toPoint()) }
+                    },
+                    corners.bottomLeft?.let { bl ->
+                        corners.bottomRight?.let { br -> "${name}-Bottom" to listOf(bl.toPoint(), br.toPoint()) }
+                    },
+                    corners.topMid?.let { tm ->
+                        corners.bottomMid?.let { bm -> "${name}-Axis" to listOf(tm.toPoint(), bm.toPoint()) }
+                    },
+                ).forEachIndexed { lineIndex, (type, points) ->
+                    output += ImageAnalysisMeasurement(
+                        key = "ai_detect_vertebra_${name}_${lineIndex}_$index",
+                        type = type,
+                        value = formatLineAngle(points),
+                        points = points,
+                    )
+                }
+            }
+        }
+
+        return output
+    }
+
+    private fun formatLineAngle(points: List<MeasurementPoint>): String {
+        if (points.size < 2) return "--"
+        val dx = points[1].x - points[0].x
+        val dy = points[1].y - points[0].y
+        val angle = atan2(dy, dx) * 180.0 / PI
+        val rounded = ((angle * 10.0).roundToInt() / 10.0)
+        return "${rounded}°"
+    }
+
+    private fun AiPointNode.toPoint(): MeasurementPoint {
+        return MeasurementPoint(x = x, y = y)
     }
 }
