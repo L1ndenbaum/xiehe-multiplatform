@@ -29,6 +29,7 @@ fun MobileShell(
     onTabSelected: (Int) -> Unit,
     onBack: (() -> Unit)? = null,
     rightActionGlyph: IconToken? = null,
+    rightActionText: String? = null,
     onRightAction: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -43,6 +44,7 @@ fun MobileShell(
             modifier = Modifier.statusBarsPadding(),
             leftGlyph = if (onBack != null) IconToken.BACK else null,
             rightGlyph = rightActionGlyph,
+            rightText = rightActionText,
             onLeftClick = onBack,
             onRightClick = onRightAction,
         )

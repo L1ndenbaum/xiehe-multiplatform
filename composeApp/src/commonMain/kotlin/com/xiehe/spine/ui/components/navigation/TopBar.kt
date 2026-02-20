@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ fun TopBar(
     modifier: Modifier = Modifier,
     leftGlyph: IconToken? = null,
     rightGlyph: IconToken? = null,
+    rightText: String? = null,
     onLeftClick: (() -> Unit)? = null,
     onRightClick: (() -> Unit)? = null,
 ) {
@@ -53,7 +55,10 @@ fun TopBar(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        TopActionChip(glyph = rightGlyph, onClick = onRightClick)
+        when {
+            !rightText.isNullOrBlank() -> TopTextAction(text = rightText, onClick = onRightClick)
+            else -> TopActionChip(glyph = rightGlyph, onClick = onRightClick)
+        }
     }
 }
 
@@ -86,5 +91,36 @@ private fun TopActionChip(
         if (glyph != null) {
             AppIcon(glyph = glyph, modifier = Modifier.size(16.dp), tint = colors.onPrimary)
         }
+    }
+}
+
+@Composable
+private fun TopTextAction(
+    text: String,
+    onClick: (() -> Unit)?,
+) {
+    val colors = SpineTheme.colors
+    val enabled = onClick != null
+    Box(
+        modifier = Modifier
+            .height(34.dp)
+            .clip(RoundedCornerShape(SpineTheme.radius.full))
+            .background(colors.onPrimary.copy(alpha = if (enabled) 0.18f else 0.1f))
+            .then(
+                if (enabled) {
+                    Modifier.clickable(onClick = onClick)
+                } else {
+                    Modifier
+                },
+            )
+            .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        BasicText(
+            text = text,
+            style = SpineTheme.typography.subhead.copy(color = colors.onPrimary),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }

@@ -25,6 +25,7 @@ import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.screens.AppearanceScreen
 import com.xiehe.spine.ui.screens.DashboardScreen
 import com.xiehe.spine.ui.screens.ImageAnalysisScreen
+import com.xiehe.spine.ui.screens.ImageUploadScreen
 import com.xiehe.spine.ui.screens.ImagesScreen
 import com.xiehe.spine.ui.screens.LoginScreen
 import com.xiehe.spine.ui.screens.MessagesScreen
@@ -40,6 +41,7 @@ import com.xiehe.spine.ui.viewmodel.AppearanceViewModel
 import com.xiehe.spine.ui.viewmodel.DashboardViewModel
 import com.xiehe.spine.ui.viewmodel.ImagesViewModel
 import com.xiehe.spine.ui.viewmodel.ImageAnalysisViewModel
+import com.xiehe.spine.ui.viewmodel.ImageUploadViewModel
 import com.xiehe.spine.ui.viewmodel.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
@@ -65,6 +67,7 @@ private sealed interface OverlayRoute {
     data object PersonalInfo : OverlayRoute
     data object ChangePassword : OverlayRoute
     data object Messages : OverlayRoute
+    data object ImageUpload : OverlayRoute
 }
 
 @Composable
@@ -79,6 +82,7 @@ fun App(
     val dashboardVm = remember { DashboardViewModel() }
     val imagesVm = remember { ImagesViewModel() }
     val imageAnalysisVm = remember { ImageAnalysisViewModel() }
+    val imageUploadVm = remember { ImageUploadViewModel() }
     val patientsVm = remember { PatientsViewModel() }
     val patientDetailVm = remember { PatientDetailViewModel() }
     val patientFormVm = remember { PatientFormViewModel() }
@@ -187,12 +191,17 @@ fun App(
                 val rightGlyph = when (selectedTab) {
                     0 -> IconToken.BELL
                     1 -> IconToken.ADD
-                    2 -> IconToken.ADD
+                    2 -> null
+                    else -> null
+                }
+                val rightText = when (selectedTab) {
+                    2 -> "上传影像"
                     else -> null
                 }
                 val onRightAction: (() -> Unit)? = when (selectedTab) {
                     0 -> ({ route = OverlayRoute.Messages })
                     1 -> ({ route = OverlayRoute.PatientForm })
+                    2 -> ({ route = OverlayRoute.ImageUpload })
                     else -> null
                 }
 
@@ -201,6 +210,7 @@ fun App(
                     selectedTab = selectedTab,
                     onTabSelected = onTabSelected,
                     rightActionGlyph = rightGlyph,
+                    rightActionText = rightText,
                     onRightAction = onRightAction,
                 ) {
                     AnimatedContent(
@@ -380,6 +390,33 @@ fun App(
                             onBack = { route = null },
                         ) {
                             MessagesScreen()
+                        }
+                    }
+
+                    OverlayRoute.ImageUpload -> {
+                        MobileShell(
+                            title = "上传影像",
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            onBack = { route = null },
+                        ) {
+                            ImageUploadScreen(
+                                vm = imageUploadVm,
+                                session = activeSession,
+                                patientRepository = appContainer.patientRepository,
+                                imageRepository = appContainer.imageFileRepository,
+                                onSessionUpdated = { session = it },
+                                onUploadSuccess = {
+                                    route = null
+                                    selectedTab = 2
+                                    val latestSession = session ?: activeSession
+                                    imagesVm.refresh(
+                                        session = latestSession,
+                                        repository = appContainer.imageFileRepository,
+                                        onSessionUpdated = { updated -> session = updated },
+                                    )
+                                },
+                            )
                         }
                     }
                 }

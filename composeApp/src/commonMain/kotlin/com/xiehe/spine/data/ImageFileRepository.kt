@@ -6,8 +6,14 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Headers
+import kotlinx.serialization.json.JsonObject
 
 class ImageFileRepository(
     private val apiClient: ApiClient,
@@ -42,6 +48,68 @@ class ImageFileRepository(
                 AppResult.Failure(
                     message = apiClient.classifyNetworkError(e.message),
                     debugDetails = "[GET] $requestUrl message=${e.message ?: "N/A"}",
+                )
+            }
+        }
+    }
+
+    suspend fun uploadSingleImage(
+        session: UserSession,
+        patientId: Int,
+        examType: String,
+        fileName: String,
+        bytes: ByteArray,
+        mimeType: String,
+        description: String? = null,
+    ): AppResult<Pair<UserSession, JsonObject>> {
+        return withRefresh(session) { activeSession ->
+            val requestUrl = "${apiClient.baseUrl}/upload/single"
+            try {
+                val envelope = apiClient.httpClient.post(requestUrl) {
+                    header(HttpHeaders.Authorization, "Bearer ${activeSession.accessToken}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append("patient_id", patientId.toString())
+                                append("exam_type", examType)
+                                if (!description.isNullOrBlank()) {
+                                    append("description", description.trim())
+                                }
+                                append(
+                                    key = "file",
+                                    value = bytes,
+                                    headers = Headers.build {
+                                        append(HttpHeaders.ContentType, mimeType)
+                                        append(HttpHeaders.ContentDisposition, """form-data; name="file"; filename="$fileName"""")
+                                    },
+                                )
+                            },
+                        ),
+                    )
+                }.body<ApiEnvelope<JsonObject>>()
+                val payload = envelope.data
+                if (payload == null) {
+                    AppResult.Failure(
+                        message = envelope.message,
+                        code = envelope.code,
+                        isUnauthorized = envelope.code == HttpStatusCode.Unauthorized.value,
+                        debugDetails = "[POST] $requestUrl code=${envelope.code} data=null",
+                    )
+                } else {
+                    AppResult.Success(payload)
+                }
+            } catch (e: ClientRequestException) {
+                val status = e.response.status
+                AppResult.Failure(
+                    message = "上传影像失败",
+                    code = status.value,
+                    isUnauthorized = status == HttpStatusCode.Unauthorized,
+                    debugDetails = "[POST] $requestUrl status=${status.value}",
+                )
+            } catch (e: Exception) {
+                AppResult.Failure(
+                    message = apiClient.classifyNetworkError(e.message),
+                    debugDetails = "[POST] $requestUrl message=${e.message ?: "N/A"}",
                 )
             }
         }
