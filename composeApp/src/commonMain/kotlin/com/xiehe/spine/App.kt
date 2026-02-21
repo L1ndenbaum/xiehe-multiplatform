@@ -43,6 +43,7 @@ import com.xiehe.spine.ui.viewmodel.ImagesViewModel
 import com.xiehe.spine.ui.viewmodel.ImageAnalysisViewModel
 import com.xiehe.spine.ui.viewmodel.ImageUploadViewModel
 import com.xiehe.spine.ui.viewmodel.LoginViewModel
+import com.xiehe.spine.ui.viewmodel.MessagesViewModel
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.PatientsViewModel
@@ -79,6 +80,7 @@ fun App(
     val appContainer = remember(container) { container ?: AppContainer.createInMemory() }
     val loginVm = remember { LoginViewModel() }
     val registerVm = remember { RegisterViewModel() }
+    val messagesVm = remember { MessagesViewModel() }
     val dashboardVm = remember { DashboardViewModel() }
     val imagesVm = remember { ImagesViewModel() }
     val imageAnalysisVm = remember { ImageAnalysisViewModel() }
@@ -389,7 +391,12 @@ fun App(
                             onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
-                            MessagesScreen()
+                            MessagesScreen(
+                                vm = messagesVm,
+                                session = activeSession,
+                                repository = appContainer.notificationRepository,
+                                onSessionUpdated = { session = it },
+                            )
                         }
                     }
 

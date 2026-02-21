@@ -3,7 +3,7 @@ package com.xiehe.spine.ui.components
 import androidx.compose.runtime.Composable
 
 sealed interface FileSaveResult {
-    data class Success(val location: String) : FileSaveResult
+    data class Success(val location: String? = null) : FileSaveResult
     data class Failure(val message: String) : FileSaveResult
 }
 
