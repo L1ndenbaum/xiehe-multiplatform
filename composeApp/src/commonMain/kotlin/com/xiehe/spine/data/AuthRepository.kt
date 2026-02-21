@@ -122,6 +122,31 @@ class AuthRepository(
         }
     }
 
+    suspend fun getCurrentUser(
+        session: UserSession,
+    ): AppResult<Pair<UserSession, CurrentUserProfile>> {
+        return withRefresh(session) { active ->
+            apiClient.get<CurrentUserProfile>(path = "/auth/me", accessToken = active.accessToken)
+        }.mapSessionAndSave { base, profile ->
+            profileToSession(base, profile)
+        }
+    }
+
+    suspend fun updateCurrentUser(
+        session: UserSession,
+        request: UpdateCurrentUserRequest,
+    ): AppResult<Pair<UserSession, CurrentUserProfile>> {
+        return withRefresh(session) { active ->
+            apiClient.put<CurrentUserProfile, UpdateCurrentUserRequest>(
+                path = "/auth/me",
+                body = request,
+                accessToken = active.accessToken,
+            )
+        }.mapSessionAndSave { base, profile ->
+            profileToSession(base, profile)
+        }
+    }
+
     suspend fun ensureFreshSession(session: UserSession): AppResult<UserSession> {
         val expiresAt = session.accessTokenExpiresAtEpochSeconds ?: return AppResult.Success(session)
         val remainingSeconds = expiresAt - currentEpochSeconds()
@@ -134,6 +159,59 @@ class AuthRepository(
 
     fun logout() {
         sessionStore.clear()
+    }
+
+    private suspend inline fun <reified T> withRefresh(
+        session: UserSession,
+        crossinline action: suspend (UserSession) -> AppResult<T>,
+    ): AppResult<Pair<UserSession, T>> {
+        return when (val first = action(session)) {
+            is AppResult.Success -> AppResult.Success(session to first.data)
+            is AppResult.Failure -> {
+                if (!first.isUnauthorized) {
+                    first
+                } else {
+                    when (val refreshed = refreshToken(session)) {
+                        is AppResult.Success -> {
+                            when (val second = action(refreshed.data)) {
+                                is AppResult.Success -> AppResult.Success(refreshed.data to second.data)
+                                is AppResult.Failure -> second
+                            }
+                        }
+
+                        is AppResult.Failure -> refreshed
+                    }
+                }
+            }
+        }
+    }
+
+    private inline fun <T> AppResult<Pair<UserSession, T>>.mapSessionAndSave(
+        mapper: (UserSession, T) -> UserSession,
+    ): AppResult<Pair<UserSession, T>> {
+        return when (this) {
+            is AppResult.Success -> {
+                val base = data.first
+                val payload = data.second
+                val updated = mapper(base, payload)
+                sessionStore.save(updated)
+                AppResult.Success(updated to payload)
+            }
+
+            is AppResult.Failure -> this
+        }
+    }
+
+    private fun profileToSession(
+        base: UserSession,
+        profile: CurrentUserProfile,
+    ): UserSession {
+        return base.copy(
+            userId = profile.id,
+            username = profile.username,
+            email = profile.email ?: base.email,
+            fullName = profile.fullName ?: profile.realName ?: base.fullName,
+        )
     }
 
     @OptIn(ExperimentalEncodingApi::class)

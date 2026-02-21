@@ -61,3 +61,29 @@ data class UserDto(
     @SerialName("avatar_url") val avatarUrl: String? = null,
     @SerialName("avatar") val avatar: String? = null,
 )
+
+@Serializable
+data class CurrentUserProfile(
+    val id: Int,
+    val username: String,
+    val email: String? = null,
+    @SerialName("full_name") val fullName: String? = null,
+    val phone: String? = null,
+    @SerialName("real_name") val realName: String? = null,
+    @SerialName("employee_id") val employeeId: String? = null,
+    val department: String? = null,
+    @SerialName("department_id") val departmentId: Int? = null,
+    val position: String? = null,
+    val title: String? = null,
+    @SerialName("is_active") val isActive: Boolean? = null,
+    val role: String? = null,
+)
+
+@Serializable
+data class UpdateCurrentUserRequest(
+    @SerialName("full_name") val fullName: String? = null,
+    @SerialName("real_name") val realName: String? = null,
+    val phone: String? = null,
+    val position: String? = null,
+    val title: String? = null,
+)

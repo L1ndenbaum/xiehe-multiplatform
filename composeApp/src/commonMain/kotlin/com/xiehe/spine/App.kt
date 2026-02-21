@@ -33,6 +33,7 @@ import com.xiehe.spine.ui.screens.MobileShell
 import com.xiehe.spine.ui.screens.PatientDetailScreen
 import com.xiehe.spine.ui.screens.PatientFormScreen
 import com.xiehe.spine.ui.screens.PatientsScreen
+import com.xiehe.spine.ui.screens.PersonalInfoScreen
 import com.xiehe.spine.ui.screens.PlaceholderScreen
 import com.xiehe.spine.ui.screens.ProfileScreen
 import com.xiehe.spine.ui.screens.RegisterScreen
@@ -46,6 +47,7 @@ import com.xiehe.spine.ui.viewmodel.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.MessagesViewModel
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
+import com.xiehe.spine.ui.viewmodel.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.PatientsViewModel
 import com.xiehe.spine.ui.viewmodel.RegisterViewModel
 import kotlinx.coroutines.delay
@@ -88,6 +90,7 @@ fun App(
     val patientsVm = remember { PatientsViewModel() }
     val patientDetailVm = remember { PatientDetailViewModel() }
     val patientFormVm = remember { PatientFormViewModel() }
+    val personalInfoVm = remember { PersonalInfoViewModel() }
     val appearanceVm = remember { AppearanceViewModel(appContainer.themeRepository) }
 
     var session by remember { mutableStateOf<UserSession?>(appContainer.authRepository.restoreSession()) }
@@ -164,6 +167,28 @@ fun App(
                             authRoute = AuthRoute.LOGIN
                             break
                         }
+                    }
+                }
+            }
+        }
+
+        LaunchedEffect(session?.accessToken) {
+            val current = session ?: return@LaunchedEffect
+            when (val result = appContainer.authRepository.getCurrentUser(current)) {
+                is AppResult.Success -> {
+                    val updated = result.data.first
+                    if (updated != current) {
+                        session = updated
+                    }
+                }
+
+                is AppResult.Failure -> {
+                    if (result.isUnauthorized) {
+                        appContainer.authRepository.logout()
+                        session = null
+                        route = null
+                        selectedTab = 0
+                        authRoute = AuthRoute.LOGIN
                     }
                 }
             }
@@ -363,9 +388,11 @@ fun App(
                             onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
-                            PlaceholderScreen(
-                                title = "个人信息接口待完善",
-                                description = "页面已就绪，等后端接口稳定后可直接接入。",
+                            PersonalInfoScreen(
+                                vm = personalInfoVm,
+                                session = activeSession,
+                                authRepository = appContainer.authRepository,
+                                onSessionUpdated = { session = it },
                             )
                         }
                     }

@@ -8,6 +8,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
@@ -48,6 +49,25 @@ class ApiClient(
             requestUrl = requestUrl,
         ) {
             post {
+                url(requestUrl)
+                attachAuth(accessToken)
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
+    internal suspend inline fun <reified T, reified B : Any> put(
+        path: String,
+        body: B,
+        accessToken: String? = null,
+    ): AppResult<T> {
+        val requestUrl = "$baseUrl$path"
+        return request(
+            requestName = "PUT",
+            requestUrl = requestUrl,
+        ) {
+            put {
                 url(requestUrl)
                 attachAuth(accessToken)
                 contentType(ContentType.Application.Json)
