@@ -1209,6 +1209,102 @@
               ]
             }
           ]
+        },
+        {
+          "type": "text",
+          "id": "opVTitle",
+          "name": "operationVerifyTitle",
+          "content": "Operation Verify Card",
+          "fill": "$text_primary",
+          "fontFamily": "Outfit",
+          "fontSize": 18,
+          "fontWeight": "600"
+        },
+        {
+          "type": "frame",
+          "id": "opVCard",
+          "name": "operationVerifyCard",
+          "width": "fill_container",
+          "fill": "$bg_surface",
+          "cornerRadius": "$radius_lg",
+          "layout": "vertical",
+          "gap": "$space_md",
+          "padding": 16,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "$shadow_subtle",
+            "offset": {
+              "x": 0,
+              "y": 2
+            },
+            "blur": 12
+          },
+          "children": [
+            {
+              "type": "text",
+              "id": "opVMsg",
+              "name": "operationVerifyMessage",
+              "content": "确认删除当前影像吗？该操作不可恢复。",
+              "fill": "$text_secondary",
+              "fontFamily": "Outfit",
+              "fontSize": "$font_size_body",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "opVActions",
+              "name": "operationVerifyActions",
+              "width": "fill_container",
+              "gap": "$space_base",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "opVCancel",
+                  "name": "operationCancelBtn",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$text_secondary",
+                  "cornerRadius": "$radius_md",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "opVCancelText",
+                      "content": "取消",
+                      "fill": "$bg_surface",
+                      "fontFamily": "Outfit",
+                      "fontSize": "$font_size_body",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "opVConfirm",
+                  "name": "operationConfirmBtn",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$status_negative",
+                  "cornerRadius": "$radius_md",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "opVConfirmText",
+                      "content": "删除",
+                      "fill": "$bg_surface",
+                      "fontFamily": "Outfit",
+                      "fontSize": "$font_size_body",
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },

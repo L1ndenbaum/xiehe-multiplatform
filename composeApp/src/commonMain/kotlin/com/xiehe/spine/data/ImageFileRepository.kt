@@ -2,6 +2,7 @@ package com.xiehe.spine.data
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import io.ktor.client.request.delete
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
@@ -10,6 +11,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Headers
@@ -110,6 +112,45 @@ class ImageFileRepository(
                 AppResult.Failure(
                     message = apiClient.classifyNetworkError(e.message),
                     debugDetails = "[POST] $requestUrl message=${e.message ?: "N/A"}",
+                )
+            }
+        }
+    }
+
+    suspend fun deleteImageFile(
+        session: UserSession,
+        imageId: Int,
+    ): AppResult<Pair<UserSession, Unit>> {
+        return withRefresh(session) { activeSession ->
+            val requestUrl = "${apiClient.baseUrl}/image-files/$imageId"
+            try {
+                val response = apiClient.httpClient.delete(requestUrl) {
+                    header(HttpHeaders.Authorization, "Bearer ${activeSession.accessToken}")
+                }
+                val ok = response.status.value in 200..299
+                if (ok) {
+                    AppResult.Success(Unit)
+                } else {
+                    val bodyText = runCatching { response.bodyAsText() }.getOrNull()
+                    AppResult.Failure(
+                        message = "删除影像失败",
+                        code = response.status.value,
+                        isUnauthorized = response.status == HttpStatusCode.Unauthorized,
+                        debugDetails = "[DELETE] $requestUrl status=${response.status.value} body=${bodyText ?: "N/A"}",
+                    )
+                }
+            } catch (e: ClientRequestException) {
+                val status = e.response.status
+                AppResult.Failure(
+                    message = "删除影像失败",
+                    code = status.value,
+                    isUnauthorized = status == HttpStatusCode.Unauthorized,
+                    debugDetails = "[DELETE] $requestUrl status=${status.value}",
+                )
+            } catch (e: Exception) {
+                AppResult.Failure(
+                    message = apiClient.classifyNetworkError(e.message),
+                    debugDetails = "[DELETE] $requestUrl message=${e.message ?: "N/A"}",
                 )
             }
         }

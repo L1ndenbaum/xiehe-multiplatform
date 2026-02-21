@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,16 +39,20 @@ import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.ImageFileSummary
 import com.xiehe.spine.ui.components.AppIcon
 import com.xiehe.spine.ui.components.Card
+import com.xiehe.spine.ui.components.FileSaveResult
 import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.components.LoadingOverlay
+import com.xiehe.spine.ui.components.OperationVerifyCard
 import com.xiehe.spine.ui.components.PickerDialog
 import com.xiehe.spine.ui.components.Text
 import com.xiehe.spine.ui.components.TextField
+import com.xiehe.spine.ui.components.rememberDownloadedFileSaver
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.ImageStatusFilter
 import com.xiehe.spine.ui.viewmodel.ImageTypeFilter
 import com.xiehe.spine.ui.viewmodel.ImagesViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 private enum class ImagesPicker {
@@ -64,6 +70,12 @@ fun ImagesScreen(
 ) {
     val state by vm.state.collectAsState()
     var picker by remember { mutableStateOf<ImagesPicker?>(null) }
+    var pendingDeleteItem by remember { mutableStateOf<ImageFileSummary?>(null) }
+    var actionError by remember { mutableStateOf<String?>(null) }
+    var actionSuccess by remember { mutableStateOf<String?>(null) }
+    var actionLoadingMessage by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    val saver = rememberDownloadedFileSaver()
 
     LaunchedEffect(session.accessToken) {
         vm.refresh(session, repository, onSessionUpdated)
@@ -109,6 +121,12 @@ fun ImagesScreen(
             state.errorMessage?.let {
                 Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
             }
+            actionError?.let {
+                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+            }
+            actionSuccess?.let {
+                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.primary))
+            }
 
             LazyColumn(
                 modifier = Modifier
@@ -123,6 +141,43 @@ fun ImagesScreen(
                         repository = repository,
                         onSessionUpdated = onSessionUpdated,
                         onOpenAnalysis = onOpenAnalysis,
+                        onDownload = {
+                            coroutineScope.launch {
+                                actionError = null
+                                actionSuccess = null
+                                actionLoadingMessage = "...正在下载中"
+                                when (val result = repository.downloadImageBytes(session, it.id)) {
+                                    is AppResult.Success -> {
+                                        val activeSession = result.data.first
+                                        onSessionUpdated(activeSession)
+                                        val saveResult = saver.save(
+                                            fileName = it.originalFilename.ifBlank { "image_${it.id}.png" },
+                                            mimeType = it.mimeType ?: "image/png",
+                                            bytes = result.data.second,
+                                        )
+                                        when (saveResult) {
+                                            is FileSaveResult.Success -> {
+                                                actionSuccess = "下载完成"
+                                            }
+
+                                            is FileSaveResult.Failure -> {
+                                                actionError = saveResult.message
+                                            }
+                                        }
+                                    }
+
+                                    is AppResult.Failure -> {
+                                        actionError = result.message
+                                    }
+                                }
+                                actionLoadingMessage = null
+                            }
+                        },
+                        onAskDelete = {
+                            pendingDeleteItem = it
+                            actionError = null
+                            actionSuccess = null
+                        },
                     )
                 }
 
@@ -145,8 +200,67 @@ fun ImagesScreen(
             }
         }
 
-        if (state.loading && state.filteredItems.isEmpty()) {
-            LoadingOverlay(message = "...正在加载中")
+        if ((state.loading && state.filteredItems.isEmpty()) || actionLoadingMessage != null) {
+            LoadingOverlay(message = actionLoadingMessage ?: "...正在加载中")
+        }
+
+        pendingDeleteItem?.let { item ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.35f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { pendingDeleteItem = null },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {},
+                        ),
+                ) {
+                    OperationVerifyCard(
+                        title = "删除影像",
+                        message = "确认删除影像“${item.originalFilename}”吗？该操作不可恢复。",
+                        confirmText = "删除",
+                        cancelText = "取消",
+                        confirmButtonColor = SpineTheme.colors.error,
+                        cancelButtonColor = SpineTheme.colors.textSecondary,
+                        onCancel = { pendingDeleteItem = null },
+                        onConfirm = {
+                            coroutineScope.launch {
+                                pendingDeleteItem = null
+                                actionError = null
+                                actionSuccess = null
+                                actionLoadingMessage = "...正在删除中"
+                                when (val result = repository.deleteImageFile(session, item.id)) {
+                                    is AppResult.Success -> {
+                                        val activeSession = result.data.first
+                                        onSessionUpdated(activeSession)
+                                        vm.refresh(
+                                            session = activeSession,
+                                            repository = repository,
+                                            onSessionUpdated = onSessionUpdated,
+                                        )
+                                        actionSuccess = "删除成功"
+                                    }
+
+                                    is AppResult.Failure -> {
+                                        actionError = result.message
+                                    }
+                                }
+                                actionLoadingMessage = null
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 
@@ -184,6 +298,8 @@ private fun ImageFileCard(
     repository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
+    onDownload: (ImageFileSummary) -> Unit,
+    onAskDelete: (ImageFileSummary) -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -262,14 +378,14 @@ private fun ImageFileCard(
                     glyph = IconToken.DOWNLOAD,
                     style = ImageActionStyle.OUTLINE,
                     modifier = Modifier.weight(1f),
-                    onClick = {},
+                    onClick = { onDownload(item) },
                 )
                 ImageActionButton(
                     text = "删除",
                     glyph = IconToken.DELETE,
                     style = ImageActionStyle.DANGER,
                     modifier = Modifier.weight(1f),
-                    onClick = {},
+                    onClick = { onAskDelete(item) },
                 )
             }
         }
