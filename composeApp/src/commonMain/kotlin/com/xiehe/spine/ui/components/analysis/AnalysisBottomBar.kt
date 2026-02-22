@@ -32,12 +32,14 @@ fun AnalysisBottomBar(
     modifier: Modifier = Modifier,
     onAction: (AnalysisBottomAction) -> Unit,
 ) {
-    val colors = SpineTheme.colors
+    val barBackground = Color(0xFF1E3552)
+    val itemBackground = Color(0xFF324D70)
+    val contentColor = Color(0xFFF2F7FF)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(74.dp)
-            .background(Color(0xFF122438))
+            .background(barBackground)
             .padding(horizontal = 10.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -46,24 +48,32 @@ fun AnalysisBottomBar(
             label = "AI检测",
             icon = IconToken.AI_DETECT,
             modifier = Modifier.weight(1f),
+            containerColor = itemBackground,
+            contentColor = contentColor,
             onClick = { onAction(AnalysisBottomAction.AI_DETECT) },
         )
         AnalysisBottomItem(
             label = "报告",
             icon = IconToken.REPORT,
             modifier = Modifier.weight(1f),
+            containerColor = itemBackground,
+            contentColor = contentColor,
             onClick = { onAction(AnalysisBottomAction.REPORT) },
         )
         AnalysisBottomItem(
             label = "工具",
             icon = IconToken.MEASURE_TOOLKIT,
             modifier = Modifier.weight(1f),
+            containerColor = itemBackground,
+            contentColor = contentColor,
             onClick = { onAction(AnalysisBottomAction.TOOLKIT) },
         )
         AnalysisBottomItem(
             label = "设置",
             icon = IconToken.SETTINGS,
             modifier = Modifier.weight(1f),
+            containerColor = itemBackground,
+            contentColor = contentColor,
             onClick = { onAction(AnalysisBottomAction.SETTINGS) },
         )
     }
@@ -74,14 +84,15 @@ private fun AnalysisBottomItem(
     label: String,
     icon: IconToken,
     modifier: Modifier,
+    containerColor: Color,
+    contentColor: Color,
     onClick: () -> Unit,
 ) {
-    val colors = SpineTheme.colors
     Column(
         modifier = modifier
             .height(54.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.08f))
+            .background(containerColor)
             .clickable(onClick = onClick)
             .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,13 +100,13 @@ private fun AnalysisBottomItem(
     ) {
         AppIcon(
             glyph = icon,
-            tint = colors.onPrimary,
+            tint = contentColor,
             modifier = Modifier.size(16.dp),
         )
         Text(
             text = label,
             style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-            color = colors.onPrimary,
+            color = contentColor,
             modifier = Modifier.padding(top = 3.dp),
         )
     }

@@ -24,6 +24,7 @@ import com.xiehe.spine.data.AppContainer
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.screens.AppearanceScreen
 import com.xiehe.spine.ui.screens.DashboardScreen
+import com.xiehe.spine.ui.screens.PatientEditScreen
 import com.xiehe.spine.ui.screens.ImageAnalysisScreen
 import com.xiehe.spine.ui.screens.ImageUploadScreen
 import com.xiehe.spine.ui.screens.ImagesScreen
@@ -46,6 +47,7 @@ import com.xiehe.spine.ui.viewmodel.ImageUploadViewModel
 import com.xiehe.spine.ui.viewmodel.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.MessagesViewModel
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
+import com.xiehe.spine.ui.viewmodel.PatientEditViewModel
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.PatientsViewModel
@@ -89,6 +91,7 @@ fun App(
     val imageUploadVm = remember { ImageUploadViewModel() }
     val patientsVm = remember { PatientsViewModel() }
     val patientDetailVm = remember { PatientDetailViewModel() }
+    val patientEditVm = remember { PatientEditViewModel() }
     val patientFormVm = remember { PatientFormViewModel() }
     val personalInfoVm = remember { PersonalInfoViewModel() }
     val appearanceVm = remember { AppearanceViewModel(appContainer.themeRepository) }
@@ -217,11 +220,12 @@ fun App(
                 }
                 val rightGlyph = when (selectedTab) {
                     0 -> IconToken.BELL
-                    1 -> IconToken.ADD
+                    1 -> null
                     2 -> null
                     else -> null
                 }
                 val rightText = when (selectedTab) {
+                    1 -> "新增患者"
                     2 -> "上传影像"
                     else -> null
                 }
@@ -258,8 +262,17 @@ fun App(
                             0 -> DashboardScreen(
                                 vm = dashboardVm,
                                 session = activeSession,
-                                repository = appContainer.dashboardRepository,
+                                dashboardRepository = appContainer.dashboardRepository,
+                                imageRepository = appContainer.imageFileRepository,
+                                authRepository = appContainer.authRepository,
                                 onSessionUpdated = { session = it },
+                                onOpenAnalysis = { fileId, patientId, examType ->
+                                    route = OverlayRoute.ImageAnalysis(
+                                        fileId = fileId,
+                                        patientId = patientId,
+                                        examType = examType,
+                                    )
+                                },
                             )
 
                             1 -> PatientsScreen(
@@ -315,8 +328,16 @@ fun App(
                                 patientId = current.patientId,
                                 vm = patientDetailVm,
                                 session = activeSession,
-                                repository = appContainer.patientRepository,
+                                patientRepository = appContainer.patientRepository,
+                                imageRepository = appContainer.imageFileRepository,
                                 onSessionUpdated = { session = it },
+                                onOpenAnalysis = { fileId, patientId, examType ->
+                                    route = OverlayRoute.ImageAnalysis(
+                                        fileId = fileId,
+                                        patientId = patientId,
+                                        examType = examType,
+                                    )
+                                },
                             )
                         }
                     }
@@ -363,9 +384,15 @@ fun App(
                             onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
-                            PlaceholderScreen(
-                                title = "编辑接口待完善",
-                                description = "患者ID: ${current.patientId}。页面入口已接好，后端编辑接口可用后直接接入。",
+                            PatientEditScreen(
+                                patientId = current.patientId,
+                                vm = patientEditVm,
+                                session = activeSession,
+                                repository = appContainer.patientRepository,
+                                onSessionUpdated = { session = it },
+                                onSubmitSuccess = {
+                                    route = OverlayRoute.PatientDetail(current.patientId)
+                                },
                             )
                         }
                     }

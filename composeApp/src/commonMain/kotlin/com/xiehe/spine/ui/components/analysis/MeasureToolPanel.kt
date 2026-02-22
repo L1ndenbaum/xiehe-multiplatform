@@ -11,13 +11,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import com.xiehe.spine.ui.theme.SpineTheme
+import com.xiehe.spine.ui.viewmodel.AnalysisToolDefinition
 
 @Composable
 fun MeasureToolPanel(
+    tools: List<AnalysisToolDefinition>,
+    activeToolId: String,
     onSelectTool: (String) -> Unit,
 ) {
     val colors = SpineTheme.colors
@@ -28,39 +32,24 @@ fun MeasureToolPanel(
             color = colors.textPrimary,
         )
 
-        ToolSection(
-            title = "基础模式",
-            tools = listOf(
-                ToolItem("移动", IconToken.MEASURE_MOVE),
-            ),
-            onSelectTool = onSelectTool,
-        )
-
-        ToolSection(
-            title = "测量标注",
-            tools = listOf(
-                ToolItem("T1 Tilt", IconToken.MEASURE_T1_TILT),
-                ToolItem("Cobb", IconToken.MEASURE_COBB),
-                ToolItem("CA", IconToken.MEASURE_CA),
-                ToolItem("Pelvic", IconToken.MEASURE_PELVIC),
-                ToolItem("TS", IconToken.MEASURE_TS),
-                ToolItem("AVT", IconToken.MEASURE_AVT),
-                ToolItem("标准距离", IconToken.MEASURE_STANDARD_DISTANCE),
-            ),
-            onSelectTool = onSelectTool,
-        )
+        tools
+            .groupBy { it.section.title }
+            .forEach { (sectionTitle, sectionTools) ->
+                ToolSection(
+                    title = sectionTitle,
+                    tools = sectionTools,
+                    activeToolId = activeToolId,
+                    onSelectTool = onSelectTool,
+                )
+            }
     }
 }
-
-private data class ToolItem(
-    val label: String,
-    val icon: IconToken,
-)
 
 @Composable
 private fun ToolSection(
     title: String,
-    tools: List<ToolItem>,
+    tools: List<AnalysisToolDefinition>,
+    activeToolId: String,
     onSelectTool: (String) -> Unit,
 ) {
     val colors = SpineTheme.colors
@@ -79,27 +68,39 @@ private fun ToolSection(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 rowItems.forEach { item ->
+                    val selected = activeToolId == item.id
                     Row(
                         modifier = Modifier
                             .width(72.dp)
-                            .background(colors.surfaceMuted, RoundedCornerShape(10.dp))
-                            .clickable { onSelectTool(item.label) }
+                            .background(
+                                if (selected) colors.primary.copy(alpha = 0.18f) else colors.surfaceMuted,
+                                RoundedCornerShape(10.dp),
+                            )
+                            .clickable { onSelectTool(item.id) }
                             .padding(horizontal = 8.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppIcon(
                             glyph = item.icon,
-                            tint = colors.textPrimary,
+                            tint = if (selected) colors.primary else colors.textPrimary,
                         )
                         Text(
                             text = item.label,
                             style = SpineTheme.typography.caption,
-                            color = colors.textPrimary,
+                            color = if (selected) colors.primary else colors.textPrimary,
                             modifier = Modifier.padding(start = 4.dp),
                             maxLines = 1,
                         )
                     }
+                }
+                repeat(4 - rowItems.size) {
+                    Row(
+                        modifier = Modifier
+                            .width(72.dp)
+                            .background(Color.Transparent, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                    ) { }
                 }
             }
         }

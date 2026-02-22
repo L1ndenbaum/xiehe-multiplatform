@@ -63,6 +63,20 @@ class PatientRepository(
         }
     }
 
+    suspend fun updatePatient(
+        session: UserSession,
+        patientId: Int,
+        request: UpdatePatientRequest,
+    ): AppResult<Pair<UserSession, PatientDetail>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.put(
+                path = "/patients/$patientId",
+                body = request,
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
     private suspend inline fun <reified T> withRefresh(
         session: UserSession,
         crossinline action: suspend (UserSession) -> AppResult<T>,

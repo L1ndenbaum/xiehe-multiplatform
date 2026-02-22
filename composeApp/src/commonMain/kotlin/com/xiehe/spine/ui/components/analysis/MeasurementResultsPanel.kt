@@ -1,5 +1,10 @@
 package com.xiehe.spine.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,12 +37,23 @@ fun MeasurementResultsPanel(
     hiddenKeys: Set<String>,
     onToggleExpanded: () -> Unit,
     onToggleItemVisibility: (String) -> Unit,
+    onDeleteItem: (String) -> Unit,
     onShowAll: () -> Unit,
     onHideAll: () -> Unit,
+    onShowComputed: () -> Unit,
+    onHideComputed: () -> Unit,
+    onShowDetected: () -> Unit,
+    onHideDetected: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
     val hasHiddenItems = hiddenKeys.isNotEmpty()
+    val computedKeys = computedMeasurements.map { it.key }
+    val detectedKeys = detectedPoseFields.map { it.key }
+    val hasComputedItems = computedKeys.isNotEmpty()
+    val hasDetectedItems = detectedKeys.isNotEmpty()
+    val allComputedHidden = hasComputedItems && computedKeys.all(hiddenKeys::contains)
+    val allDetectedHidden = hasDetectedItems && detectedKeys.all(hiddenKeys::contains)
     val chevronRotation = animateFloatAsState(
         targetValue = if (expanded) -90f else 90f,
         animationSpec = tween(durationMillis = 180),
@@ -46,7 +62,7 @@ fun MeasurementResultsPanel(
 
     Column(
         modifier = modifier
-            .width(196.dp)
+            .width(178.dp)
             .background(
                 color = colors.backgroundElevated.copy(alpha = 0.92f),
                 shape = RoundedCornerShape(14.dp),
@@ -80,60 +96,91 @@ fun MeasurementResultsPanel(
             )
         }
 
-        if (expanded) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ColorTokens.purple.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-            ) {
-                Text(
-                    text = standardDistanceLabel,
-                    style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-                    color = ColorTokens.purple,
-                )
-            }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn(animationSpec = tween(220)) + slideInVertically(animationSpec = tween(240)) { -it / 5 },
+            exit = fadeOut(animationSpec = tween(180)) + slideOutVertically(animationSpec = tween(200)) { -it / 6 },
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(ColorTokens.purple.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                ) {
+                    Text(
+                        text = standardDistanceLabel,
+                        style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+                        color = ColorTokens.purple,
+                    )
+                }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(216.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                item {
-                    SectionTitle(text = "AI测量结果")
-                }
-                items(computedMeasurements, key = { it.key }) { item ->
-                    val hidden = hiddenKeys.contains(item.key)
-                    MeasurementRow(
-                        title = item.type,
-                        value = item.value,
-                        hidden = hidden,
-                        valueColor = ColorTokens.valueYellow,
-                        onToggle = { onToggleItemVisibility(item.key) },
-                    )
-                }
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp)
-                            .background(colors.borderSubtle, RoundedCornerShape(6.dp))
-                            .height(1.dp),
-                    )
-                }
-                item {
-                    SectionTitle(text = "AI检测关键点")
-                }
-                items(detectedPoseFields, key = { it.key }) { item ->
-                    val hidden = hiddenKeys.contains(item.key)
-                    MeasurementRow(
-                        title = item.pointLabel ?: item.type,
-                        value = item.value,
-                        hidden = hidden,
-                        valueColor = colors.primary,
-                        onToggle = { onToggleItemVisibility(item.key) },
-                    )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(216.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    item {
+                        SectionTitle(
+                            text = "测量项",
+                            hidden = allComputedHidden,
+                            enabled = hasComputedItems,
+                            onToggle = {
+                                if (allComputedHidden) {
+                                    onShowComputed()
+                                } else {
+                                    onHideComputed()
+                                }
+                            },
+                        )
+                    }
+                    items(computedMeasurements, key = { it.key }) { item ->
+                        val hidden = hiddenKeys.contains(item.key)
+                        MeasurementRow(
+                            title = item.type,
+                            value = item.value,
+                            hidden = hidden,
+                            valueColor = AnalysisMeasurementPalette.valueColorFor(item),
+                            onToggle = { onToggleItemVisibility(item.key) },
+                            onDelete = { onDeleteItem(item.key) },
+                        )
+                    }
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp)
+                                .background(colors.borderSubtle, RoundedCornerShape(6.dp))
+                                .height(1.dp),
+                        )
+                    }
+                    item {
+                        SectionTitle(
+                            text = "关键点",
+                            hidden = allDetectedHidden,
+                            enabled = hasDetectedItems,
+                            onToggle = {
+                                if (allDetectedHidden) {
+                                    onShowDetected()
+                                } else {
+                                    onHideDetected()
+                                }
+                            },
+                        )
+                    }
+                    items(detectedPoseFields, key = { it.key }) { item ->
+                        val hidden = hiddenKeys.contains(item.key)
+                        MeasurementRow(
+                            title = item.pointLabel ?: item.type,
+                            value = "",
+                            hidden = hidden,
+                            valueColor = AnalysisMeasurementPalette.valueColorFor(item),
+                            onToggle = { onToggleItemVisibility(item.key) },
+                            onDelete = { onDeleteItem(item.key) },
+                            showValue = false,
+                        )
+                    }
                 }
             }
         }
@@ -141,12 +188,29 @@ fun MeasurementResultsPanel(
 }
 
 @Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-        color = SpineTheme.colors.textSecondary,
-    )
+private fun SectionTitle(
+    text: String,
+    hidden: Boolean,
+    enabled: Boolean,
+    onToggle: () -> Unit,
+) {
+    val colors = SpineTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.textSecondary,
+            modifier = Modifier.weight(1f),
+        )
+        AppIcon(
+            glyph = if (hidden) IconToken.EYE_OFF else IconToken.EYE,
+            tint = if (enabled) colors.textSecondary else colors.textTertiary,
+            modifier = Modifier.clickable(enabled = enabled, onClick = onToggle),
+        )
+    }
 }
 
 @Composable
@@ -156,6 +220,8 @@ private fun MeasurementRow(
     hidden: Boolean,
     valueColor: androidx.compose.ui.graphics.Color,
     onToggle: () -> Unit,
+    onDelete: () -> Unit,
+    showValue: Boolean = true,
 ) {
     val colors = SpineTheme.colors
     Row(
@@ -176,16 +242,24 @@ private fun MeasurementRow(
                 .padding(start = 6.dp),
             maxLines = 1,
         )
-        Text(
-            text = value,
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-            color = if (hidden) colors.textTertiary else valueColor,
-            maxLines = 1,
+        if (showValue) {
+            Text(
+                text = value,
+                style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+                color = if (hidden) colors.textTertiary else valueColor,
+                maxLines = 1,
+            )
+        }
+        AppIcon(
+            glyph = IconToken.DELETE,
+            tint = if (hidden) colors.textTertiary else colors.textSecondary,
+            modifier = Modifier
+                .padding(start = 6.dp)
+                .clickable(onClick = onDelete),
         )
     }
 }
 
 private object ColorTokens {
     val purple = androidx.compose.ui.graphics.Color(0xFF8A57D9)
-    val valueYellow = androidx.compose.ui.graphics.Color(0xFFC9A837)
 }

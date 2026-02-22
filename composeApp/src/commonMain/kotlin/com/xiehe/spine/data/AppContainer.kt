@@ -4,6 +4,9 @@ import com.xiehe.spine.core.store.InMemoryKeyValueStore
 import com.xiehe.spine.core.store.KeyValueStore
 import com.xiehe.spine.core.store.SessionStore
 import com.xiehe.spine.core.store.ThemePreferenceRepository
+import com.xiehe.spine.data.cache.ImageBinaryStore
+import com.xiehe.spine.data.cache.ImageCacheRepository
+import com.xiehe.spine.data.cache.InMemoryImageBinaryStore
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -19,6 +22,7 @@ class AppContainer private constructor(
     val dashboardRepository: DashboardRepository,
     val patientRepository: PatientRepository,
     val imageFileRepository: ImageFileRepository,
+    val imageCacheRepository: ImageCacheRepository,
     val notificationRepository: NotificationRepository,
     val measurementRepository: MeasurementRepository,
     val aiInferenceRepository: AiInferenceRepository,
@@ -30,6 +34,7 @@ class AppContainer private constructor(
             baseUrl: String = defaultBaseUrl,
             enableNetworkDiagnostics: Boolean = false,
             httpClient: HttpClient? = null,
+            imageBinaryStore: ImageBinaryStore = InMemoryImageBinaryStore(),
         ): AppContainer {
             val json = Json {
                 ignoreUnknownKeys = true
@@ -47,11 +52,21 @@ class AppContainer private constructor(
             )
             val sessionStore = SessionStore(store = store, json = json)
             val authRepository = AuthRepository(apiClient = instrumentedApiClient, sessionStore = sessionStore)
+            val imageCacheRepository = ImageCacheRepository(
+                store = store,
+                json = json,
+                binaryStore = imageBinaryStore,
+            )
             return AppContainer(
                 authRepository = authRepository,
                 dashboardRepository = DashboardRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
                 patientRepository = PatientRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
-                imageFileRepository = ImageFileRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
+                imageFileRepository = ImageFileRepository(
+                    apiClient = instrumentedApiClient,
+                    authRepository = authRepository,
+                    cacheRepository = imageCacheRepository,
+                ),
+                imageCacheRepository = imageCacheRepository,
                 notificationRepository = NotificationRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
                 measurementRepository = MeasurementRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
                 aiInferenceRepository = AiInferenceRepository(httpClient = sharedHttpClient),
@@ -69,6 +84,7 @@ class AppContainer private constructor(
                 baseUrl = baseUrl,
                 enableNetworkDiagnostics = enableNetworkDiagnostics,
                 httpClient = httpClient,
+                imageBinaryStore = InMemoryImageBinaryStore(),
             )
         }
 

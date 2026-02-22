@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel
 
+import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.ImageFileRepository
@@ -28,6 +29,7 @@ enum class ImageStatusFilter(val label: String) {
 
 data class ImagesUiState(
     val loading: Boolean = false,
+    val lastLoadedAtEpochSeconds: Long? = null,
     val search: String = "",
     val typeFilter: ImageTypeFilter = ImageTypeFilter.ALL,
     val statusFilter: ImageStatusFilter = ImageStatusFilter.ALL,
@@ -61,6 +63,26 @@ class ImagesViewModel : BaseViewModel() {
         }
     }
 
+    fun refreshIfNeeded(
+        session: UserSession,
+        repository: ImageFileRepository,
+        onSessionUpdated: (UserSession) -> Unit,
+        force: Boolean = false,
+    ) {
+        val snapshot = _state.value
+        if (snapshot.loading) {
+            return
+        }
+        if (!force && snapshot.items.isNotEmpty()) {
+            val now = currentEpochSeconds()
+            val last = snapshot.lastLoadedAtEpochSeconds ?: 0L
+            if ((now - last) < 20L) {
+                return
+            }
+        }
+        refresh(session, repository, onSessionUpdated)
+    }
+
     fun refresh(
         session: UserSession,
         repository: ImageFileRepository,
@@ -75,6 +97,7 @@ class ImagesViewModel : BaseViewModel() {
                     _state.update { current ->
                         val next = current.copy(
                             loading = false,
+                            lastLoadedAtEpochSeconds = currentEpochSeconds(),
                             items = payload,
                             errorMessage = null,
                         )

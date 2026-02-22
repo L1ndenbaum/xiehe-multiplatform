@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
@@ -51,11 +52,17 @@ fun MobileShell(
         Box(modifier = Modifier.weight(1f)) {
             content()
         }
-        NavBar(
-            items = navItems,
-            selectedIndex = selectedTab,
-            onSelect = onTabSelected,
-            modifier = Modifier.navigationBarsPadding(),
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SpineTheme.colors.surface)
+                .navigationBarsPadding(),
+        ) {
+            NavBar(
+                items = navItems,
+                selectedIndex = selectedTab,
+                onSelect = onTabSelected,
+            )
+        }
     }
 }

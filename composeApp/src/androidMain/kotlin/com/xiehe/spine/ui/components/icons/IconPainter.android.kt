@@ -53,8 +53,17 @@ private fun IconToken.androidDrawableName(): String {
         IconToken.MEASURE_COBB -> "icons_measure_toolkit_cobb"
         IconToken.MEASURE_CA -> "icons_measure_toolkit_ca"
         IconToken.MEASURE_PELVIC -> "icons_measure_toolkit_pelvic"
+        IconToken.MEASURE_SACRAL -> "icons_measure_toolkit_sacral"
         IconToken.MEASURE_TS -> "icons_measure_toolkit_ts"
         IconToken.MEASURE_AVT -> "icons_measure_toolkit_avt"
         IconToken.MEASURE_STANDARD_DISTANCE -> "icons_measure_toolkit_standard_distance"
+        IconToken.MEASURE_VERTEBRA_CENTER -> "icons_measure_toolkit_vertebra_center"
+        IconToken.MEASURE_DISTANCE -> "icons_measure_toolkit_distance"
+        IconToken.MEASURE_ANGLE -> "icons_measure_toolkit_angle"
+        IconToken.MEASURE_AUX_CIRCLE -> "icons_measure_toolkit_aux_circle"
+        IconToken.MEASURE_AUX_ELLIPSE -> "icons_measure_toolkit_aux_ellipse"
+        IconToken.MEASURE_AUX_BOX -> "icons_measure_toolkit_aux_box"
+        IconToken.MEASURE_AUX_ARROW -> "icons_measure_toolkit_aux_arrow"
+        IconToken.MEASURE_AUX_POLYGON -> "icons_measure_toolkit_aux_polygon"
     }
 }

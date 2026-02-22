@@ -28,13 +28,22 @@ import spine.composeapp.generated.resources.icons_navigation_icon_images
 import spine.composeapp.generated.resources.icons_navigation_icon_patients
 import spine.composeapp.generated.resources.icons_navigation_icon_profile
 import spine.composeapp.generated.resources.icons_measure_toolkit_avt
+import spine.composeapp.generated.resources.icons_measure_toolkit_aux_arrow
+import spine.composeapp.generated.resources.icons_measure_toolkit_aux_box
+import spine.composeapp.generated.resources.icons_measure_toolkit_aux_circle
+import spine.composeapp.generated.resources.icons_measure_toolkit_aux_ellipse
+import spine.composeapp.generated.resources.icons_measure_toolkit_aux_polygon
 import spine.composeapp.generated.resources.icons_measure_toolkit_ca
 import spine.composeapp.generated.resources.icons_measure_toolkit_cobb
+import spine.composeapp.generated.resources.icons_measure_toolkit_distance
 import spine.composeapp.generated.resources.icons_measure_toolkit_move
 import spine.composeapp.generated.resources.icons_measure_toolkit_pelvic
+import spine.composeapp.generated.resources.icons_measure_toolkit_sacral
 import spine.composeapp.generated.resources.icons_measure_toolkit_standard_distance
 import spine.composeapp.generated.resources.icons_measure_toolkit_t1_tilt
 import spine.composeapp.generated.resources.icons_measure_toolkit_ts
+import spine.composeapp.generated.resources.icons_measure_toolkit_vertebra_center
+import spine.composeapp.generated.resources.icons_measure_toolkit_angle
 import spine.composeapp.generated.resources.icons_status_icon_check
 import spine.composeapp.generated.resources.icons_status_icon_hourglass
 import spine.composeapp.generated.resources.icons_status_icon_image
@@ -83,8 +92,17 @@ internal fun IconToken.composeDrawable(): DrawableResource {
         IconToken.MEASURE_COBB -> Res.drawable.icons_measure_toolkit_cobb
         IconToken.MEASURE_CA -> Res.drawable.icons_measure_toolkit_ca
         IconToken.MEASURE_PELVIC -> Res.drawable.icons_measure_toolkit_pelvic
+        IconToken.MEASURE_SACRAL -> Res.drawable.icons_measure_toolkit_sacral
         IconToken.MEASURE_TS -> Res.drawable.icons_measure_toolkit_ts
         IconToken.MEASURE_AVT -> Res.drawable.icons_measure_toolkit_avt
         IconToken.MEASURE_STANDARD_DISTANCE -> Res.drawable.icons_measure_toolkit_standard_distance
+        IconToken.MEASURE_VERTEBRA_CENTER -> Res.drawable.icons_measure_toolkit_vertebra_center
+        IconToken.MEASURE_DISTANCE -> Res.drawable.icons_measure_toolkit_distance
+        IconToken.MEASURE_ANGLE -> Res.drawable.icons_measure_toolkit_angle
+        IconToken.MEASURE_AUX_CIRCLE -> Res.drawable.icons_measure_toolkit_aux_circle
+        IconToken.MEASURE_AUX_ELLIPSE -> Res.drawable.icons_measure_toolkit_aux_ellipse
+        IconToken.MEASURE_AUX_BOX -> Res.drawable.icons_measure_toolkit_aux_box
+        IconToken.MEASURE_AUX_ARROW -> Res.drawable.icons_measure_toolkit_aux_arrow
+        IconToken.MEASURE_AUX_POLYGON -> Res.drawable.icons_measure_toolkit_aux_polygon
     }
 }

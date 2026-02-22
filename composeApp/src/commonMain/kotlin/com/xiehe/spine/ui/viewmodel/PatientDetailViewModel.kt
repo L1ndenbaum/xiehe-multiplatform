@@ -2,6 +2,8 @@ package com.xiehe.spine.ui.viewmodel
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.ImageFileRepository
+import com.xiehe.spine.data.ImageFileSummary
 import com.xiehe.spine.data.PatientDetail
 import com.xiehe.spine.data.PatientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,8 @@ import kotlinx.coroutines.launch
 data class PatientDetailUiState(
     val loading: Boolean = false,
     val detail: PatientDetail? = null,
+    val relatedImages: List<ImageFileSummary> = emptyList(),
+    val relatedLoading: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -23,21 +27,50 @@ class PatientDetailViewModel : BaseViewModel() {
     fun load(
         patientId: Int,
         session: UserSession,
-        repository: PatientRepository,
+        patientRepository: PatientRepository,
+        imageRepository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
     ) {
         scope.launch {
-            _state.update { it.copy(loading = true, errorMessage = null) }
-            when (val result = repository.loadPatientDetail(session, patientId)) {
+            _state.update { it.copy(loading = true, relatedLoading = true, errorMessage = null) }
+            var activeSession = session
+
+            val detail = when (val result = patientRepository.loadPatientDetail(activeSession, patientId)) {
                 is AppResult.Success -> {
-                    onSessionUpdated(result.data.first)
-                    _state.update { it.copy(loading = false, detail = result.data.second) }
+                    activeSession = result.data.first
+                    onSessionUpdated(activeSession)
+                    result.data.second
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(loading = false, errorMessage = result.message) }
+                    _state.update { it.copy(loading = false, relatedLoading = false, errorMessage = result.message) }
+                    return@launch
                 }
             }
+
+            val relatedImages = when (val imageResult = imageRepository.loadAllImageFiles(activeSession)) {
+                is AppResult.Success -> {
+                    activeSession = imageResult.data.first
+                    onSessionUpdated(activeSession)
+                    imageResult.data.second.filter { it.patientId == patientId }
+                }
+
+                is AppResult.Failure -> emptyList()
+            }
+
+            _state.update {
+                it.copy(
+                    loading = false,
+                    relatedLoading = false,
+                    detail = detail,
+                    relatedImages = relatedImages,
+                    errorMessage = null,
+                )
+            }
         }
+    }
+
+    fun clear() {
+        _state.value = PatientDetailUiState()
     }
 }

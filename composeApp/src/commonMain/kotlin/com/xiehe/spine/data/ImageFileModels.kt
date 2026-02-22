@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class ImageFilePageData(
     val items: List<ImageFileSummary>,
     val pagination: Pagination,
+    val fromCache: Boolean = false,
 )
 
 @Serializable

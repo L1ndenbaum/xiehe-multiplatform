@@ -29,7 +29,8 @@ fun DatePickerField(
         placeholder = "请选择出生日期",
         modifier = modifier.clickable { showing = true },
         readOnly = true,
-        trailingGlyph = IconToken.CALENDAR,
+        leadingGlyph = IconToken.CALENDAR,
+        trailingGlyph = IconToken.CHEVRON_DOWN,
         onTrailingClick = { showing = true },
     )
 
@@ -69,6 +70,7 @@ fun DateWheelPickerDialog(
     PickerDialog(
         title = "",
         onDismissRequest = onDismissRequest,
+        overlayMaxAlpha = 0f,
         onConfirm = {
             val result = formatDate(currentYear, currentMonth, dayIdx + 1)
             onConfirm(result)

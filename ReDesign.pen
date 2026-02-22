@@ -1212,24 +1212,21 @@
         },
         {
           "type": "text",
-          "id": "opVTitle",
+          "id": "4g2x7",
           "name": "operationVerifyTitle",
-          "content": "Operation Verify Card",
           "fill": "$text_primary",
+          "content": "Operation Verify Card",
           "fontFamily": "Outfit",
           "fontSize": 18,
           "fontWeight": "600"
         },
         {
           "type": "frame",
-          "id": "opVCard",
+          "id": "irYEX",
           "name": "operationVerifyCard",
           "width": "fill_container",
           "fill": "$bg_surface",
           "cornerRadius": "$radius_lg",
-          "layout": "vertical",
-          "gap": "$space_md",
-          "padding": 16,
           "effect": {
             "type": "shadow",
             "shadowType": "outer",
@@ -1240,27 +1237,30 @@
             },
             "blur": 12
           },
+          "layout": "vertical",
+          "gap": "$space_md",
+          "padding": 16,
           "children": [
             {
               "type": "text",
-              "id": "opVMsg",
+              "id": "EfefF",
               "name": "operationVerifyMessage",
-              "content": "确认删除当前影像吗？该操作不可恢复。",
               "fill": "$text_secondary",
+              "content": "确认删除当前影像吗？该操作不可恢复。",
               "fontFamily": "Outfit",
               "fontSize": "$font_size_body",
               "fontWeight": "normal"
             },
             {
               "type": "frame",
-              "id": "opVActions",
+              "id": "kYBek",
               "name": "operationVerifyActions",
               "width": "fill_container",
               "gap": "$space_base",
               "children": [
                 {
                   "type": "frame",
-                  "id": "opVCancel",
+                  "id": "uFqZR",
                   "name": "operationCancelBtn",
                   "width": "fill_container",
                   "height": 44,
@@ -1271,9 +1271,10 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "opVCancelText",
-                      "content": "取消",
+                      "id": "cushL",
+                      "name": "opCancelText",
                       "fill": "$bg_surface",
+                      "content": "取消",
                       "fontFamily": "Outfit",
                       "fontSize": "$font_size_body",
                       "fontWeight": "600"
@@ -1282,7 +1283,7 @@
                 },
                 {
                   "type": "frame",
-                  "id": "opVConfirm",
+                  "id": "N8Po3",
                   "name": "operationConfirmBtn",
                   "width": "fill_container",
                   "height": 44,
@@ -1293,9 +1294,10 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "opVConfirmText",
-                      "content": "删除",
+                      "id": "TeAET",
+                      "name": "opConfirmText",
                       "fill": "$bg_surface",
+                      "content": "删除",
                       "fontFamily": "Outfit",
                       "fontSize": "$font_size_body",
                       "fontWeight": "600"

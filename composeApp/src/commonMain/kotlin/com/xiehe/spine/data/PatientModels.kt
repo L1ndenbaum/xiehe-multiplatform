@@ -62,3 +62,17 @@ data class CreatePatientRequest(
     @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
     @SerialName("medical_history") val medicalHistory: String? = null,
 )
+
+@Serializable
+data class UpdatePatientRequest(
+    val name: String? = null,
+    val gender: String? = null,
+    @SerialName("birth_date") val birthDate: String? = null,
+    val phone: String? = null,
+    val email: String? = null,
+    val address: String? = null,
+    @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
+    @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
+    @SerialName("id_card") val idCard: String? = null,
+    @SerialName("insurance_number") val insuranceNumber: String? = null,
+)

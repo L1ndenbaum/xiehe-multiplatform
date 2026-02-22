@@ -15,7 +15,8 @@ data class PatientFormUiState(
     val name: String = "",
     val gender: String = "male",
     val birthDate: String = "1990-01-01",
-    val phone: String = "+86",
+    val phonePrefix: String = "+86",
+    val phoneLocalNumber: String = "",
     val email: String = "",
     val idCard: String = "",
     val address: String = "",
@@ -33,12 +34,13 @@ class PatientFormViewModel : BaseViewModel() {
     fun updateName(value: String) = _state.update { it.copy(name = value) }
     fun updateGender(value: String) = _state.update { it.copy(gender = value) }
     fun updateBirthDate(value: String) = _state.update { it.copy(birthDate = value) }
-    fun updatePhone(value: String) = _state.update { it.copy(phone = sanitizePhone(value)) }
+    fun updatePhonePrefix(value: String) = _state.update { it.copy(phonePrefix = value) }
+    fun updatePhoneLocalNumber(value: String) = _state.update { it.copy(phoneLocalNumber = sanitizeLocalPhone(value)) }
     fun updateEmail(value: String) = _state.update { it.copy(email = value) }
     fun updateIdCard(value: String) = _state.update { it.copy(idCard = value) }
     fun updateAddress(value: String) = _state.update { it.copy(address = value) }
     fun updateEmergencyContactName(value: String) = _state.update { it.copy(emergencyContactName = value) }
-    fun updateEmergencyContactPhone(value: String) = _state.update { it.copy(emergencyContactPhone = sanitizePhone(value)) }
+    fun updateEmergencyContactPhone(value: String) = _state.update { it.copy(emergencyContactPhone = sanitizeEmergencyPhone(value)) }
     fun updateMedicalHistory(value: String) = _state.update { it.copy(medicalHistory = value) }
 
     fun submit(
@@ -56,8 +58,15 @@ class PatientFormViewModel : BaseViewModel() {
             _state.update { it.copy(errorMessage = "请选择有效的出生日期") }
             return
         }
-        if (!PHONE_PATTERN.matches(form.phone)) {
-            _state.update { it.copy(errorMessage = "联系电话需为 +86 开头并包含11位手机号，如 +8613800138000") }
+        if (!isValidPhone(form.phonePrefix, form.phoneLocalNumber)) {
+            _state.update {
+                it.copy(
+                    errorMessage = when (form.phonePrefix) {
+                        "+86" -> "联系电话需为 +86 开头并包含11位手机号"
+                        else -> "联系电话格式不正确"
+                    },
+                )
+            }
             return
         }
         if (form.idCard.isBlank() || !ID_CARD_PATTERN.matches(form.idCard.trim())) {
@@ -70,7 +79,7 @@ class PatientFormViewModel : BaseViewModel() {
             name = form.name.trim(),
             gender = form.gender,
             birthDate = form.birthDate,
-            phone = form.phone,
+            phone = form.phonePrefix + form.phoneLocalNumber,
             idCard = form.idCard.trim(),
             email = form.email.trim().ifBlank { null },
             address = form.address.trim().ifBlank { null },
@@ -95,24 +104,33 @@ class PatientFormViewModel : BaseViewModel() {
         }
     }
 
-    private fun sanitizePhone(raw: String): String {
-        val hasPrefix = raw.startsWith("+86")
-        val digits = raw.filter { it.isDigit() }
-        val body = when {
-            hasPrefix -> digits.removePrefix("86")
-            raw.startsWith("+") -> digits
-            digits.startsWith("86") && digits.length > 11 -> digits.removePrefix("86")
-            else -> digits
-        }.take(11)
-        return "+86$body"
+    private fun sanitizeLocalPhone(raw: String): String {
+        return raw.filter { it.isDigit() }.take(15)
+    }
+
+    private fun sanitizeEmergencyPhone(raw: String): String {
+        val trimmed = raw.trim()
+        if (trimmed.startsWith("+")) {
+            val prefix = "+" + trimmed.drop(1).takeWhile { it.isDigit() }.take(4)
+            val rest = trimmed.drop(1).dropWhile { it.isDigit() }.filter { it.isDigit() }.take(15)
+            return prefix + rest
+        }
+        return "+86" + trimmed.filter { it.isDigit() }.take(11)
     }
 
     private fun isValidBirthDate(value: String): Boolean {
         return value.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$"))
     }
 
+    private fun isValidPhone(prefix: String, localNumber: String): Boolean {
+        return if (prefix == "+86") {
+            localNumber.length == 11 && localNumber.all { it.isDigit() }
+        } else {
+            localNumber.length in 6..15 && localNumber.all { it.isDigit() }
+        }
+    }
+
     private companion object {
-        val PHONE_PATTERN = Regex("^\\+86\\d{11}$")
         val ID_CARD_PATTERN = Regex("^[0-9A-Za-z]{18}$")
     }
 }

@@ -16,10 +16,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 import kotlinx.coroutines.delay
@@ -42,6 +45,9 @@ fun PickerDialog(
     modifier: Modifier = Modifier,
     showActionRow: Boolean = true,
     onConfirm: (() -> Unit)? = null,
+    maxDialogWidth: Dp? = null,
+    maxDialogHeightFraction: Float? = null,
+    overlayMaxAlpha: Float = 0.26f,
     content: @Composable ColumnScope.(dismiss: () -> Unit) -> Unit,
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -62,10 +68,20 @@ fun PickerDialog(
     }
 
     val overlayAlpha by animateFloatAsState(
-        targetValue = if (visible) 0.26f else 0f,
+        targetValue = if (visible) overlayMaxAlpha.coerceIn(0f, 1f) else 0f,
         animationSpec = tween(220),
         label = "picker_overlay_alpha",
     )
+    val sizeModifier = Modifier.run {
+        var result: Modifier = this
+        if (maxDialogWidth != null) {
+            result = result.widthIn(max = maxDialogWidth)
+        }
+        if (maxDialogHeightFraction != null) {
+            result = result.fillMaxHeight(maxDialogHeightFraction.coerceIn(0.2f, 0.95f))
+        }
+        result
+    }
 
     Box(
         modifier = Modifier
@@ -86,6 +102,7 @@ fun PickerDialog(
             Column(
                 modifier = modifier
                     .fillMaxWidth()
+                    .then(sizeModifier)
                     .padding(horizontal = 20.dp)
                     .background(SpineTheme.colors.surface, RoundedCornerShape(28.dp))
                     .padding(horizontal = 16.dp, vertical = 18.dp)

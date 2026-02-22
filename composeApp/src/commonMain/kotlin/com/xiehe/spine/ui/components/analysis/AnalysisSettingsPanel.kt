@@ -23,11 +23,13 @@ fun AnalysisSettingsPanel(
     contrast: Int,
     brightness: Int,
     standardDistanceInput: String,
+    isImageLocked: Boolean,
     onClearAll: () -> Unit,
     onZoomChange: (Int) -> Unit,
     onContrastChange: (Int) -> Unit,
     onBrightnessChange: (Int) -> Unit,
     onStandardDistanceChange: (String) -> Unit,
+    onToggleImageLock: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Button(
@@ -69,6 +71,25 @@ fun AnalysisSettingsPanel(
                 onValueChange = onStandardDistanceChange,
                 placeholder = "输入标准距离，默认100",
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "锁定图像",
+                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+                color = SpineTheme.colors.textPrimary,
+            )
+            Button(
+                text = if (isImageLocked) "已锁定" else "未锁定",
+                onClick = onToggleImageLock,
+                customContainerColor = if (isImageLocked) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
+                customContentColor = if (isImageLocked) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary,
+                leadingGlyph = IconToken.LOCK,
             )
         }
     }

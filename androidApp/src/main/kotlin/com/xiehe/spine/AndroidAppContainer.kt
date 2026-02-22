@@ -3,6 +3,7 @@ package com.xiehe.spine
 import android.content.Context
 import com.xiehe.spine.core.store.KeyValueStore
 import com.xiehe.spine.data.AppContainer
+import com.xiehe.spine.data.cache.AndroidImageBinaryStore
 
 private class AndroidKeyValueStore(context: Context) : KeyValueStore {
     private val prefs = context.getSharedPreferences("spine_prefs", Context.MODE_PRIVATE)
@@ -27,5 +28,6 @@ fun createAndroidAppContainer(
         store = AndroidKeyValueStore(context.applicationContext),
         baseUrl = baseUrl,
         enableNetworkDiagnostics = enableNetworkDiagnostics,
+        imageBinaryStore = AndroidImageBinaryStore(context.applicationContext),
     )
 }
