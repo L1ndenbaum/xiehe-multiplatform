@@ -246,7 +246,10 @@ class ImageFileRepository(
                                     value = bytes,
                                     headers = Headers.build {
                                         append(HttpHeaders.ContentType, mimeType)
-                                        append(HttpHeaders.ContentDisposition, """form-data; name=\"file\"; filename=\"$fileName\"""")
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "form-data; name=\"file\"; filename=\"$fileName\"",
+                                        )
                                     },
                                 )
                             },
@@ -266,11 +269,13 @@ class ImageFileRepository(
                 }
             } catch (e: ClientRequestException) {
                 val status = e.response.status
+                val error = runCatching { e.response.body<ApiErrorEnvelope>() }.getOrNull()
+                val bodyText = runCatching { e.response.bodyAsText() }.getOrNull()
                 AppResult.Failure(
-                    message = "上传影像失败",
+                    message = error?.message ?: "上传影像失败",
                     code = status.value,
                     isUnauthorized = status == HttpStatusCode.Unauthorized,
-                    debugDetails = "[POST] $requestUrl status=${status.value}",
+                    debugDetails = "[POST] $requestUrl status=${status.value} errorCode=${error?.errorCode ?: "N/A"} body=${bodyText ?: "N/A"}",
                 )
             } catch (e: Exception) {
                 AppResult.Failure(
