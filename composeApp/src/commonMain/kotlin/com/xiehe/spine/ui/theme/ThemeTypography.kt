@@ -8,10 +8,10 @@ import androidx.compose.ui.unit.sp
 internal fun defaultTypography(): SpineAppTypography {
     val family = FontFamily.SansSerif
     return SpineAppTypography(
-        display = TextStyle(fontFamily = family, fontWeight = FontWeight.Bold, fontSize = 32.sp),
-        title = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 18.sp),
-        body = TextStyle(fontFamily = family, fontWeight = FontWeight.Normal, fontSize = 15.sp),
-        subhead = TextStyle(fontFamily = family, fontWeight = FontWeight.Normal, fontSize = 13.sp),
-        caption = TextStyle(fontFamily = family, fontWeight = FontWeight.Normal, fontSize = 11.sp),
+        display = TextStyle(fontFamily = family, fontWeight = FontWeight.Bold, fontSize = 30.sp),
+        title = TextStyle(fontFamily = family, fontWeight = FontWeight.Bold, fontSize = 17.sp),
+        body = TextStyle(fontFamily = family, fontWeight = FontWeight.Medium, fontSize = 14.sp),
+        subhead = TextStyle(fontFamily = family, fontWeight = FontWeight.Normal, fontSize = 12.sp),
+        caption = TextStyle(fontFamily = family, fontWeight = FontWeight.Normal, fontSize = 10.sp),
     )
 }

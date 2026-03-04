@@ -55,7 +55,7 @@ fun MobileShell(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SpineTheme.colors.surface)
+                .background(SpineTheme.colors.surface.copy(alpha = 0.96f))
                 .navigationBarsPadding(),
         ) {
             NavBar(

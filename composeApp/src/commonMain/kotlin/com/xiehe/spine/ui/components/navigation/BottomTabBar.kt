@@ -25,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
@@ -54,15 +56,15 @@ fun BottomTabBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(76.dp)
-            .background(colors.surface)
-            .padding(horizontal = SpineTheme.spacing.xl, vertical = SpineTheme.spacing.base),
+            .height(86.dp)
+            .background(colors.surface.copy(alpha = 0.95f))
+            .padding(horizontal = SpineTheme.spacing.base, vertical = SpineTheme.spacing.sm),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         tabs.forEachIndexed { index, label ->
             val selected = selectedIndex == index
-            val activeColor = colors.primary
+            val activeColor = colors.onPrimary
             val mutedColor = colors.tabInactive
             val tone by animateColorAsState(
                 targetValue = if (selected) activeColor else mutedColor,
@@ -80,38 +82,58 @@ fun BottomTabBar(
                         pulseTrigger += 1
                         onSelect(index)
                     }
-                    .padding(vertical = SpineTheme.spacing.sm),
+                    .padding(vertical = SpineTheme.spacing.xs),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(SpineTheme.spacing.xs),
             ) {
                 Box(
-                    modifier = Modifier.width(34.dp).height(26.dp),
+                    modifier = Modifier
+                        .width(44.dp)
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(SpineTheme.radius.md))
+                        .background(
+                            brush = if (selected) {
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        colors.primary,
+                                        colors.primary.copy(alpha = 0.86f),
+                                    ),
+                                )
+                            } else {
+                                Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                            },
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (isPulsing) {
                         Box(
                             modifier = Modifier
-                                .width(30.dp)
-                                .height(22.dp)
+                                .width(34.dp)
+                                .height(34.dp)
                                 .graphicsLayer {
                                     val scale = 0.18f + 1.05f * progress
                                     scaleX = scale
                                     scaleY = scale
                                 }
-                                .alpha(0.30f * (1f - progress))
+                                .alpha(0.24f * (1f - progress))
                                 .clip(RoundedCornerShape(SpineTheme.radius.md))
-                                .background(colors.textPrimary),
+                                .background(colors.primary),
                         )
                     }
                     AppIcon(
                         glyph = icons.getOrNull(index) ?: IconToken.DASHBOARD,
-                        modifier = Modifier.height(16.dp).width(16.dp),
-                        tint = tone,
+                        modifier = Modifier
+                            .height(18.dp)
+                            .width(18.dp),
+                        tint = if (selected) colors.onPrimary else tone,
                     )
                 }
                 BasicText(
                     text = label,
-                    style = SpineTheme.typography.caption.copy(color = tone),
+                    style = SpineTheme.typography.caption.copy(
+                        color = if (selected) colors.primary else tone,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                    ),
                 )
             }
         }

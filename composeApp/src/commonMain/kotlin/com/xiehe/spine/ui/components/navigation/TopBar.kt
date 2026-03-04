@@ -38,10 +38,14 @@ fun TopBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(72.dp)
             .background(
                 brush = Brush.horizontalGradient(
-                    colors = listOf(colors.primary, colors.primary.copy(alpha = 0.85f)),
+                    colors = listOf(
+                        colors.primary,
+                        colors.primary.copy(alpha = 0.9f),
+                        colors.primary.copy(alpha = 0.82f),
+                    ),
                 ),
             )
             .padding(horizontal = SpineTheme.spacing.xl),
@@ -50,7 +54,9 @@ fun TopBar(
         TopActionChip(glyph = leftGlyph, onClick = onLeftClick)
         BasicText(
             text = title,
-            modifier = Modifier.weight(1f).padding(horizontal = SpineTheme.spacing.base),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = SpineTheme.spacing.base),
             style = SpineTheme.typography.title.copy(color = colors.onPrimary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -75,10 +81,10 @@ private fun TopActionChip(
     )
     Box(
         modifier = Modifier
-            .size(32.dp)
+            .size(38.dp)
             .alpha(alpha)
             .clip(CircleShape)
-            .background(colors.onPrimary.copy(alpha = 0.16f))
+            .background(colors.onPrimary.copy(alpha = 0.2f))
             .then(
                 if (onClick != null) {
                     Modifier.clickable(onClick = onClick)
@@ -89,7 +95,7 @@ private fun TopActionChip(
         contentAlignment = Alignment.Center,
     ) {
         if (glyph != null) {
-            AppIcon(glyph = glyph, modifier = Modifier.size(16.dp), tint = colors.onPrimary)
+            AppIcon(glyph = glyph, modifier = Modifier.size(18.dp), tint = colors.onPrimary)
         }
     }
 }
@@ -103,9 +109,9 @@ private fun TopTextAction(
     val enabled = onClick != null
     Box(
         modifier = Modifier
-            .height(34.dp)
+            .height(38.dp)
             .clip(RoundedCornerShape(SpineTheme.radius.full))
-            .background(colors.onPrimary.copy(alpha = if (enabled) 0.18f else 0.1f))
+            .background(colors.onPrimary.copy(alpha = if (enabled) 0.22f else 0.12f))
             .then(
                 if (enabled) {
                     Modifier.clickable(onClick = onClick)
@@ -113,7 +119,7 @@ private fun TopTextAction(
                     Modifier
                 },
             )
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
         BasicText(
