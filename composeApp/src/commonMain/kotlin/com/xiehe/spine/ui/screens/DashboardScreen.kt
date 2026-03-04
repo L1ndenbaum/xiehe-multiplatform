@@ -11,17 +11,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xiehe.spine.core.store.UserSession
@@ -52,7 +54,6 @@ fun DashboardScreen(
     onOpenAnalysis: (Int, Int?, String) -> Unit = { _, _, _ -> },
 ) {
     val state by vm.state.collectAsState()
-    val spacing = SpineTheme.spacing
 
     LaunchedEffect(session.accessToken) {
         vm.load(
@@ -72,9 +73,13 @@ fun DashboardScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(spacing.base),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            item {
+                GreetingCard(name = state.doctorDisplayName.ifBlank { session.fullName ?: session.username })
+            }
+
             item {
                 AnimatedVisibility(
                     visible = state.errorMessage != null,
@@ -99,15 +104,15 @@ fun DashboardScreen(
                 }
             } else {
                 item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                        StatCard("累计患者", overview.totalPatients.toString(), IconToken.USERS, modifier = Modifier.weight(1f))
-                        StatCard("待处理影像", overview.pendingImages.toString(), IconToken.HOURGLASS, modifier = Modifier.weight(1f))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        DashboardStatCard("累计患者", overview.totalPatients.toString(), IconToken.USERS, Modifier.weight(1f))
+                        DashboardStatCard("待处理影像", overview.pendingImages.toString(), IconToken.HOURGLASS, Modifier.weight(1f))
                     }
                 }
                 item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(spacing.base)) {
-                        StatCard("已完成影像", overview.processedImages.toString(), IconToken.CHECK, modifier = Modifier.weight(1f))
-                        StatCard("累计影像", overview.totalImages.toString(), IconToken.IMAGE, modifier = Modifier.weight(1f))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        DashboardStatCard("已完成影像", overview.processedImages.toString(), IconToken.CHECK, Modifier.weight(1f))
+                        DashboardStatCard("累计影像", overview.totalImages.toString(), IconToken.IMAGE, Modifier.weight(1f))
                     }
                 }
                 item {
@@ -119,8 +124,8 @@ fun DashboardScreen(
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text("完成率 ${overview.completionRate}%", style = SpineTheme.typography.title)
-                                Text("平均处理时长 ${overview.averageProcessingTime} 小时")
-                                Text("系统提醒 ${overview.systemAlerts}")
+                                Text("平均处理时长 ${overview.averageProcessingTime} 小时", color = SpineTheme.colors.textSecondary)
+                                Text("系统提醒 ${overview.systemAlerts}", color = SpineTheme.colors.textSecondary)
                             }
                             ProgressRing(progress = (overview.completionRate / 100f).toFloat())
                         }
@@ -133,7 +138,7 @@ fun DashboardScreen(
                     text = "待处理任务",
                     style = SpineTheme.typography.title,
                     color = SpineTheme.colors.textPrimary,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
+                    modifier = Modifier.padding(top = 2.dp),
                 )
             }
 
@@ -182,12 +187,51 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun StatCard(
+private fun GreetingCard(name: String) {
+    val colors = SpineTheme.colors
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        listOf(colors.primary, colors.primary.copy(alpha = 0.84f)),
+                    ),
+                    RoundedCornerShape(SpineTheme.radius.lg),
+                )
+                .padding(14.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("早上好", style = SpineTheme.typography.subhead, color = colors.onPrimary.copy(alpha = 0.8f))
+                    Text(name, style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold), color = colors.onPrimary)
+                    Text("脊柱影像分析系统", style = SpineTheme.typography.caption, color = colors.onPrimary.copy(alpha = 0.75f))
+                }
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .background(colors.onPrimary.copy(alpha = 0.2f), RoundedCornerShape(SpineTheme.radius.full)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    AppIcon(glyph = IconToken.BELL, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardStatCard(
     title: String,
     value: String,
     glyph: IconToken,
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineTheme.colors
     Card(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -197,23 +241,17 @@ private fun StatCard(
             Text(text = title, style = SpineTheme.typography.subhead)
             Box(
                 modifier = Modifier
-                    .width(34.dp)
-                    .height(34.dp)
-                    .background(
-                        color = SpineTheme.colors.primaryMuted,
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
-                    ),
+                    .size(34.dp)
+                    .background(colors.primaryMuted, RoundedCornerShape(SpineTheme.radius.md)),
                 contentAlignment = Alignment.Center,
             ) {
                 AppIcon(
                     glyph = glyph,
-                    tint = SpineTheme.colors.primary,
-                    modifier = Modifier
-                        .width(16.dp)
-                        .height(16.dp),
+                    tint = colors.primary,
+                    modifier = Modifier.size(15.dp),
                 )
             }
         }
-        Text(text = value, style = SpineTheme.typography.display.copy(fontSize = 38.sp))
+        Text(text = value, style = SpineTheme.typography.display.copy(fontSize = 28.sp))
     }
 }

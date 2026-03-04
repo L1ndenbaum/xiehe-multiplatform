@@ -22,13 +22,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.PatientRepository
 import com.xiehe.spine.ui.components.Avatar
 import com.xiehe.spine.ui.components.Card
 import com.xiehe.spine.ui.components.CompactButton
-import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.PickerDialog
@@ -77,13 +77,13 @@ fun PatientsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             TextField(
                 value = state.search,
                 onValueChange = vm::updateSearch,
-                placeholder = "搜索患者姓名、ID或电话...",
+                placeholder = "搜索患者姓名、ID或手机号",
                 modifier = Modifier.fillMaxWidth(),
                 leadingGlyph = IconToken.SEARCH,
             )
@@ -92,29 +92,31 @@ fun PatientsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                FilterSelector(
+                FilterChip(
                     text = state.genderFilter.label,
-                    modifier = Modifier.weight(1f),
-                    leadingGlyph = IconToken.PROFILE,
+                    active = state.genderFilter != GenderFilter.ALL,
                     onClick = { picker = PatientsPicker.GENDER },
-                )
-                FilterSelector(
-                    text = state.ageFilter.label,
                     modifier = Modifier.weight(1f),
-                    leadingGlyph = IconToken.CALENDAR,
+                )
+                FilterChip(
+                    text = state.ageFilter.label,
+                    active = state.ageFilter != AgeFilter.ALL,
                     onClick = { picker = PatientsPicker.AGE },
+                    modifier = Modifier.weight(1f),
                 )
             }
 
             state.errorMessage?.let {
-                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                }
             }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 state = listState,
             ) {
                 items(state.items, key = { it.id }) { patient ->
@@ -124,29 +126,51 @@ fun PatientsScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Avatar(name = patient.name)
+                            Avatar(name = patient.name, size = 52.dp)
                             Column(
                                 modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalArrangement = Arrangement.spacedBy(3.dp),
                             ) {
-                                Text(text = "${patient.name}·${patient.gender}·${patient.age}岁", style = SpineTheme.typography.title)
-                                Text(text = patient.patientId, style = SpineTheme.typography.subhead)
-                                Text(text = patient.phone ?: "无手机号", style = SpineTheme.typography.subhead)
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = patient.name,
+                                        style = SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
+                                    )
+                                    Text(
+                                        text = patient.gender,
+                                        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+                                        color = SpineTheme.colors.primary,
+                                        modifier = Modifier
+                                            .background(
+                                                SpineTheme.colors.primaryMuted,
+                                                RoundedCornerShape(SpineTheme.radius.full),
+                                            )
+                                            .padding(horizontal = 7.dp, vertical = 3.dp),
+                                    )
+                                }
+                                Text(text = "${patient.age}岁 · ${patient.patientId}", color = SpineTheme.colors.textSecondary)
+                                Text(text = patient.phone ?: "无手机号", color = SpineTheme.colors.textSecondary)
                             }
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                CompactButton(
-                                    text = "编辑",
-                                    onClick = { onEditPatient(patient.id) },
-                                    containerColor = SpineTheme.colors.warning,
-                                    contentColor = SpineTheme.colors.onPrimary,
-                                )
-                                CompactButton(
-                                    text = "查看",
-                                    onClick = { onOpenPatient(patient.id) },
-                                    containerColor = SpineTheme.colors.primary,
-                                    contentColor = SpineTheme.colors.onPrimary,
-                                )
-                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            CompactButton(
+                                text = "编辑",
+                                onClick = { onEditPatient(patient.id) },
+                                containerColor = SpineTheme.colors.success,
+                                contentColor = SpineTheme.colors.onPrimary,
+                            )
+                            CompactButton(
+                                text = "查看",
+                                onClick = { onOpenPatient(patient.id) },
+                                containerColor = SpineTheme.colors.primary,
+                                contentColor = SpineTheme.colors.onPrimary,
+                            )
                         }
                     }
                 }
@@ -155,8 +179,11 @@ fun PatientsScreen(
                     if (state.loading || state.loadingMore) {
                         Text(
                             text = "加载中...",
-                            modifier = Modifier.fillMaxWidth().padding(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
                             style = SpineTheme.typography.subhead,
+                            color = SpineTheme.colors.textSecondary,
                         )
                     }
                 }
@@ -196,6 +223,39 @@ fun PatientsScreen(
 }
 
 @Composable
+private fun FilterChip(
+    text: String,
+    active: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = SpineTheme.colors
+    Row(
+        modifier = modifier
+            .background(
+                if (active) colors.primary else colors.surface,
+                RoundedCornerShape(SpineTheme.radius.full),
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = text,
+            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+            color = if (active) colors.onPrimary else colors.textSecondary,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "▾",
+            style = SpineTheme.typography.subhead,
+            color = if (active) colors.onPrimary else colors.textSecondary,
+        )
+    }
+}
+
+@Composable
 private fun OptionPickerOverlay(
     title: String,
     options: List<String>,
@@ -215,20 +275,23 @@ private fun OptionPickerOverlay(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = if (item == selected) SpineTheme.colors.primaryMuted else SpineTheme.colors.surface,
+                            color = if (item == selected) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
                             shape = RoundedCornerShape(SpineTheme.radius.md),
                         )
                         .clickable {
                             onSelect(item)
                             dismiss()
                         }
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 11.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = item)
+                    Text(
+                        text = item,
+                        color = if (item == selected) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary,
+                    )
                     if (item == selected) {
-                        Text(text = "✓", color = SpineTheme.colors.primary)
+                        Text(text = "✓", color = SpineTheme.colors.onPrimary)
                     }
                 }
             }

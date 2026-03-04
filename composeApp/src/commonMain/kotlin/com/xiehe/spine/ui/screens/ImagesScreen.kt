@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
@@ -37,7 +39,6 @@ import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.ImageFileSummary
 import com.xiehe.spine.ui.components.Card
 import com.xiehe.spine.ui.components.FileSaveResult
-import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.components.ImageTaskAction
 import com.xiehe.spine.ui.components.ImageTaskActionStyle
@@ -95,13 +96,13 @@ fun ImagesScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             TextField(
                 value = state.search,
                 onValueChange = vm::updateSearch,
-                placeholder = "搜索患者姓名、检查类型或文件名...",
+                placeholder = "搜索患者姓名、检查类型或文件名",
                 modifier = Modifier.fillMaxWidth(),
                 leadingGlyph = IconToken.SEARCH,
             )
@@ -110,35 +111,41 @@ fun ImagesScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                FilterSelector(
+                FilterChip(
                     text = state.typeFilter.label,
-                    modifier = Modifier.weight(1f),
-                    leadingGlyph = IconToken.IMAGE,
+                    active = state.typeFilter != ImageTypeFilter.ALL,
                     onClick = { picker = ImagesPicker.TYPE },
-                )
-                FilterSelector(
-                    text = state.statusFilter.label,
                     modifier = Modifier.weight(1f),
-                    leadingGlyph = IconToken.HOURGLASS,
+                )
+                FilterChip(
+                    text = state.statusFilter.label,
+                    active = state.statusFilter != ImageStatusFilter.ALL,
                     onClick = { picker = ImagesPicker.STATUS },
+                    modifier = Modifier.weight(1f),
                 )
             }
 
             state.errorMessage?.let {
-                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                }
             }
             actionError?.let {
-                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                }
             }
             actionSuccess?.let {
-                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.primary))
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.success))
+                }
             }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items(state.filteredItems, key = { it.id }) { file ->
                     ImageTaskCard(
@@ -391,6 +398,39 @@ fun ImagesScreen(
 }
 
 @Composable
+private fun FilterChip(
+    text: String,
+    active: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = SpineTheme.colors
+    Row(
+        modifier = modifier
+            .background(
+                if (active) colors.primary else colors.surface,
+                RoundedCornerShape(SpineTheme.radius.full),
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = text,
+            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+            color = if (active) colors.onPrimary else colors.textSecondary,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "▾",
+            style = SpineTheme.typography.subhead,
+            color = if (active) colors.onPrimary else colors.textSecondary,
+        )
+    }
+}
+
+@Composable
 private fun OptionPickerOverlay(
     title: String,
     options: List<String>,
@@ -410,20 +450,23 @@ private fun OptionPickerOverlay(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = if (item == selected) SpineTheme.colors.primaryMuted else SpineTheme.colors.surface,
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(SpineTheme.radius.md),
+                            color = if (item == selected) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
+                            shape = RoundedCornerShape(SpineTheme.radius.md),
                         )
                         .clickable {
                             onSelect(item)
                             dismiss()
                         }
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 11.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = item)
+                    Text(
+                        text = item,
+                        color = if (item == selected) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary,
+                    )
                     if (item == selected) {
-                        Text(text = "✓", color = SpineTheme.colors.primary)
+                        Text(text = "✓", color = SpineTheme.colors.onPrimary)
                     }
                 }
             }
