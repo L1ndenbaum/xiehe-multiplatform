@@ -28,7 +28,6 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.PatientRepository
 import com.xiehe.spine.ui.components.Button
-import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.PickerDialog
@@ -88,19 +87,17 @@ fun ImageUploadScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scroll)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            FilterSelector(
+            PickerField(
                 text = selectedPatientName,
-                modifier = Modifier.fillMaxWidth(),
                 leadingGlyph = IconToken.PATIENTS,
                 onClick = { picker = ImageUploadPicker.PATIENT },
             )
 
-            FilterSelector(
+            PickerField(
                 text = state.selectedExamType,
-                modifier = Modifier.fillMaxWidth(),
                 leadingGlyph = IconToken.IMAGE,
                 onClick = { picker = ImageUploadPicker.EXAM_TYPE },
             )
@@ -142,13 +139,14 @@ fun ImageUploadScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(112.dp),
+                leadingGlyph = IconToken.MESSAGE,
             )
 
             state.errorMessage?.let {
                 Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
             }
             state.successMessage?.let {
-                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.primary))
+                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.success))
             }
 
             Button(
@@ -186,11 +184,7 @@ fun ImageUploadScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    color = if (patient.id == state.selectedPatientId) {
-                                        SpineTheme.colors.primaryMuted
-                                    } else {
-                                        SpineTheme.colors.surface
-                                    },
+                                    color = if (patient.id == state.selectedPatientId) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
                                     shape = RoundedCornerShape(SpineTheme.radius.md),
                                 )
                                 .clickable {
@@ -201,9 +195,9 @@ fun ImageUploadScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(patient.name)
+                            Text(patient.name, color = if (patient.id == state.selectedPatientId) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
                             if (patient.id == state.selectedPatientId) {
-                                Text("✓", color = SpineTheme.colors.primary)
+                                Text("✓", color = SpineTheme.colors.onPrimary)
                             }
                         }
                     }
@@ -224,11 +218,7 @@ fun ImageUploadScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    color = if (examType == state.selectedExamType) {
-                                        SpineTheme.colors.primaryMuted
-                                    } else {
-                                        SpineTheme.colors.surface
-                                    },
+                                    color = if (examType == state.selectedExamType) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
                                     shape = RoundedCornerShape(SpineTheme.radius.md),
                                 )
                                 .clickable {
@@ -239,9 +229,9 @@ fun ImageUploadScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(examType)
+                            Text(examType, color = if (examType == state.selectedExamType) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
                             if (examType == state.selectedExamType) {
-                                Text("✓", color = SpineTheme.colors.primary)
+                                Text("✓", color = SpineTheme.colors.onPrimary)
                             }
                         }
                     }
@@ -251,4 +241,24 @@ fun ImageUploadScreen(
 
         null -> Unit
     }
+}
+
+@Composable
+private fun PickerField(
+    text: String,
+    leadingGlyph: IconToken,
+    onClick: () -> Unit,
+) {
+    TextField(
+        value = text,
+        onValueChange = {},
+        placeholder = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        readOnly = true,
+        leadingGlyph = leadingGlyph,
+        trailingGlyph = IconToken.CHEVRON_DOWN,
+        onTrailingClick = onClick,
+    )
 }

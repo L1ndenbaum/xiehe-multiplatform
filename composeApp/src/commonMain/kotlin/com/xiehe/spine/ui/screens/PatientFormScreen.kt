@@ -26,7 +26,6 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.PatientRepository
 import com.xiehe.spine.ui.components.Button
 import com.xiehe.spine.ui.components.DatePickerField
-import com.xiehe.spine.ui.components.FilterSelector
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.PickerDialog
@@ -72,20 +71,20 @@ fun PatientFormScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scroll)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             TextField(
                 value = state.name,
                 onValueChange = vm::updateName,
                 placeholder = "请输入患者姓名",
+                leadingGlyph = IconToken.PROFILE,
             )
 
-            FilterSelector(
+            PickerField(
                 text = genderOptions.firstOrNull { it.value == state.gender }?.label ?: "请选择患者性别",
-                modifier = Modifier.fillMaxWidth(),
-                leadingGlyph = IconToken.PROFILE,
                 onClick = { picker = PatientFormPicker.GENDER },
+                leadingGlyph = IconToken.PROFILE,
             )
 
             DatePickerField(
@@ -106,11 +105,11 @@ fun PatientFormScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                FilterSelector(
+                PickerField(
                     text = state.phonePrefix,
-                    modifier = Modifier.weight(0.36f),
-                    leadingGlyph = IconToken.MESSAGE,
                     onClick = { picker = PatientFormPicker.PHONE_PREFIX },
+                    leadingGlyph = IconToken.MESSAGE,
+                    modifier = Modifier.weight(0.36f),
                 )
                 TextField(
                     value = state.phoneLocalNumber,
@@ -183,7 +182,7 @@ fun PatientFormScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    color = if (state.gender == option.value) SpineTheme.colors.primaryMuted else SpineTheme.colors.surface,
+                                    color = if (state.gender == option.value) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
                                     shape = RoundedCornerShape(SpineTheme.radius.md),
                                 )
                                 .clickable {
@@ -194,9 +193,9 @@ fun PatientFormScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(option.label)
+                            Text(option.label, color = if (state.gender == option.value) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
                             if (state.gender == option.value) {
-                                Text("✓", color = SpineTheme.colors.primary)
+                                Text("✓", color = SpineTheme.colors.onPrimary)
                             }
                         }
                     }
@@ -217,7 +216,7 @@ fun PatientFormScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    color = if (state.phonePrefix == option) SpineTheme.colors.primaryMuted else SpineTheme.colors.surface,
+                                    color = if (state.phonePrefix == option) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
                                     shape = RoundedCornerShape(SpineTheme.radius.md),
                                 )
                                 .clickable {
@@ -228,9 +227,9 @@ fun PatientFormScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(option)
+                            Text(option, color = if (state.phonePrefix == option) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
                             if (state.phonePrefix == option) {
-                                Text("✓", color = SpineTheme.colors.primary)
+                                Text("✓", color = SpineTheme.colors.onPrimary)
                             }
                         }
                     }
@@ -240,4 +239,23 @@ fun PatientFormScreen(
 
         null -> Unit
     }
+}
+
+@Composable
+private fun PickerField(
+    text: String,
+    onClick: () -> Unit,
+    leadingGlyph: IconToken,
+    modifier: Modifier = Modifier,
+) {
+    TextField(
+        value = text,
+        onValueChange = {},
+        placeholder = text,
+        modifier = modifier.clickable(onClick = onClick),
+        readOnly = true,
+        leadingGlyph = leadingGlyph,
+        trailingGlyph = IconToken.CHEVRON_DOWN,
+        onTrailingClick = onClick,
+    )
 }

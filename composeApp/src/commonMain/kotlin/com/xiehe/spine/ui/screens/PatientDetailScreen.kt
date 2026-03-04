@@ -19,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.ImageFileRepository
@@ -64,8 +65,8 @@ fun PatientDetailScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
                 state.errorMessage?.let {
@@ -85,41 +86,45 @@ fun PatientDetailScreen(
             } else {
                 item {
                     Card(modifier = Modifier.fillMaxWidth()) {
-                        val (phonePrefix, phoneNumber) = splitPhone(detail.phone)
-                        Text("姓名：${detail.name}", style = SpineTheme.typography.title)
-                        Text("患者ID：${detail.patientId}")
-                        Text("性别：${detail.gender}")
-                        Text("年龄：${detail.age}岁")
-                        Text("出生日期：${detail.birthDate}")
+                        Text("基本信息", style = SpineTheme.typography.title)
+                        PatientInfoRow("姓名", detail.name)
+                        PatientInfoRow("患者ID", detail.patientId)
+                        PatientInfoRow("性别", detail.gender)
+                        PatientInfoRow("年龄", "${detail.age}岁")
+                        PatientInfoRow("出生日期", detail.birthDate)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text("联系电话：")
+                            Text("联系电话", color = SpineTheme.colors.textSecondary)
+                            val (phonePrefix, phoneNumber) = splitPhone(detail.phone)
                             if (phoneNumber == null) {
                                 Text("-")
                             } else {
-                                if (phonePrefix != null) {
-                                    Text(
-                                        text = phonePrefix,
-                                        style = SpineTheme.typography.caption,
-                                        color = SpineTheme.colors.onPrimary,
-                                        modifier = Modifier
-                                            .background(
-                                                color = SpineTheme.colors.primary,
-                                                shape = RoundedCornerShape(SpineTheme.radius.full),
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 3.dp),
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (phonePrefix != null) {
+                                        Text(
+                                            text = phonePrefix,
+                                            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+                                            color = SpineTheme.colors.onPrimary,
+                                            modifier = Modifier
+                                                .background(
+                                                    color = SpineTheme.colors.primary,
+                                                    shape = RoundedCornerShape(SpineTheme.radius.full),
+                                                )
+                                                .padding(horizontal = 8.dp, vertical = 3.dp),
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                    Text(phoneNumber)
                                 }
-                                Text(phoneNumber)
                             }
                         }
-                        Text("身份证号：${detail.idCard ?: "-"}")
-                        Text("地址：${detail.address ?: "-"}")
-                        Text("紧急联系人：${detail.emergencyContactName ?: "-"}")
-                        Text("紧急联系人电话：${detail.emergencyContactPhone ?: "-"}")
+                        PatientInfoRow("身份证号", detail.idCard ?: "-")
+                        PatientInfoRow("地址", detail.address ?: "-")
+                        PatientInfoRow("紧急联系人", detail.emergencyContactName ?: "-")
+                        PatientInfoRow("紧急联系人电话", detail.emergencyContactPhone ?: "-")
                     }
                 }
 
@@ -128,7 +133,7 @@ fun PatientDetailScreen(
                         text = "影像记录",
                         style = SpineTheme.typography.title,
                         color = SpineTheme.colors.textPrimary,
-                        modifier = Modifier.padding(top = 6.dp),
+                        modifier = Modifier.padding(top = 2.dp),
                     )
                 }
 
@@ -170,6 +175,18 @@ fun PatientDetailScreen(
         if (state.loading) {
             LoadingOverlay(message = "...正在加载中")
         }
+    }
+}
+
+@Composable
+private fun PatientInfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = label, color = SpineTheme.colors.textSecondary)
+        Text(text = value)
     }
 }
 
