@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,7 +72,7 @@ fun ImageTaskCard(
     patientNameOverride: String? = null,
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -83,7 +84,7 @@ fun ImageTaskCard(
                     repository = repository,
                     onSessionUpdated = onSessionUpdated,
                     modifier = Modifier
-                        .size(width = 96.dp, height = 96.dp)
+                        .size(width = 88.dp, height = 88.dp)
                         .clip(RoundedCornerShape(SpineTheme.radius.md))
                         .background(SpineTheme.colors.surfaceMuted),
                 )
@@ -138,7 +139,7 @@ fun ImageTaskCard(
                             glyph = action.glyph,
                             style = action.style,
                             compactText = compactActionText,
-                            modifier = Modifier.width(128.dp),
+                            modifier = Modifier.width(118.dp),
                             onClick = action.onClick,
                         )
                     } else {
@@ -168,7 +169,7 @@ private fun StatusChip(
     Box(
         modifier = Modifier
             .background(background, RoundedCornerShape(SpineTheme.radius.sm))
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 10.dp, vertical = 5.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -283,9 +284,15 @@ private fun ImageActionButton(
 
     Row(
         modifier = modifier
-            .height(40.dp)
+            .height(38.dp)
             .clip(corner)
-            .background(background)
+            .background(
+                if (style == ImageTaskActionStyle.PRIMARY) {
+                    Brush.horizontalGradient(listOf(colors.primary, colors.primary.copy(alpha = 0.86f)))
+                } else {
+                    Brush.horizontalGradient(listOf(background, background))
+                },
+            )
             .border(width = 1.dp, color = border, shape = corner)
             .clickable(onClick = onClick)
             .padding(horizontal = 8.dp),

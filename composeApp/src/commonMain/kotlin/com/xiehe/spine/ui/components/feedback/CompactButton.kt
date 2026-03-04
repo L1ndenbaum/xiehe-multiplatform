@@ -17,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -40,16 +42,30 @@ fun CompactButton(
         label = "compact_button_scale",
     )
 
+    val shape = RoundedCornerShape(SpineTheme.radius.md)
     Box(
         modifier = modifier
-            .width(80.dp)
-            .height(34.dp)
+            .width(88.dp)
+            .height(36.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(SpineTheme.radius.full))
-            .background(if (enabled) containerColor else SpineTheme.colors.surfaceMuted)
+            .shadow(
+                elevation = if (enabled) 8.dp else 0.dp,
+                shape = shape,
+                ambientColor = containerColor.copy(alpha = 0.24f),
+                spotColor = containerColor.copy(alpha = 0.24f),
+                clip = false,
+            )
+            .clip(shape)
+            .background(
+                if (enabled) {
+                    Brush.horizontalGradient(listOf(containerColor, containerColor.copy(alpha = 0.86f)))
+                } else {
+                    Brush.horizontalGradient(listOf(SpineTheme.colors.surfaceMuted, SpineTheme.colors.surfaceMuted))
+                },
+            )
             .clickable(enabled = enabled, interactionSource = interaction, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

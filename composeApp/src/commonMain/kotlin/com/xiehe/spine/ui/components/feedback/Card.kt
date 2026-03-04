@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
@@ -19,12 +20,20 @@ fun Card(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val shape = RoundedCornerShape(SpineTheme.radius.xl)
     Column(
         modifier = modifier
             .animateContentSize(tween(220))
-            .clip(RoundedCornerShape(SpineTheme.radius.lg))
+            .shadow(
+                elevation = 14.dp,
+                shape = shape,
+                clip = false,
+                ambientColor = SpineTheme.colors.textTertiary.copy(alpha = 0.2f),
+                spotColor = SpineTheme.colors.textTertiary.copy(alpha = 0.2f),
+            )
+            .clip(shape)
             .background(SpineTheme.colors.surface)
-            .border(1.dp, SpineTheme.colors.borderSubtle, RoundedCornerShape(SpineTheme.radius.lg))
+            .border(1.dp, SpineTheme.colors.borderSubtle, shape)
             .padding(SpineTheme.spacing.xl),
         verticalArrangement = Arrangement.spacedBy(SpineTheme.spacing.md),
         content = { content() },

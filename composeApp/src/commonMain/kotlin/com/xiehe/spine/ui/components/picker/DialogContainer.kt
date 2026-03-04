@@ -92,20 +92,20 @@ fun PickerDialog(
                 indication = null,
                 onClick = dismiss,
             ),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.BottomCenter,
     ) {
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(220)) + slideInVertically(tween(240)) { it },
+            enter = fadeIn(tween(220)) + slideInVertically(tween(240)) { it / 2 },
             exit = fadeOut(tween(180)) + slideOutVertically(tween(200)) { it / 2 },
         ) {
             Column(
                 modifier = modifier
                     .fillMaxWidth()
                     .then(sizeModifier)
-                    .padding(horizontal = 20.dp)
-                    .background(SpineTheme.colors.surface, RoundedCornerShape(28.dp))
-                    .padding(horizontal = 16.dp, vertical = 18.dp)
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                    .background(SpineTheme.colors.surface, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -113,6 +113,17 @@ fun PickerDialog(
                     ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(42.dp)
+                        .height(4.dp)
+                        .background(
+                            color = SpineTheme.colors.borderStrong,
+                            shape = RoundedCornerShape(SpineTheme.radius.full),
+                        ),
+                )
+
                 if (title.isNotBlank()) {
                     Text(
                         text = title,
@@ -129,8 +140,8 @@ fun PickerDialog(
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                             Text(
                                 text = "取消",
-                                style = SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
-                                color = SpineTheme.colors.warning,
+                                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+                                color = SpineTheme.colors.textSecondary,
                                 modifier = Modifier.clickable(onClick = dismiss),
                             )
                         }
@@ -143,8 +154,8 @@ fun PickerDialog(
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                             Text(
                                 text = "确定",
-                                style = SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
-                                color = SpineTheme.colors.warning,
+                                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+                                color = SpineTheme.colors.primary,
                                 modifier = Modifier.clickable {
                                     onConfirm?.invoke()
                                     dismiss()

@@ -19,7 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.theme.SpineTheme
 
@@ -41,15 +44,30 @@ fun Button(
         animationSpec = tween(durationMillis = 120),
         label = "button_scale",
     )
+    val shape = RoundedCornerShape(SpineTheme.radius.md)
+    val containerColor = customContainerColor ?: colors.primary
+    val gradientBrush = Brush.horizontalGradient(
+        colors = listOf(
+            containerColor,
+            containerColor.copy(alpha = 0.86f),
+        ),
+    )
     Box(
         modifier = modifier
-            .height(50.dp)
+            .height(48.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(SpineTheme.radius.md))
-            .background(if (enabled) (customContainerColor ?: colors.primary) else colors.surfaceMuted)
+            .shadow(
+                elevation = if (enabled) 10.dp else 0.dp,
+                shape = shape,
+                ambientColor = colors.primary.copy(alpha = 0.28f),
+                spotColor = colors.primary.copy(alpha = 0.28f),
+                clip = false,
+            )
+            .clip(shape)
+            .background(if (enabled) gradientBrush else Brush.horizontalGradient(listOf(colors.surfaceMuted, colors.surfaceMuted)))
             .clickable(enabled = enabled, interactionSource = interaction, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -68,6 +86,7 @@ fun Button(
                 text = text,
                 style = SpineTheme.typography.body.copy(
                     color = if (enabled) (customContentColor ?: colors.onPrimary) else colors.textTertiary,
+                    fontWeight = FontWeight.SemiBold,
                 ),
             )
         }

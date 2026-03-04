@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,21 +40,31 @@ fun TextField(
     val colors = SpineTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None
+    val shape = RoundedCornerShape(SpineTheme.radius.lg)
 
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(SpineTheme.radius.md))
-            .background(colors.surface)
-            .border(1.dp, colors.borderSubtle, RoundedCornerShape(SpineTheme.radius.md))
-            .padding(horizontal = SpineTheme.spacing.xl, vertical = SpineTheme.spacing.lg),
+            .clip(shape)
+            .background(colors.surfaceMuted.copy(alpha = 0.62f))
+            .border(1.dp, colors.borderSubtle, shape)
+            .padding(horizontal = SpineTheme.spacing.base, vertical = SpineTheme.spacing.base),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (leadingGlyph != null) {
-            AppIcon(
-                glyph = leadingGlyph,
-                modifier = Modifier.size(16.dp).padding(end = 6.dp),
-                tint = colors.textTertiary,
-            )
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(SpineTheme.radius.sm))
+                    .background(colors.surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                AppIcon(
+                    glyph = leadingGlyph,
+                    modifier = Modifier.size(13.dp),
+                    tint = colors.textSecondary,
+                )
+            }
         }
         Box(modifier = Modifier.weight(1f)) {
             if (value.isBlank()) {
@@ -75,11 +86,11 @@ fun TextField(
             )
         }
         if (trailingGlyph != null) {
-            AppIcon(
-                glyph = trailingGlyph,
+            Box(
                 modifier = Modifier
-                    .size(16.dp)
-                    .padding(start = 6.dp)
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(SpineTheme.radius.sm))
+                    .background(colors.surface)
                     .then(
                         if (onTrailingClick != null) {
                             Modifier.clickable(onClick = onTrailingClick)
@@ -87,8 +98,14 @@ fun TextField(
                             Modifier
                         },
                     ),
-                tint = colors.textTertiary,
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                AppIcon(
+                    glyph = trailingGlyph,
+                    modifier = Modifier.size(13.dp),
+                    tint = colors.textSecondary,
+                )
+            }
         }
     }
 }

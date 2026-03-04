@@ -14,7 +14,7 @@ fun FilterSelector(
     TextField(
         value = text,
         onValueChange = {},
-        placeholder = text,
+        placeholder = "请选择",
         modifier = modifier.clickable(onClick = onClick),
         readOnly = true,
         leadingGlyph = leadingGlyph,
