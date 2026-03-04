@@ -32,9 +32,10 @@ fun AnalysisBottomBar(
     modifier: Modifier = Modifier,
     onAction: (AnalysisBottomAction) -> Unit,
 ) {
-    val barBackground = Color(0xFF1E3552)
-    val itemBackground = Color(0xFF324D70)
-    val contentColor = Color(0xFFF2F7FF)
+    val barBackground = Color(0xFF111827)
+    val itemBackground = Color(0xFF1F2937)
+    val contentColor = Color(0xFFE5E7EB)
+    val primaryItemBackground = Color(0xFF7C3AED)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -48,8 +49,8 @@ fun AnalysisBottomBar(
             label = "AI检测",
             icon = IconToken.AI_DETECT,
             modifier = Modifier.weight(1f),
-            containerColor = itemBackground,
-            contentColor = contentColor,
+            containerColor = primaryItemBackground,
+            contentColor = Color.White,
             onClick = { onAction(AnalysisBottomAction.AI_DETECT) },
         )
         AnalysisBottomItem(

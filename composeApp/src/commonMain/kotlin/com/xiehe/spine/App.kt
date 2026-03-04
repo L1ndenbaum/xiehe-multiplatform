@@ -23,6 +23,7 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
 import com.xiehe.spine.ui.components.IconToken
 import com.xiehe.spine.ui.screens.AppearanceScreen
+import com.xiehe.spine.ui.screens.ChangePasswordScreen
 import com.xiehe.spine.ui.screens.DashboardScreen
 import com.xiehe.spine.ui.screens.PatientEditScreen
 import com.xiehe.spine.ui.screens.ImageAnalysisScreen
@@ -35,7 +36,6 @@ import com.xiehe.spine.ui.screens.PatientDetailScreen
 import com.xiehe.spine.ui.screens.PatientFormScreen
 import com.xiehe.spine.ui.screens.PatientsScreen
 import com.xiehe.spine.ui.screens.PersonalInfoScreen
-import com.xiehe.spine.ui.screens.PlaceholderScreen
 import com.xiehe.spine.ui.screens.ProfileScreen
 import com.xiehe.spine.ui.screens.RegisterScreen
 import com.xiehe.spine.ui.theme.SpineTheme
@@ -431,10 +431,7 @@ fun App(
                             onTabSelected = onTabSelected,
                             onBack = { route = null },
                         ) {
-                            PlaceholderScreen(
-                                title = "修改密码接口待完善",
-                                description = "架构与导航已预留，后续可在不改路由的情况下直接接入。",
-                            )
+                            ChangePasswordScreen()
                         }
                     }
 

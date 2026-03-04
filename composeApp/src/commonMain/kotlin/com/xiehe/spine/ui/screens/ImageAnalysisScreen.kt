@@ -122,7 +122,7 @@ fun ImageAnalysisScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background),
+            .background(Color(0xFF0B1220)),
     ) {
         AnalysisTopBar(
             modifier = Modifier.statusBarsPadding(),

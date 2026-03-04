@@ -33,31 +33,31 @@ fun AnalysisTopBar(
     onImportJson: () -> Unit,
     onExportJson: () -> Unit,
 ) {
-    val colors = SpineTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(84.dp)
+            .height(80.dp)
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
-                        colors.primary.copy(alpha = 0.95f),
-                        colors.primary.copy(alpha = 0.82f),
+                        androidx.compose.ui.graphics.Color(0xFF6D28D9),
+                        androidx.compose.ui.graphics.Color(0xFF7C3AED),
+                        androidx.compose.ui.graphics.Color(0xFF5B21B6),
                     ),
                 ),
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(30.dp)
+                .size(34.dp)
                 .clip(CircleShape)
-                .background(colors.onPrimary.copy(alpha = 0.2f))
+                .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f))
                 .clickable(onClick = onBack),
             contentAlignment = Alignment.Center,
         ) {
-            AppIcon(glyph = IconToken.BACK, tint = colors.onPrimary, modifier = Modifier.size(15.dp))
+            AppIcon(glyph = IconToken.BACK, tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(16.dp))
         }
 
         Column(
@@ -69,13 +69,13 @@ fun AnalysisTopBar(
             Text(
                 text = "$doctorName · $examType",
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
-                color = colors.onPrimary,
+                color = androidx.compose.ui.graphics.Color.White,
                 maxLines = 1,
             )
             Text(
                 text = "影像ID: $fileId｜患者ID: ${patientId ?: "--"}",
                 style = SpineTheme.typography.caption,
-                color = colors.onPrimary.copy(alpha = 0.88f),
+                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.88f),
                 maxLines = 1,
             )
         }
@@ -89,7 +89,7 @@ fun AnalysisTopBar(
                 icon = IconToken.SAVE,
                 onClick = onSave,
                 isPrimary = true,
-                modifier = Modifier.height(52.dp),
+                modifier = Modifier.height(48.dp),
             )
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 TopActionButton(
@@ -97,14 +97,14 @@ fun AnalysisTopBar(
                     icon = IconToken.IMPORT,
                     onClick = onImportJson,
                     isPrimary = false,
-                    modifier = Modifier.height(23.dp),
+                    modifier = Modifier.height(21.dp),
                 )
                 TopActionButton(
                     text = "导出",
                     icon = IconToken.EXPORT,
                     onClick = onExportJson,
                     isPrimary = false,
-                    modifier = Modifier.height(23.dp),
+                    modifier = Modifier.height(21.dp),
                 )
             }
         }
@@ -119,15 +119,14 @@ private fun TopActionButton(
     isPrimary: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val colors = SpineTheme.colors
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .background(
                 if (isPrimary) {
-                    colors.onPrimary.copy(alpha = 0.18f)
+                    androidx.compose.ui.graphics.Color.White.copy(alpha = 0.24f)
                 } else {
-                    colors.onPrimary.copy(alpha = 0.12f)
+                    androidx.compose.ui.graphics.Color.White.copy(alpha = 0.15f)
                 },
             )
             .clickable(onClick = onClick)
@@ -137,13 +136,13 @@ private fun TopActionButton(
     ) {
         AppIcon(
             glyph = icon,
-            tint = colors.onPrimary,
+            tint = androidx.compose.ui.graphics.Color.White,
             modifier = Modifier.size(13.dp),
         )
         Text(
             text = text,
             style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-            color = colors.onPrimary,
+            color = androidx.compose.ui.graphics.Color.White,
             modifier = Modifier.padding(start = 3.dp),
         )
     }
