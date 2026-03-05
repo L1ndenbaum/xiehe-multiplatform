@@ -118,7 +118,13 @@ private fun parseDate(value: String): Triple<Int, Int, Int> {
 }
 
 private fun formatDate(year: Int, month: Int, day: Int): String {
-    return "%04d-%02d-%02d".format(year, month, day)
+    return buildString {
+        append(year.toString().padStart(4, '0'))
+        append('-')
+        append(month.toString().padStart(2, '0'))
+        append('-')
+        append(day.toString().padStart(2, '0'))
+    }
 }
 
 private fun daysInMonth(year: Int, month: Int): Int {
