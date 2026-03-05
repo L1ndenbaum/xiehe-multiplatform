@@ -2,6 +2,7 @@ package com.xiehe.spine
 
 import androidx.compose.runtime.Composable
 import platform.Foundation.NSDate
+import platform.Foundation.timeIntervalSince1970
 import platform.UIKit.UIDevice
 
 class IOSPlatform : Platform {
