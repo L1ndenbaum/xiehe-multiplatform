@@ -75,6 +75,7 @@
 				1B4A003201B2377BD7411467 /* Sources */,
 				86B31DD517F5E34F0376D7E2 /* Frameworks */,
 				DD7416DDDC1DE35E70313FAC /* Resources */,
+				9E9F3C2D4B5A697887665544 /* Configure ATS By Branch */,
 			);
 			buildRules = (
 			);
@@ -153,6 +154,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
+		};
+		9E9F3C2D4B5A697887665544 /* Configure ATS By Branch */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Configure ATS By Branch";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\nAPP_PLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\nif [ ! -f \"$APP_PLIST\" ]; then\n  echo \"warning: Info.plist not found at $APP_PLIST\"\n  exit 0\nfi\n\nRESOLVED_BRANCH=\"${GIT_BRANCH:-${CI_COMMIT_REF_NAME:-${GITHUB_REF_NAME:-}}}\"\nif [ -z \"$RESOLVED_BRANCH\" ]; then\n  RESOLVED_BRANCH=\"$(git -C \"$SRCROOT/..\" rev-parse --abbrev-ref HEAD 2>/dev/null || true)\"\nfi\n\nALLOW_HTTP=\"NO\"\ncase \"$RESOLVED_BRANCH\" in\n  dev|refs/heads/dev)\n    ALLOW_HTTP=\"YES\"\n    ;;\n  *)\n    ALLOW_HTTP=\"NO\"\n    ;;\nesac\n\n/usr/libexec/PlistBuddy -c \"Add :NSAppTransportSecurity dict\" \"$APP_PLIST\" 2>/dev/null || true\n/usr/libexec/PlistBuddy -c \"Delete :NSAppTransportSecurity:NSAllowsArbitraryLoads\" \"$APP_PLIST\" 2>/dev/null || true\nif [ \"$ALLOW_HTTP\" = \"YES\" ]; then\n  /usr/libexec/PlistBuddy -c \"Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true\" \"$APP_PLIST\"\n  echo \"ATS: cleartext HTTP enabled for branch '$RESOLVED_BRANCH'\"\nelse\n  /usr/libexec/PlistBuddy -c \"Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool false\" \"$APP_PLIST\"\n  echo \"ATS: cleartext HTTP disabled for branch '$RESOLVED_BRANCH'\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
