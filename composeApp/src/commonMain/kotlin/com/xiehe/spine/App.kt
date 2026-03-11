@@ -21,6 +21,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
+import com.xiehe.spine.data.image.ImageFileSummary
+import com.xiehe.spine.data.patient.PatientSummary
+import com.xiehe.spine.ui.components.feedback.shared.AppStartupScreen
 import com.xiehe.spine.ui.components.navigation.shared.DashboardShellHeader
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.navigation.shared.SearchShellHeader
@@ -55,6 +58,7 @@ import com.xiehe.spine.ui.viewmodel.patient.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
 import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 
 private enum class AuthRoute {
@@ -78,6 +82,12 @@ private sealed interface OverlayRoute {
     data object Messages : OverlayRoute
     data object ImageUpload : OverlayRoute
 }
+
+private data class DashboardBootstrapState(
+    val loading: Boolean = true,
+    val patients: List<PatientSummary> = emptyList(),
+    val images: List<ImageFileSummary> = emptyList(),
+)
 
 @Composable
 @Preview
@@ -104,6 +114,7 @@ fun App(
     var selectedTab by remember { mutableIntStateOf(0) }
     var route by remember { mutableStateOf<OverlayRoute?>(null) }
     var authRoute by remember { mutableStateOf(AuthRoute.LOGIN) }
+    var dashboardBootstrap by remember(session?.userId) { mutableStateOf(DashboardBootstrapState()) }
 
     val onTabSelected: (Int) -> Unit = remember {
         { tab ->
@@ -203,6 +214,44 @@ fun App(
             }
         }
 
+        LaunchedEffect(session?.userId) {
+            val current = session ?: return@LaunchedEffect
+            dashboardBootstrap = DashboardBootstrapState(loading = true)
+
+            val patientsDeferred = async { appContainer.patientRepository.loadAllPatients(current) }
+            val imagesDeferred = async { appContainer.imageFileRepository.loadAllImageFiles(current) }
+
+            val patientsResult = patientsDeferred.await()
+            val imagesResult = imagesDeferred.await()
+
+            val latestSession = listOfNotNull(
+                (patientsResult as? AppResult.Success)?.data?.first,
+                (imagesResult as? AppResult.Success)?.data?.first,
+            ).lastOrNull() ?: current
+
+            if (latestSession != current) {
+                session = latestSession
+            }
+
+            val unauthorized = listOf(patientsResult, imagesResult).any { result ->
+                result is AppResult.Failure && result.isUnauthorized
+            }
+            if (unauthorized) {
+                appContainer.authRepository.logout()
+                session = null
+                route = null
+                selectedTab = 0
+                authRoute = AuthRoute.LOGIN
+                return@LaunchedEffect
+            }
+
+            dashboardBootstrap = DashboardBootstrapState(
+                loading = false,
+                patients = (patientsResult as? AppResult.Success)?.data?.second.orEmpty(),
+                images = (imagesResult as? AppResult.Success)?.data?.second.orEmpty(),
+            )
+        }
+
         val activeSession = session!!
         AnimatedContent(
             targetState = route,
@@ -218,6 +267,13 @@ fun App(
             label = "scene_transition",
         ) { currentRoute ->
             if (currentRoute == null) {
+                if (selectedTab == 0 && dashboardBootstrap.loading) {
+                    AppStartupScreen(
+                        title = "正在同步工作台数据",
+                        message = "先加载患者与影像数据，再进入 Dashboard",
+                    )
+                    return@AnimatedContent
+                }
                 MobileShell(
                     selectedTab = selectedTab,
                     onTabSelected = onTabSelected,
@@ -280,6 +336,8 @@ fun App(
                                 notificationRepository = appContainer.notificationRepository,
                                 authRepository = appContainer.authRepository,
                                 onSessionUpdated = { session = it },
+                                preloadedPatients = dashboardBootstrap.patients,
+                                preloadedImages = dashboardBootstrap.images,
                                 onOpenAnalysis = { fileId, patientId, examType ->
                                     route = OverlayRoute.ImageAnalysis(
                                         fileId = fileId,
@@ -550,4 +608,3 @@ fun App(
         }
     }
 }
-

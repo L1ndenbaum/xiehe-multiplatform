@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.Dp
 
 @Immutable
 enum class AppThemeBrandColor {
+    PURPLE,
     GREEN,
     BLUE,
 }
@@ -21,12 +22,13 @@ enum class ThemeMode {
 
 @Immutable
 data class ThemePreference(
-    val brand: AppThemeBrandColor = AppThemeBrandColor.GREEN,
+    val brand: AppThemeBrandColor = AppThemeBrandColor.PURPLE,
     val mode: ThemeMode = ThemeMode.SYSTEM,
 )
 
 @Immutable
 data class SpineAppColors(
+    val isDark: Boolean,
     val primary: Color,
     val onPrimary: Color,
     val primaryMuted: Color,

@@ -42,7 +42,7 @@ fun BottomTabBar(
             .fillMaxWidth()
             .height(64.dp)
             .clip(containerShape)
-            .background(Color.White.copy(alpha = 0.95f))
+            .background(colors.surface.copy(alpha = if (colors.isDark) 0.96f else 0.95f))
             .border(1.dp, colors.borderSubtle, containerShape)
             .padding(horizontal = 4.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -62,7 +62,10 @@ fun BottomTabBar(
                     .background(
                         if (selected) {
                             Brush.linearGradient(
-                                listOf(colors.primary, colors.primary.copy(alpha = 0.9f)),
+                                listOf(
+                                    colors.primary.copy(alpha = if (colors.isDark) 0.92f else 0.86f),
+                                    colors.primary,
+                                ),
                             )
                         } else {
                             Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))

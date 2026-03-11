@@ -71,9 +71,9 @@ fun LoginScreen(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFF5F3FF),
-                        Color(0xFFFAF5FF),
-                        Color(0xFFFDF2F8),
+                        colors.primary.copy(alpha = if (colors.isDark) 0.18f else 0.08f),
+                        colors.info.copy(alpha = if (colors.isDark) 0.12f else 0.06f),
+                        colors.background,
                     ),
                 ),
             )
@@ -86,7 +86,7 @@ fun LoginScreen(
                 .padding(start = 0.dp, top = 0.dp)
                 .size(240.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF8B5CF6).copy(alpha = 0.2f)),
+                .background(colors.primary.copy(alpha = if (colors.isDark) 0.18f else 0.16f)),
         )
         Box(
             modifier = Modifier
@@ -94,7 +94,7 @@ fun LoginScreen(
                 .padding(end = 0.dp, bottom = 0.dp)
                 .size(260.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFA855F7).copy(alpha = 0.2f)),
+                .background(colors.info.copy(alpha = if (colors.isDark) 0.14f else 0.14f)),
         )
 
         Column(
@@ -146,8 +146,8 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(28.dp))
-                    .background(Color.White.copy(alpha = 0.85f))
-                    .border(1.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(28.dp))
+                    .background(colors.surface.copy(alpha = if (colors.isDark) 0.94f else 0.88f))
+                    .border(1.dp, colors.borderSubtle, RoundedCornerShape(28.dp))
                     .padding(28.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
@@ -163,7 +163,7 @@ fun LoginScreen(
                     onValueChange = vm::updateUsername,
                     placeholder = "请输入账号",
                     leadingGlyph = IconToken.USER,
-                    leadingColors = listOf(Color(0xFFA78BFA), Color(0xFF8B5CF6)),
+                    leadingColors = listOf(colors.primary.copy(alpha = 0.78f), colors.primary),
                 )
                 LoginInputField(
                     label = "密码",
@@ -171,7 +171,7 @@ fun LoginScreen(
                     onValueChange = vm::updatePassword,
                     placeholder = "请输入密码",
                     leadingGlyph = IconToken.LOCK,
-                    leadingColors = listOf(Color(0xFFC084FC), Color(0xFFA855F7)),
+                    leadingColors = listOf(colors.primary.copy(alpha = 0.66f), colors.info),
                     password = !passwordVisible,
                     trailingGlyph = if (passwordVisible) IconToken.EYE_OFF else IconToken.EYE,
                     onTrailingClick = { passwordVisible = !passwordVisible },
@@ -266,8 +266,8 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(22.dp))
-                        .background(Color.White.copy(alpha = 0.78f))
-                        .border(1.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(22.dp))
+                        .background(colors.surface.copy(alpha = if (colors.isDark) 0.92f else 0.82f))
+                        .border(1.dp, colors.borderSubtle, RoundedCornerShape(22.dp))
                         .padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -299,7 +299,7 @@ fun LoginScreen(
             Text(
                 text = "© 2024 协和医疗 版权所有",
                 style = SpineTheme.typography.caption,
-                color = Color(0xFFA1A1AA),
+                color = colors.textTertiary,
             )
         }
 
@@ -326,13 +326,14 @@ private fun LoginInputField(
         Text(
             text = label,
             style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-            color = Color(0xFF475569),
+            color = colors.textSecondary,
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFFF8FAFC))
+                .background(colors.surfaceMuted.copy(alpha = if (colors.isDark) 0.88f else 1f))
+                .border(1.dp, colors.borderSubtle, RoundedCornerShape(14.dp))
                 .padding(horizontal = 14.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -350,7 +351,7 @@ private fun LoginInputField(
                     Text(
                         text = placeholder,
                         style = SpineTheme.typography.body,
-                        color = Color(0xFF94A3B8),
+                        color = colors.textTertiary,
                     )
                 }
                 BasicTextField(
@@ -368,7 +369,7 @@ private fun LoginInputField(
                     modifier = Modifier
                         .size(24.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White)
+                        .background(colors.surface)
                         .clickable(enabled = onTrailingClick != null) {
                             onTrailingClick?.invoke()
                         },

@@ -1,8 +1,5 @@
 package com.xiehe.spine.ui.components.navigation.shared
 
-import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.icon.shared.AppIcon
-import com.xiehe.spine.ui.components.icon.shared.IconToken
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,16 +25,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.icon.shared.AppIcon
+import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
 
-private val shellHeaderBrush = Brush.linearGradient(
-    colors = listOf(
-        Color(0xFF7C3AED),
-        Color(0xFF6D28D9),
-        Color(0xFF5B21B6),
-    ),
-)
+private val HeaderContentHeight = 110.dp
 
 @Composable
 fun DashboardShellHeader(
@@ -47,15 +42,18 @@ fun DashboardShellHeader(
     onMessages: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineTheme.colors
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(shellHeaderBrush)
+            .background(shellHeaderBrush())
             .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HeaderContentHeight),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -67,13 +65,13 @@ fun DashboardShellHeader(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.2f))
-                        .border(2.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
+                        .background(Color.White.copy(alpha = 0.18f))
+                        .border(2.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     AppIcon(
                         glyph = IconToken.USER_ROUND,
-                        tint = SpineTheme.colors.onPrimary,
+                        tint = colors.onPrimary,
                         modifier = Modifier.size(20.dp),
                     )
                 }
@@ -81,12 +79,12 @@ fun DashboardShellHeader(
                     Text(
                         text = "早上好",
                         style = SpineTheme.typography.subhead,
-                        color = Color(0xFFDDD6FE),
+                        color = Color.White.copy(alpha = 0.72f),
                     )
                     Text(
                         text = userName,
                         style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                        color = SpineTheme.colors.onPrimary,
+                        color = colors.onPrimary,
                     )
                 }
             }
@@ -106,10 +104,14 @@ fun DashboardShellHeader(
                     Text(
                         text = secondaryMeta,
                         style = SpineTheme.typography.caption,
-                        color = Color(0xFFDDD6FE),
+                        color = Color.White.copy(alpha = 0.72f),
                     )
                 }
-                HeaderActionBubble(glyph = IconToken.BELL, onClick = onMessages, showBadge = true)
+                HeaderActionBubble(
+                    glyph = IconToken.BELL,
+                    onClick = onMessages,
+                    showBadge = true,
+                )
             }
         }
     }
@@ -126,12 +128,14 @@ fun SearchShellHeader(
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineTheme.colors
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(shellHeaderBrush)
+            .background(shellHeaderBrush())
             .statusBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .height(HeaderContentHeight),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Row(
@@ -143,15 +147,20 @@ fun SearchShellHeader(
                 Text(
                     text = title,
                     style = SpineTheme.typography.display.copy(fontWeight = FontWeight.Bold),
-                    color = SpineTheme.colors.onPrimary,
+                    color = colors.onPrimary,
                 )
                 Text(
                     text = subtitle,
                     style = SpineTheme.typography.subhead,
-                    color = Color(0xFFDDD6FE),
+                    color = Color.White.copy(alpha = 0.72f),
                 )
             }
-            HeaderActionBubble(glyph = actionGlyph, onClick = onAction)
+            HeaderActionBubble(
+                glyph = actionGlyph,
+                onClick = onAction,
+                bubbleSize = 46.dp,
+                iconSize = 20.dp,
+            )
         }
         HeaderSearchField(
             value = searchValue,
@@ -171,29 +180,34 @@ fun SimpleShellHeader(
     onAction: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(shellHeaderBrush)
+            .background(shellHeaderBrush())
             .statusBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .height(HeaderContentHeight),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leadingGlyph != null && onLeadingAction != null) {
             HeaderActionBubble(glyph = leadingGlyph, onClick = onLeadingAction)
         }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             Text(
                 text = title,
                 style = SpineTheme.typography.display.copy(fontWeight = FontWeight.Bold),
-                color = SpineTheme.colors.onPrimary,
+                color = colors.onPrimary,
             )
             subtitle?.takeIf { it.isNotBlank() }?.let {
                 Text(
                     text = it,
                     style = SpineTheme.typography.subhead,
-                    color = Color(0xFFDDD6FE),
+                    color = Color.White.copy(alpha = 0.72f),
                 )
             }
         }
@@ -216,7 +230,7 @@ private fun HeaderSearchField(
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(Color.White.copy(alpha = 0.96f))
+            .background(colors.surface.copy(alpha = if (colors.isDark) 0.96f else 0.94f))
             .padding(horizontal = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -248,26 +262,43 @@ private fun HeaderActionBubble(
     glyph: IconToken,
     onClick: () -> Unit,
     showBadge: Boolean = false,
+    bubbleSize: Dp = 40.dp,
+    iconSize: Dp = 18.dp,
 ) {
+    val colors = SpineTheme.colors
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(bubbleSize)
             .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.2f))
+            .background(Color.White.copy(alpha = 0.18f))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        AppIcon(glyph = glyph, tint = SpineTheme.colors.onPrimary, modifier = Modifier.size(18.dp))
+        AppIcon(glyph = glyph, tint = colors.onPrimary, modifier = Modifier.size(iconSize))
         if (showBadge) {
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 7.dp, end = 7.dp)
+                    .padding(top = 8.dp, end = 8.dp)
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFB7185))
-                    .border(1.dp, Color(0xFF6D28D9), CircleShape),
+                    .background(colors.error)
+                    .border(1.dp, colors.primary.copy(alpha = 0.88f), CircleShape),
             )
         }
+    }
+}
+
+@Composable
+private fun shellHeaderBrush(): Brush {
+    val colors = SpineTheme.colors
+    return remember(colors.primary, colors.info, colors.isDark) {
+        Brush.linearGradient(
+            colors = listOf(
+                colors.primary,
+                colors.primary.copy(alpha = if (colors.isDark) 0.88f else 0.94f),
+                colors.info.copy(alpha = if (colors.isDark) 0.76f else 0.9f),
+            ),
+        )
     }
 }

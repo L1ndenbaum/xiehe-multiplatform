@@ -35,6 +35,8 @@ import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.image.ImageFileSummary
+import com.xiehe.spine.data.image.ImageWorkflowStatus
+import com.xiehe.spine.data.image.normalizeImageStatus
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
@@ -327,26 +329,26 @@ data class ImageStatusPresentation(
 @Composable
 fun imageStatusPresentation(rawStatus: String?): ImageStatusPresentation {
     val colors = SpineTheme.colors
-    return when (rawStatus?.uppercase()) {
-        "UPLOADED" -> ImageStatusPresentation(
+    return when (normalizeImageStatus(rawStatus)) {
+        ImageWorkflowStatus.UPLOADED -> ImageStatusPresentation(
             text = "待审核",
             textColor = colors.primary,
             background = colors.primaryMuted,
         )
 
-        "PROCESSED" -> ImageStatusPresentation(
+        ImageWorkflowStatus.PROCESSED -> ImageStatusPresentation(
             text = "已归档",
             textColor = colors.textSecondary,
             background = colors.surfaceMuted,
         )
 
-        "PROCESSING" -> ImageStatusPresentation(
+        ImageWorkflowStatus.PROCESSING -> ImageStatusPresentation(
             text = "处理中",
             textColor = colors.warning,
             background = colors.warning.copy(alpha = 0.16f),
         )
 
-        "FAILED" -> ImageStatusPresentation(
+        ImageWorkflowStatus.FAILED -> ImageStatusPresentation(
             text = "失败",
             textColor = colors.error,
             background = colors.error.copy(alpha = 0.16f),
@@ -399,5 +401,4 @@ private fun modalityLabel(modality: String): String {
         else -> modality
     }
 }
-
 

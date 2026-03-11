@@ -4,8 +4,10 @@ import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.image.ImageWorkflowStatus
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.image.ImageFileSummary
+import com.xiehe.spine.data.image.normalizeImageStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -134,10 +136,10 @@ class ImagesViewModel : BaseViewModel() {
             }
             val matchesStatus = when (state.statusFilter) {
                 ImageStatusFilter.ALL -> true
-                ImageStatusFilter.PENDING_REVIEW -> item.status.equals("UPLOADED", ignoreCase = true)
-                ImageStatusFilter.ARCHIVED -> item.status.equals("PROCESSED", ignoreCase = true)
-                ImageStatusFilter.PROCESSING -> item.status.equals("PROCESSING", ignoreCase = true)
-                ImageStatusFilter.FAILED -> item.status.equals("FAILED", ignoreCase = true)
+                ImageStatusFilter.PENDING_REVIEW -> normalizeImageStatus(item.status) == ImageWorkflowStatus.UPLOADED
+                ImageStatusFilter.ARCHIVED -> normalizeImageStatus(item.status) == ImageWorkflowStatus.PROCESSED
+                ImageStatusFilter.PROCESSING -> normalizeImageStatus(item.status) == ImageWorkflowStatus.PROCESSING
+                ImageStatusFilter.FAILED -> normalizeImageStatus(item.status) == ImageWorkflowStatus.FAILED
             }
             matchesSearch && matchesType && matchesStatus
         }
@@ -157,5 +159,4 @@ class ImagesViewModel : BaseViewModel() {
         }
     }
 }
-
 

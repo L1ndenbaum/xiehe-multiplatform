@@ -42,8 +42,8 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
                 SelectRowItem(
                     label = "紫色",
                     icon = IconToken.CHECK,
-                    selected = preference.brand == AppThemeBrandColor.GREEN,
-                    onClick = { vm.updateBrand(AppThemeBrandColor.GREEN) },
+                    selected = preference.brand == AppThemeBrandColor.PURPLE,
+                    onClick = { vm.updateBrand(AppThemeBrandColor.PURPLE) },
                     modifier = Modifier.weight(1f),
                 )
                 SelectRowItem(
@@ -51,6 +51,13 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
                     icon = IconToken.MESSAGE,
                     selected = preference.brand == AppThemeBrandColor.BLUE,
                     onClick = { vm.updateBrand(AppThemeBrandColor.BLUE) },
+                    modifier = Modifier.weight(1f),
+                )
+                SelectRowItem(
+                    label = "绿色",
+                    icon = IconToken.HEART_PULSE,
+                    selected = preference.brand == AppThemeBrandColor.GREEN,
+                    onClick = { vm.updateBrand(AppThemeBrandColor.GREEN) },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -146,5 +153,4 @@ private fun ModeOption(
         }
     }
 }
-
 

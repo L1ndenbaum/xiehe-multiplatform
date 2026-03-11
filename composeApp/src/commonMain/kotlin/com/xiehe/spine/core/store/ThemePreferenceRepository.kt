@@ -26,15 +26,33 @@ class ThemePreferenceRepository(
     }
 
     private fun persist(value: ThemePreference) {
-        store.putString(preferenceKey, "${value.brand.name}|${value.mode.name}")
+        store.putString(preferenceKey, "${encodeBrand(value.brand)}|${value.mode.name}")
         _preference.value = value
     }
 
     private fun loadPreference(): ThemePreference {
         val raw = store.getString(preferenceKey) ?: return ThemePreference()
         val parts = raw.split('|')
-        val brand = AppThemeBrandColor.entries.firstOrNull { it.name == parts.getOrNull(0) } ?: AppThemeBrandColor.GREEN
+        val brand = decodeBrand(parts.getOrNull(0))
         val mode = ThemeMode.entries.firstOrNull { it.name == parts.getOrNull(1) } ?: ThemeMode.SYSTEM
         return ThemePreference(brand = brand, mode = mode)
+    }
+
+    private fun encodeBrand(brand: AppThemeBrandColor): String {
+        return when (brand) {
+            AppThemeBrandColor.PURPLE -> "PURPLE"
+            AppThemeBrandColor.BLUE -> "BLUE"
+            AppThemeBrandColor.GREEN -> "GREEN_V2"
+        }
+    }
+
+    private fun decodeBrand(raw: String?): AppThemeBrandColor {
+        return when (raw) {
+            "PURPLE" -> AppThemeBrandColor.PURPLE
+            "BLUE" -> AppThemeBrandColor.BLUE
+            "GREEN_V2" -> AppThemeBrandColor.GREEN
+            "GREEN" -> AppThemeBrandColor.PURPLE
+            else -> ThemePreference().brand
+        }
     }
 }

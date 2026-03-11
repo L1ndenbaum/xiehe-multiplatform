@@ -11,6 +11,36 @@ class PatientRepository(
     private val apiClient: ApiClient,
     private val authRepository: AuthRepository,
 ) {
+    suspend fun loadAllPatients(session: UserSession): AppResult<Pair<UserSession, List<PatientSummary>>> {
+        var activeSession = session
+        var page = 1
+        var totalPages = 1
+        val aggregate = mutableListOf<PatientSummary>()
+
+        while (page <= totalPages) {
+            when (
+                val result = loadPatients(
+                    session = activeSession,
+                    page = page,
+                    pageSize = 50,
+                    search = "",
+                )
+            ) {
+                is AppResult.Success -> {
+                    activeSession = result.data.first
+                    val payload = result.data.second
+                    aggregate += payload.items
+                    totalPages = payload.pagination.totalPages.coerceAtLeast(1)
+                    page += 1
+                }
+
+                is AppResult.Failure -> return result
+            }
+        }
+
+        return AppResult.Success(activeSession to aggregate)
+    }
+
     suspend fun loadPatients(
         session: UserSession,
         page: Int,

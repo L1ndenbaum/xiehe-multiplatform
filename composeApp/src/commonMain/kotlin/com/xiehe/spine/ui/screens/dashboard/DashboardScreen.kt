@@ -23,7 +23,9 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.dashboard.DashboardRepository
 import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.notification.NotificationRepository
+import com.xiehe.spine.data.patient.PatientSummary
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
@@ -45,6 +47,8 @@ fun DashboardScreen(
     notificationRepository: NotificationRepository,
     authRepository: AuthRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    preloadedPatients: List<PatientSummary> = emptyList(),
+    preloadedImages: List<ImageFileSummary> = emptyList(),
     onOpenAnalysis: (Int, Int?, String) -> Unit = { _, _, _ -> },
     onOpenPatientForm: () -> Unit = {},
     onOpenImageUpload: () -> Unit = {},
@@ -61,13 +65,17 @@ fun DashboardScreen(
             notificationRepository = notificationRepository,
             authRepository = authRepository,
             onSessionUpdated = onSessionUpdated,
+            preloadedPatients = preloadedPatients,
+            preloadedImages = preloadedImages,
         )
     }
+
+    val colors = SpineTheme.colors
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background),
+            .background(colors.background),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -112,14 +120,14 @@ fun DashboardScreen(
                             title = "总患者数",
                             value = overview.totalPatients.toString(),
                             icon = IconToken.HEART_PULSE,
-                            colors = listOf(Color(0xFF8B5CF6), Color(0xFF7C3AED)),
+                            colors = patientStatGradient(colors),
                             modifier = Modifier.weight(1f),
                         )
                         DashboardStatCard(
                             title = "总影像数",
                             value = overview.totalImages.toString(),
                             icon = IconToken.SCAN_SEARCH,
-                            colors = listOf(Color(0xFF38BDF8), Color(0xFF2563EB)),
+                            colors = imageStatGradient(colors),
                             modifier = Modifier.weight(1f),
                         )
                     }
@@ -134,28 +142,28 @@ fun DashboardScreen(
                     QuickActionItem(
                         label = "新增患者",
                         icon = IconToken.USER_PLUS,
-                        colors = listOf(Color(0xFF8B5CF6), Color(0xFF9333EA)),
+                        colors = patientStatGradient(colors),
                         modifier = Modifier.weight(1f),
                         onClick = onOpenPatientForm,
                     )
                     QuickActionItem(
                         label = "上传影像",
                         icon = IconToken.UPLOAD,
-                        colors = listOf(Color(0xFF38BDF8), Color(0xFF2563EB)),
+                        colors = imageStatGradient(colors),
                         modifier = Modifier.weight(1f),
                         onClick = onOpenImageUpload,
                     )
                     QuickActionItem(
                         label = "影像中心",
                         icon = IconToken.SCAN_SEARCH,
-                        colors = listOf(Color(0xFF34D399), Color(0xFF0D9488)),
+                        colors = reviewActionGradient(colors),
                         modifier = Modifier.weight(1f),
                         onClick = onOpenImagesTab,
                     )
                     QuickActionItem(
                         label = "消息通知",
                         icon = IconToken.BELL_RING,
-                        colors = listOf(Color(0xFFFB923C), Color(0xFFF43F5E)),
+                        colors = messageActionGradient(colors),
                         modifier = Modifier.weight(1f),
                         onClick = onOpenMessages,
                     )
@@ -181,5 +189,26 @@ fun DashboardScreen(
     }
 }
 
+private fun patientStatGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors): List<Color> {
+    return listOf(
+        colors.primary.copy(alpha = if (colors.isDark) 0.92f else 0.84f),
+        colors.primary,
+    )
+}
+
+private fun imageStatGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors): List<Color> {
+    return listOf(
+        colors.info.copy(alpha = if (colors.isDark) 0.92f else 0.84f),
+        colors.info.copy(alpha = if (colors.isDark) 0.82f else 1f),
+    )
+}
+
+private fun reviewActionGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors): List<Color> {
+    return listOf(colors.success.copy(alpha = 0.92f), colors.success)
+}
+
+private fun messageActionGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors): List<Color> {
+    return listOf(colors.warning.copy(alpha = 0.9f), colors.error.copy(alpha = 0.92f))
+}
 
 

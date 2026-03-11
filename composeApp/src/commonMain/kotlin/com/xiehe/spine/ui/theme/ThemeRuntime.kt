@@ -7,7 +7,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import com.xiehe.spine.currentHour24
 
-private val LocalSpineColors = compositionLocalOf { lightPalette(AppThemeBrandColor.GREEN) }
+private val LocalSpineColors = compositionLocalOf { lightPalette(AppThemeBrandColor.PURPLE) }
 private val LocalSpineTypography = compositionLocalOf { defaultTypography() }
 private val LocalSpineSpacing = compositionLocalOf { DefaultSpineAppSpacing }
 private val LocalSpineRadius = compositionLocalOf { DefaultSpineAppRadius }

@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.data.notification.NotificationMessage
@@ -27,6 +26,7 @@ import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
 fun ActivityCard(items: List<NotificationMessage>) {
+    val colors = SpineTheme.colors
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -37,12 +37,16 @@ fun ActivityCard(items: List<NotificationMessage>) {
                 modifier = Modifier
                     .size(width = 4.dp, height = 18.dp)
                     .clip(RoundedCornerShape(999.dp))
-                    .background(Brush.verticalGradient(listOf(Color(0xFF38BDF8), Color(0xFF2563EB)))),
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(colors.info.copy(alpha = 0.9f), colors.info),
+                        ),
+                    ),
             )
             Text(
                 text = "近期动态",
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFF0F172A),
+                color = colors.textPrimary,
             )
         }
 
@@ -50,7 +54,7 @@ fun ActivityCard(items: List<NotificationMessage>) {
             Text(
                 text = "暂无动态",
                 style = SpineTheme.typography.subhead,
-                color = SpineTheme.colors.textSecondary,
+                color = colors.textSecondary,
             )
         } else {
             items.forEachIndexed { index, activity ->
@@ -60,7 +64,7 @@ fun ActivityCard(items: List<NotificationMessage>) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(Color(0xFFF8FAFC)),
+                            .background(colors.borderSubtle.copy(alpha = if (colors.isDark) 1f else 0.55f)),
                     )
                 }
             }
@@ -70,7 +74,8 @@ fun ActivityCard(items: List<NotificationMessage>) {
 
 @Composable
 private fun ActivityRow(activity: NotificationMessage) {
-    val style = messageTypeStyle(activity.messageType, SpineTheme.colors)
+    val colors = SpineTheme.colors
+    val style = messageTypeStyle(activity.messageType, colors)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -92,19 +97,19 @@ private fun ActivityRow(activity: NotificationMessage) {
             Text(
                 text = activity.title,
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-                color = Color(0xFF334155),
+                color = colors.textPrimary,
             )
             Text(
                 text = activity.content,
                 style = SpineTheme.typography.caption,
-                color = SpineTheme.colors.textSecondary,
+                color = colors.textSecondary,
                 maxLines = 1,
             )
         }
         Text(
             text = messageTimeLabel(activity.createdAt),
             style = SpineTheme.typography.caption,
-            color = SpineTheme.colors.textTertiary,
+            color = colors.textTertiary,
         )
     }
 }
