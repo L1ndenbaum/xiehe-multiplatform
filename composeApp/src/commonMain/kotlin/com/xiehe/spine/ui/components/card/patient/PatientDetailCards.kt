@@ -431,13 +431,17 @@ private fun RowScope.RecordHeaderCell(
     text: String,
     weight: Float,
 ) {
-    Text(
-        text = text,
+    Box(
         modifier = Modifier.weight(weight),
-        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-        color = SpineTheme.colors.textTertiary,
-        maxLines = 1,
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+            color = SpineTheme.colors.textTertiary,
+            maxLines = 1,
+        )
+    }
 }
 
 @Composable
@@ -479,15 +483,18 @@ private fun ImageRecordRow(
             textColor = status.textColor,
             weight = 1.0f,
         )
-        Text(
-            text = "查看",
-            modifier = Modifier
-                .weight(0.7f)
-                .clickable { onOpenAnalysis(image.id, image.patientId, rawExamType) },
-            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-            color = colors.primary,
-            maxLines = 1,
-        )
+        Box(
+            modifier = Modifier.weight(0.7f),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "查看",
+                modifier = Modifier.clickable { onOpenAnalysis(image.id, image.patientId, rawExamType) },
+                style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.primary,
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -498,13 +505,17 @@ private fun RowScope.RecordValueCell(
     color: Color,
     fontWeight: FontWeight = FontWeight.Normal,
 ) {
-    Text(
-        text = text,
+    Box(
         modifier = Modifier.weight(weight),
-        style = SpineTheme.typography.caption.copy(fontWeight = fontWeight),
-        color = color,
-        maxLines = 1,
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = SpineTheme.typography.caption.copy(fontWeight = fontWeight),
+            color = color,
+            maxLines = 1,
+        )
+    }
 }
 
 @Composable
@@ -516,7 +527,7 @@ private fun RowScope.RecordPillCell(
 ) {
     Box(
         modifier = Modifier.weight(weight),
-        contentAlignment = Alignment.CenterStart,
+        contentAlignment = Alignment.Center,
     ) {
         StatusPill(
             text = text,
