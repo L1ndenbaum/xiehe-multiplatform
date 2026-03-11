@@ -318,13 +318,13 @@ private fun ImageActionButton(
     }
     val background = when (style) {
         ImageTaskActionStyle.PRIMARY -> colors.primary
-        ImageTaskActionStyle.OUTLINE -> colors.surface
-        ImageTaskActionStyle.DANGER -> colors.surface
+        ImageTaskActionStyle.OUTLINE -> colors.surfaceMuted
+        ImageTaskActionStyle.DANGER -> colors.error.copy(alpha = if (colors.isDark) 0.16f else 0.1f)
     }
     val border = when (style) {
         ImageTaskActionStyle.PRIMARY -> Color.Transparent
-        ImageTaskActionStyle.OUTLINE -> colors.borderStrong
-        ImageTaskActionStyle.DANGER -> colors.error.copy(alpha = 0.45f)
+        ImageTaskActionStyle.OUTLINE -> Color.Transparent
+        ImageTaskActionStyle.DANGER -> Color.Transparent
     }
 
     Row(

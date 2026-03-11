@@ -50,6 +50,7 @@ private fun IconToken.androidDrawableName(): String {
         IconToken.SCAN_SEARCH -> "icons_status_icon_scan_search"
         IconToken.SEARCH -> "icons_action_icon_search"
         IconToken.CALENDAR -> "icons_action_icon_calendar"
+        IconToken.CLOCK -> "icons_action_icon_clock"
         IconToken.LOCK -> "icons_status_icon_lock"
         IconToken.SETTINGS -> "icons_status_icon_settings"
         IconToken.ARROW_RIGHT,
