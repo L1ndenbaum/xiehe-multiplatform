@@ -45,7 +45,7 @@ import com.xiehe.spine.ui.components.badge.shared.IconBadge
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.inferExamType
+import com.xiehe.spine.ui.components.card.image.inferExamType
 import com.xiehe.spine.ui.components.message.messageTimeLabel
 import com.xiehe.spine.ui.components.message.messageTypeStyle
 import com.xiehe.spine.ui.theme.SpineTheme

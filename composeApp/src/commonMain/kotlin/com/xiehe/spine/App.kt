@@ -28,9 +28,9 @@ import com.xiehe.spine.ui.components.navigation.shared.SimpleShellHeader
 import com.xiehe.spine.ui.screens.AppearanceScreen
 import com.xiehe.spine.ui.screens.ChangePasswordScreen
 import com.xiehe.spine.ui.screens.DashboardScreen
-import com.xiehe.spine.ui.screens.ImageAnalysisScreen
-import com.xiehe.spine.ui.screens.ImageUploadScreen
-import com.xiehe.spine.ui.screens.ImagesScreen
+import com.xiehe.spine.ui.screens.image.ImageAnalysisScreen
+import com.xiehe.spine.ui.screens.image.ImageUploadScreen
+import com.xiehe.spine.ui.screens.image.ImagesScreen
 import com.xiehe.spine.ui.screens.auth.LoginScreen
 import com.xiehe.spine.ui.screens.MessagesScreen
 import com.xiehe.spine.ui.screens.shared.MobileShell
@@ -44,9 +44,9 @@ import com.xiehe.spine.ui.screens.auth.RegisterScreen
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.AppearanceViewModel
 import com.xiehe.spine.ui.viewmodel.DashboardViewModel
-import com.xiehe.spine.ui.viewmodel.ImageAnalysisViewModel
-import com.xiehe.spine.ui.viewmodel.ImageUploadViewModel
-import com.xiehe.spine.ui.viewmodel.ImagesViewModel
+import com.xiehe.spine.ui.viewmodel.image.ImageAnalysisViewModel
+import com.xiehe.spine.ui.viewmodel.image.ImageUploadViewModel
+import com.xiehe.spine.ui.viewmodel.image.ImagesViewModel
 import com.xiehe.spine.ui.viewmodel.auth.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.MessagesViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel

@@ -26,12 +26,12 @@ import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.PatientRepository
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.icon.shared.IconToken
-import com.xiehe.spine.ui.components.ImageTaskAction
-import com.xiehe.spine.ui.components.ImageTaskActionStyle
-import com.xiehe.spine.ui.components.ImageTaskCard
+import com.xiehe.spine.ui.components.card.image.ImageTaskAction
+import com.xiehe.spine.ui.components.card.image.ImageTaskActionStyle
+import com.xiehe.spine.ui.components.card.image.ImageTaskCard
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.inferExamType
+import com.xiehe.spine.ui.components.card.image.inferExamType
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel
 
@@ -205,3 +205,5 @@ private fun splitPhone(rawPhone: String?): Pair<String?, String?> {
     }
     return "+86" to phone
 }
+
+
