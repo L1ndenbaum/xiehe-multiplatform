@@ -3,17 +3,15 @@ package com.xiehe.spine.ui.components.card.patient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,12 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.data.image.ImageFileSummary
-import com.xiehe.spine.data.image.ImageWorkflowStatus
-import com.xiehe.spine.data.image.normalizeImageStatus
 import com.xiehe.spine.data.patient.PatientDetail
 import com.xiehe.spine.ui.components.card.image.imageStatusPresentation
 import com.xiehe.spine.ui.components.card.image.inferExamType
@@ -57,7 +53,7 @@ fun PatientBasicInfoCard(detail: PatientDetail) {
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = detail.gender.takeIf { !it.isNullOrBlank() } ?: "患",
+                        text = detail.gender.ifBlank { "患" },
                         style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
                         color = Color.White,
                     )
@@ -130,54 +126,6 @@ fun PatientBasicInfoCard(detail: PatientDetail) {
             rightLabel = "紧急联系电话",
             rightValue = detail.emergencyContactPhone.orDash(),
         )
-
-        detail.medicalHistory
-            ?.trim()
-            ?.takeIf { it.isNotBlank() }
-            ?.let { medicalHistory ->
-                SectionDivider()
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "病史备注",
-                        style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = medicalHistory,
-                        style = SpineTheme.typography.body,
-                        color = colors.textPrimary,
-                    )
-                }
-            }
-    }
-}
-
-@Composable
-fun PatientDetailActionsCard(
-    onEditPatient: () -> Unit,
-    onOpenImageUpload: () -> Unit,
-) {
-    val colors = SpineTheme.colors
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            ActionButton(
-                text = "编辑资料",
-                textColor = colors.primary,
-                background = colors.primaryMuted,
-                modifier = Modifier.weight(1f),
-                onClick = onEditPatient,
-            )
-            ActionButton(
-                text = "上传影像",
-                textColor = colors.onPrimary,
-                background = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.92f), colors.primary)),
-                modifier = Modifier.weight(1f),
-                onClick = onOpenImageUpload,
-            )
-        }
     }
 }
 
@@ -186,41 +134,30 @@ fun PatientOverviewCards(
     detail: PatientDetail,
     relatedImages: List<ImageFileSummary>,
 ) {
-    val pendingCount = relatedImages.count {
-        normalizeImageStatus(it.status) in setOf(ImageWorkflowStatus.UPLOADED, ImageWorkflowStatus.PROCESSING)
-    }
+    val imageCount = relatedImages.size.toString()
     val recentUpload = relatedImages
         .mapNotNull { it.createdAt ?: it.uploadedAt ?: it.studyDate }
         .maxOrNull()
         ?.let(::formatRecordDate)
         ?: "暂无记录"
-    val medicalSummary = detail.medicalHistory
+    val archiveDate = deriveArchiveDate(detail.patientId, relatedImages)
+    val medicalHistory = detail.medicalHistory
         ?.trim()
         ?.takeIf { it.isNotBlank() }
-        ?: detail.insuranceNumber?.trim()?.takeIf { it.isNotBlank() }
         ?: "暂无病史记录"
-    val medicalSummaryLabel = if (!detail.medicalHistory.isNullOrBlank()) "病史摘要" else "医保卡号"
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        OverviewMetricCard(
-            title = "就诊统计",
-            primary = relatedImages.size.toString(),
-            primaryLabel = "关联影像总数",
-            secondary = recentUpload,
-            secondaryLabel = "最近上传日期",
-            accent = listOf(Color(0xFFBBF7D0), Color(0xFF10B981)),
+        VisitStatsCard(
+            imageCount = imageCount,
+            recentUpload = recentUpload,
+            archiveDate = archiveDate,
             modifier = Modifier.weight(1f),
         )
-        OverviewMetricCard(
-            title = "医疗信息",
-            primary = pendingCount.toString(),
-            primaryLabel = "待处理影像",
-            secondary = medicalSummary,
-            secondaryLabel = medicalSummaryLabel,
-            accent = listOf(Color(0xFFDDD6FE), Color(0xFF8B5CF6)),
+        MedicalInfoCard(
+            medicalHistory = medicalHistory,
             modifier = Modifier.weight(1f),
         )
     }
@@ -229,45 +166,17 @@ fun PatientOverviewCards(
 @Composable
 fun PatientImageRecordsCard(
     images: List<ImageFileSummary>,
-    onOpenImageUpload: () -> Unit,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
 ) {
     val colors = SpineTheme.colors
     val records = images.sortedByDescending { it.createdAt ?: it.uploadedAt ?: it.studyDate.orEmpty() }
 
     Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = "影像记录",
-                    style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                    color = colors.textPrimary,
-                )
-                Text(
-                    text = "查看患者历史影像与当前状态",
-                    style = SpineTheme.typography.caption,
-                    color = colors.textTertiary,
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.92f), colors.primary)))
-                    .clickable(onClick = onOpenImageUpload)
-                    .padding(horizontal = 14.dp, vertical = 9.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "上传影像",
-                    style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.onPrimary,
-                )
-            }
-        }
+        Text(
+            text = "影像记录",
+            style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+            color = colors.textPrimary,
+        )
 
         if (records.isEmpty()) {
             Box(
@@ -278,7 +187,7 @@ fun PatientImageRecordsCard(
                     .padding(horizontal = 16.dp, vertical = 18.dp),
             ) {
                 Text(
-                    text = "暂无影像记录，上传后会显示在这里。",
+                    text = "暂无影像记录",
                     style = SpineTheme.typography.subhead,
                     color = colors.textSecondary,
                 )
@@ -367,36 +276,6 @@ private fun DetailHighlight(
 }
 
 @Composable
-private fun ActionButton(
-    text: String,
-    textColor: Color,
-    background: Any,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .then(
-                when (background) {
-                    is Brush -> Modifier.background(background)
-                    is Color -> Modifier.background(background)
-                    else -> Modifier
-                },
-            )
-            .clickable(onClick = onClick)
-            .padding(vertical = 13.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text,
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-            color = textColor,
-        )
-    }
-}
-
-@Composable
 private fun InfoCapsule(text: String) {
     val colors = SpineTheme.colors
     Box(
@@ -438,55 +317,88 @@ private fun PatientStatusBadge(status: String?) {
 }
 
 @Composable
-private fun OverviewMetricCard(
-    title: String,
-    primary: String,
-    primaryLabel: String,
-    secondary: String,
-    secondaryLabel: String,
-    accent: List<Color>,
+private fun VisitStatsCard(
+    imageCount: String,
+    recentUpload: String,
+    archiveDate: String,
     modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
     Card(modifier = modifier) {
         Text(
-            text = title,
+            text = "就诊统计",
             style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
             color = colors.textPrimary,
         )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(Brush.linearGradient(accent)),
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = primary,
-                    style = SpineTheme.typography.display.copy(fontWeight = FontWeight.Bold),
-                    color = colors.textPrimary,
-                )
-                Text(
-                    text = primaryLabel,
-                    style = SpineTheme.typography.subhead,
-                    color = colors.textSecondary,
-                )
-            }
-        }
+        MetricRow(
+            label = "影像数量",
+            value = imageCount,
+            valueColor = colors.primary,
+            valueStyle = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+        )
+        MetricRow(
+            label = "最近上传",
+            value = recentUpload,
+            valueColor = colors.textSecondary,
+        )
+        MetricRow(
+            label = "建档时间",
+            value = archiveDate,
+            valueColor = colors.textSecondary,
+        )
+    }
+}
+
+@Composable
+private fun MedicalInfoCard(
+    medicalHistory: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = SpineTheme.colors
+    Card(modifier = modifier) {
         Text(
-            text = secondaryLabel,
+            text = "医疗信息",
+            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
+            color = colors.textPrimary,
+        )
+        Text(
+            text = "既往病史",
             style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
             color = colors.textTertiary,
         )
         Text(
-            text = secondary,
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-            color = colors.textPrimary,
-            maxLines = 3,
+            text = medicalHistory,
+            style = SpineTheme.typography.subhead,
+            color = colors.textSecondary,
+            maxLines = 4,
+        )
+    }
+}
+
+@Composable
+private fun MetricRow(
+    label: String,
+    value: String,
+    valueColor: Color,
+    valueStyle: TextStyle = SpineTheme.typography.subhead,
+) {
+    val colors = SpineTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
+            color = colors.textTertiary,
+            maxLines = 1,
+        )
+        Text(
+            text = value,
+            style = valueStyle,
+            color = valueColor,
+            maxLines = 1,
         )
     }
 }
@@ -497,16 +409,14 @@ private fun RecordsHeaderRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(bottom = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(top = 2.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RecordsHeaderCell("上传日期", 82.dp)
-        RecordsHeaderCell("文件名", 118.dp)
-        RecordsHeaderCell("类型", 54.dp)
-        RecordsHeaderCell("状态", 58.dp)
-        RecordsHeaderCell("操作", 48.dp)
+        RecordHeaderCell(text = "上传日期", weight = 1.35f)
+        RecordHeaderCell(text = "文件名", weight = 1.65f)
+        RecordHeaderCell(text = "类型", weight = 0.8f)
+        RecordHeaderCell(text = "状态", weight = 1.0f)
+        RecordHeaderCell(text = "操作", weight = 0.7f)
     }
     Box(
         modifier = Modifier
@@ -517,12 +427,16 @@ private fun RecordsHeaderRow() {
 }
 
 @Composable
-private fun RecordsHeaderCell(text: String, width: Dp) {
+private fun RowScope.RecordHeaderCell(
+    text: String,
+    weight: Float,
+) {
     Text(
         text = text,
-        modifier = Modifier.width(width),
-        style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+        modifier = Modifier.weight(weight),
+        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
         color = SpineTheme.colors.textTertiary,
+        maxLines = 1,
     )
 }
 
@@ -532,49 +446,82 @@ private fun ImageRecordRow(
     onOpenAnalysis: (Int, Int?, String) -> Unit,
 ) {
     val colors = SpineTheme.colors
+    val rawExamType = inferExamType(image)
+    val examType = compactExamType(rawExamType)
     val status = imageStatusPresentation(image.status)
-    val examType = inferExamType(image)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
+        RecordValueCell(
             text = formatRecordDate(image.createdAt ?: image.uploadedAt ?: image.studyDate),
-            modifier = Modifier.width(82.dp),
-            style = SpineTheme.typography.subhead,
+            weight = 1.35f,
             color = colors.textSecondary,
         )
-        Text(
+        RecordValueCell(
             text = compactFileName(image.originalFilename),
-            modifier = Modifier.width(118.dp),
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
+            weight = 1.65f,
             color = colors.textPrimary,
-            maxLines = 1,
+            fontWeight = FontWeight.Medium,
         )
-        StatusPill(
-            text = compactExamType(examType),
+        RecordPillCell(
+            text = examType,
             background = colors.primaryMuted,
             textColor = colors.primary,
-            width = 54.dp,
+            weight = 0.8f,
         )
-        StatusPill(
+        RecordPillCell(
             text = status.text,
             background = status.background,
             textColor = status.textColor,
-            width = 58.dp,
+            weight = 1.0f,
         )
         Text(
             text = "查看",
             modifier = Modifier
-                .width(48.dp)
-                .clickable { onOpenAnalysis(image.id, image.patientId, examType) },
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+                .weight(0.7f)
+                .clickable { onOpenAnalysis(image.id, image.patientId, rawExamType) },
+            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
             color = colors.primary,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun RowScope.RecordValueCell(
+    text: String,
+    weight: Float,
+    color: Color,
+    fontWeight: FontWeight = FontWeight.Normal,
+) {
+    Text(
+        text = text,
+        modifier = Modifier.weight(weight),
+        style = SpineTheme.typography.caption.copy(fontWeight = fontWeight),
+        color = color,
+        maxLines = 1,
+    )
+}
+
+@Composable
+private fun RowScope.RecordPillCell(
+    text: String,
+    background: Color,
+    textColor: Color,
+    weight: Float,
+) {
+    Box(
+        modifier = Modifier.weight(weight),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        StatusPill(
+            text = text,
+            background = background,
+            textColor = textColor,
         )
     }
 }
@@ -584,15 +531,13 @@ private fun StatusPill(
     text: String,
     background: Color,
     textColor: Color,
-    width: Dp,
 ) {
     Box(
         modifier = Modifier
-            .width(width)
             .clip(RoundedCornerShape(999.dp))
             .background(background)
             .border(1.dp, textColor.copy(alpha = 0.15f), RoundedCornerShape(999.dp))
-            .padding(horizontal = 4.dp, vertical = 5.dp),
+            .padding(horizontal = 7.dp, vertical = 5.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -633,16 +578,28 @@ private fun formatBirthDate(raw: String): String {
 }
 
 private fun compactFileName(fileName: String): String {
-    return if (fileName.length <= 16) fileName else "${fileName.take(12)}..."
+    if (fileName.isBlank()) return "--"
+    var units = 0
+    val builder = StringBuilder()
+    for (char in fileName) {
+        val charUnits = if (char.code > 127) 2 else 1
+        if (units + charUnits > 6) {
+            return builder.append("...").toString()
+        }
+        builder.append(char)
+        units += charUnits
+    }
+    return builder.toString()
 }
 
 private fun compactExamType(examType: String): String {
     return when {
+        examType.contains("正", ignoreCase = true) -> "正面"
+        examType.contains("XR", ignoreCase = true) || examType.contains("X", ignoreCase = true) -> "XR"
         examType.contains("CT", ignoreCase = true) -> "CT"
         examType.contains("MRI", ignoreCase = true) -> "MRI"
-        examType.contains("DR", ignoreCase = true) -> "DR"
-        examType.contains("X", ignoreCase = true) -> "X光"
-        else -> "检查"
+        examType.contains("侧", ignoreCase = true) -> "侧位"
+        else -> "XR"
     }
 }
 
@@ -653,6 +610,21 @@ private fun formatRecordDate(raw: String?): String {
         normalized.isBlank() -> "--"
         else -> normalized
     }
+}
+
+private fun deriveArchiveDate(
+    patientId: String,
+    relatedImages: List<ImageFileSummary>,
+): String {
+    val digits = patientId.filter { it.isDigit() }
+    if (digits.length >= 8) {
+        return "${digits.take(4)}/${digits.drop(4).take(2)}/${digits.drop(6).take(2)}"
+    }
+    return relatedImages
+        .mapNotNull { it.createdAt ?: it.uploadedAt ?: it.studyDate }
+        .minOrNull()
+        ?.let(::formatRecordDate)
+        ?: "暂无记录"
 }
 
 private fun String?.orDash(): String {

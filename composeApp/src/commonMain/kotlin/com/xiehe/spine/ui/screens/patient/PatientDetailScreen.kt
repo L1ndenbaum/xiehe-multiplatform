@@ -17,7 +17,6 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.ui.components.card.patient.PatientBasicInfoCard
-import com.xiehe.spine.ui.components.card.patient.PatientDetailActionsCard
 import com.xiehe.spine.ui.components.card.patient.PatientImageRecordsCard
 import com.xiehe.spine.ui.components.card.patient.PatientOverviewCards
 import com.xiehe.spine.ui.components.card.shared.Card
@@ -34,9 +33,7 @@ fun PatientDetailScreen(
     patientRepository: PatientRepository,
     imageRepository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
-    onEditPatient: (Int) -> Unit,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
-    onOpenImageUpload: () -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
 
@@ -85,13 +82,6 @@ fun PatientDetailScreen(
                 }
 
                 item {
-                    PatientDetailActionsCard(
-                        onEditPatient = { onEditPatient(detail.id) },
-                        onOpenImageUpload = onOpenImageUpload,
-                    )
-                }
-
-                item {
                     PatientOverviewCards(
                         detail = detail,
                         relatedImages = state.relatedImages,
@@ -101,7 +91,6 @@ fun PatientDetailScreen(
                 item {
                     PatientImageRecordsCard(
                         images = state.relatedImages,
-                        onOpenImageUpload = onOpenImageUpload,
                         onOpenAnalysis = onOpenAnalysis,
                     )
                 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -178,6 +179,7 @@ fun SimpleShellHeader(
     onLeadingAction: (() -> Unit)? = null,
     actionGlyph: IconToken? = null,
     onAction: (() -> Unit)? = null,
+    actionsContent: (@Composable RowScope.() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
@@ -211,9 +213,41 @@ fun SimpleShellHeader(
                 )
             }
         }
-        if (actionGlyph != null && onAction != null) {
+        if (actionsContent != null) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                content = actionsContent,
+            )
+        } else if (actionGlyph != null && onAction != null) {
             HeaderActionBubble(glyph = actionGlyph, onClick = onAction)
         }
+    }
+}
+
+@Composable
+fun HeaderTextAction(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    fill: Color = Color.White.copy(alpha = 0.14f),
+    borderColor: Color = Color.White.copy(alpha = 0.12f),
+    textColor: Color = Color.White,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(fill)
+            .border(1.dp, borderColor, RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
+            color = textColor,
+        )
     }
 }
 

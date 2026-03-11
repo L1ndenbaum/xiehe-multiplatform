@@ -26,6 +26,7 @@ import com.xiehe.spine.data.patient.PatientSummary
 import com.xiehe.spine.ui.components.feedback.shared.AppStartupScreen
 import com.xiehe.spine.ui.components.navigation.shared.DashboardShellHeader
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.components.navigation.shared.HeaderTextAction
 import com.xiehe.spine.ui.components.navigation.shared.SearchShellHeader
 import com.xiehe.spine.ui.components.navigation.shared.SimpleShellHeader
 import com.xiehe.spine.ui.screens.profile.AppearanceScreen
@@ -405,6 +406,16 @@ fun App(
                                     subtitle = "查看和管理患者完整信息",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
+                                    actionsContent = {
+                                        HeaderTextAction(
+                                            text = "编辑信息",
+                                            onClick = { route = OverlayRoute.PatientEdit(current.patientId) },
+                                        )
+                                        HeaderTextAction(
+                                            text = "上传影像",
+                                            onClick = { route = OverlayRoute.ImageUpload },
+                                        )
+                                    },
                                 )
                             },
                         ) {
@@ -415,9 +426,6 @@ fun App(
                                 patientRepository = appContainer.patientRepository,
                                 imageRepository = appContainer.imageFileRepository,
                                 onSessionUpdated = { session = it },
-                                onEditPatient = { patientId ->
-                                    route = OverlayRoute.PatientEdit(patientId)
-                                },
                                 onOpenAnalysis = { fileId, patientId, examType ->
                                     route = OverlayRoute.ImageAnalysis(
                                         fileId = fileId,
@@ -425,7 +433,6 @@ fun App(
                                         examType = examType,
                                     )
                                 },
-                                onOpenImageUpload = { route = OverlayRoute.ImageUpload },
                             )
                         }
                     }
