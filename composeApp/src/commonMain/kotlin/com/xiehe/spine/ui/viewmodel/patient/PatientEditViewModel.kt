@@ -3,9 +3,9 @@ package com.xiehe.spine.ui.viewmodel.patient
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.PatientDetail
-import com.xiehe.spine.data.PatientRepository
-import com.xiehe.spine.data.UpdatePatientRequest
+import com.xiehe.spine.data.patient.PatientDetail
+import com.xiehe.spine.data.patient.PatientRepository
+import com.xiehe.spine.data.patient.UpdatePatientRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

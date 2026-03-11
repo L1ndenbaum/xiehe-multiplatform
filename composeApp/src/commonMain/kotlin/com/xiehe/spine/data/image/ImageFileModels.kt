@@ -1,5 +1,6 @@
-package com.xiehe.spine.data
+package com.xiehe.spine.data.image
 
+import com.xiehe.spine.data.patient.Pagination
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -2,7 +2,7 @@ package com.xiehe.spine.ui.viewmodel.auth
 
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
-import com.xiehe.spine.data.AuthRepository
+import com.xiehe.spine.data.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

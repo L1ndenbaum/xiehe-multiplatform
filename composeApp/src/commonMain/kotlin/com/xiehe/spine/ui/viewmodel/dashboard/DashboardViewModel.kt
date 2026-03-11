@@ -3,13 +3,13 @@ import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.AuthRepository
-import com.xiehe.spine.data.DashboardOverview
-import com.xiehe.spine.data.DashboardRepository
-import com.xiehe.spine.data.ImageFileRepository
-import com.xiehe.spine.data.ImageFileSummary
-import com.xiehe.spine.data.NotificationMessage
-import com.xiehe.spine.data.NotificationRepository
+import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.dashboard.DashboardOverview
+import com.xiehe.spine.data.dashboard.DashboardRepository
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.image.ImageFileSummary
+import com.xiehe.spine.data.notification.NotificationMessage
+import com.xiehe.spine.data.notification.NotificationRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

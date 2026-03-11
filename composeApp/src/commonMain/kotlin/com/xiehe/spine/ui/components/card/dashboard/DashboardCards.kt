@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.xiehe.spine.data.ImageFileSummary
+import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.ui.components.badge.shared.IconBadge
 import com.xiehe.spine.ui.components.card.image.inferExamType
 import com.xiehe.spine.ui.components.card.shared.Card

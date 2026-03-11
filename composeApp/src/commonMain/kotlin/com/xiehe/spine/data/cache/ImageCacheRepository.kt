@@ -1,7 +1,7 @@
 package com.xiehe.spine.data.cache
 
 import com.xiehe.spine.core.store.KeyValueStore
-import com.xiehe.spine.data.ImageFileSummary
+import com.xiehe.spine.data.image.ImageFileSummary
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer

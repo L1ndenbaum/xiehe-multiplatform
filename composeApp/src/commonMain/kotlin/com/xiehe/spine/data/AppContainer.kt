@@ -4,9 +4,16 @@ import com.xiehe.spine.core.store.InMemoryKeyValueStore
 import com.xiehe.spine.core.store.KeyValueStore
 import com.xiehe.spine.core.store.SessionStore
 import com.xiehe.spine.core.store.ThemePreferenceRepository
+import com.xiehe.spine.data.ai.AiInferenceRepository
+import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.cache.ImageBinaryStore
 import com.xiehe.spine.data.cache.ImageCacheRepository
 import com.xiehe.spine.data.cache.InMemoryImageBinaryStore
+import com.xiehe.spine.data.dashboard.DashboardRepository
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.measurement.MeasurementRepository
+import com.xiehe.spine.data.notification.NotificationRepository
+import com.xiehe.spine.data.patient.PatientRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -59,16 +66,28 @@ class AppContainer private constructor(
             )
             return AppContainer(
                 authRepository = authRepository,
-                dashboardRepository = DashboardRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
-                patientRepository = PatientRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
+                dashboardRepository = DashboardRepository(
+                    apiClient = instrumentedApiClient,
+                    authRepository = authRepository
+                ),
+                patientRepository = PatientRepository(
+                    apiClient = instrumentedApiClient,
+                    authRepository = authRepository
+                ),
                 imageFileRepository = ImageFileRepository(
                     apiClient = instrumentedApiClient,
                     authRepository = authRepository,
                     cacheRepository = imageCacheRepository,
                 ),
                 imageCacheRepository = imageCacheRepository,
-                notificationRepository = NotificationRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
-                measurementRepository = MeasurementRepository(apiClient = instrumentedApiClient, authRepository = authRepository),
+                notificationRepository = NotificationRepository(
+                    apiClient = instrumentedApiClient,
+                    authRepository = authRepository
+                ),
+                measurementRepository = MeasurementRepository(
+                    apiClient = instrumentedApiClient,
+                    authRepository = authRepository
+                ),
                 aiInferenceRepository = AiInferenceRepository(httpClient = sharedHttpClient),
                 themeRepository = ThemePreferenceRepository(store = store),
             )

@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.PatientRepository
+import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.form.picker.DatePickerField
 import com.xiehe.spine.ui.components.icon.shared.IconToken

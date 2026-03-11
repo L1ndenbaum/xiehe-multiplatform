@@ -1,5 +1,6 @@
-package com.xiehe.spine.data
+package com.xiehe.spine.data.ai
 
+import com.xiehe.spine.data.measurement.MeasurementPoint
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

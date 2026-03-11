@@ -3,7 +3,6 @@ package com.xiehe.spine.ui.screens.patient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
@@ -22,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ImageFileRepository
-import com.xiehe.spine.data.PatientRepository
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.card.image.ImageTaskAction

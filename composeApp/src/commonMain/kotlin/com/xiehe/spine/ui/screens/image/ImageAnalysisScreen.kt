@@ -33,9 +33,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.AiInferenceRepository
-import com.xiehe.spine.data.ImageFileRepository
-import com.xiehe.spine.data.MeasurementRepository
+import com.xiehe.spine.data.ai.AiInferenceRepository
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.ui.components.analysis.image.AnalysisBottomAction
 import com.xiehe.spine.ui.components.analysis.image.AnalysisBottomBar
 import com.xiehe.spine.ui.components.analysis.image.AnalysisReportPanel

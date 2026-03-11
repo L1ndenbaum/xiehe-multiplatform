@@ -1,4 +1,4 @@
-package com.xiehe.spine.data
+package com.xiehe.spine.data.ai
 
 import com.xiehe.spine.core.model.AppResult
 import io.ktor.client.HttpClient

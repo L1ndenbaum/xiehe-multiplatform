@@ -4,8 +4,8 @@ import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ImageFileRepository
-import com.xiehe.spine.data.ImageFileSummary
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.image.ImageFileSummary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

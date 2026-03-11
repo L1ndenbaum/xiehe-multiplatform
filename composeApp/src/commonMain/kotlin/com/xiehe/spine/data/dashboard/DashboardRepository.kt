@@ -1,7 +1,9 @@
-package com.xiehe.spine.data
+package com.xiehe.spine.data.dashboard
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.ApiClient
+import com.xiehe.spine.data.auth.AuthRepository
 
 class DashboardRepository(
     private val apiClient: ApiClient,

@@ -35,8 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ImageFileRepository
-import com.xiehe.spine.data.ImageFileSummary
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.form.file.FileSaveResult
 import com.xiehe.spine.ui.components.icon.shared.IconToken

@@ -3,9 +3,9 @@ import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.AuthRepository
-import com.xiehe.spine.data.CurrentUserProfile
-import com.xiehe.spine.data.UpdateCurrentUserRequest
+import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.auth.CurrentUserProfile
+import com.xiehe.spine.data.auth.UpdateCurrentUserRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

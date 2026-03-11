@@ -1,4 +1,4 @@
-package com.xiehe.spine.data
+package com.xiehe.spine.data.measurement
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

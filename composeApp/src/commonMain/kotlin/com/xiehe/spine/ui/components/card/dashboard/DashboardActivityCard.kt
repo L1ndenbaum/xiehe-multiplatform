@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -18,7 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.data.NotificationMessage
+import com.xiehe.spine.data.notification.NotificationMessage
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon

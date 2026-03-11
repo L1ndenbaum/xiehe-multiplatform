@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.data.NotificationMessage
+import com.xiehe.spine.data.notification.NotificationMessage
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon

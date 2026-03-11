@@ -3,10 +3,10 @@ package com.xiehe.spine.ui.viewmodel.patient
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ImageFileRepository
-import com.xiehe.spine.data.ImageFileSummary
-import com.xiehe.spine.data.PatientDetail
-import com.xiehe.spine.data.PatientRepository
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.image.ImageFileSummary
+import com.xiehe.spine.data.patient.PatientDetail
+import com.xiehe.spine.data.patient.PatientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

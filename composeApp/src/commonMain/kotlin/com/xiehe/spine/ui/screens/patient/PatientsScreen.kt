@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.PatientRepository
+import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.ui.components.avatar.shared.Avatar
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.button.shared.CompactButton

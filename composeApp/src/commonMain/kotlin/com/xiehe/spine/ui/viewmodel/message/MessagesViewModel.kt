@@ -3,8 +3,8 @@ import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.NotificationMessage
-import com.xiehe.spine.data.NotificationRepository
+import com.xiehe.spine.data.notification.NotificationMessage
+import com.xiehe.spine.data.notification.NotificationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

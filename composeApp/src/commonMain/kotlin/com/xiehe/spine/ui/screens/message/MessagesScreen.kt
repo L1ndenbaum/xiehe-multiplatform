@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,11 +17,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.NotificationMessage
-import com.xiehe.spine.data.NotificationRepository
+import com.xiehe.spine.data.notification.NotificationRepository
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.icon.shared.IconToken
@@ -30,7 +27,6 @@ import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.PeriodicTaskTrigger
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.message.shared.MessageCard
-import com.xiehe.spine.ui.components.message.shared.messageTypeStyle
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.message.MessagesViewModel
 

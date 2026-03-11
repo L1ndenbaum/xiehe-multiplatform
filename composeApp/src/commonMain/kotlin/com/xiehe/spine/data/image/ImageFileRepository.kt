@@ -1,7 +1,13 @@
-package com.xiehe.spine.data
+package com.xiehe.spine.data.image
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.ApiClient
+import com.xiehe.spine.data.ApiEnvelope
+import com.xiehe.spine.data.ApiErrorEnvelope
+import com.xiehe.spine.data.patient.Pagination
+import com.xiehe.spine.data.patient.PatientDetail
+import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.cache.ImageCacheRepository
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -19,6 +25,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
+import kotlin.collections.orEmpty
 
 class ImageFileRepository(
     private val apiClient: ApiClient,
