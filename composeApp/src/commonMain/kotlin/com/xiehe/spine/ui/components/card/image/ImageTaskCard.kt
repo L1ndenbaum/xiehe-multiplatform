@@ -79,6 +79,8 @@ fun ImageTaskCard(
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            val examType = compactCardExamType(item)
+            val status = imageStatusPresentation(item.status)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -97,35 +99,43 @@ fun ImageTaskCard(
 
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(7.dp),
                 ) {
                     Text(
-                        text = item.originalFilename,
-                        style = SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
-                        maxLines = 2,
-                    )
-                    Text(
-                        text = imageSubtitle(item = item, patientNameOverride = patientNameOverride),
-                        style = SpineTheme.typography.subhead,
-                        color = SpineTheme.colors.textSecondary,
+                        text = item.originalFilename.ifBlank { "未命名影像" },
+                        style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Bold),
+                        color = SpineTheme.colors.textPrimary,
                         maxLines = 1,
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = imageTimeLabel(item),
-                            style = SpineTheme.typography.caption,
-                            color = SpineTheme.colors.textTertiary,
-                            maxLines = 1,
+                        StatusChip(
+                            text = examType,
+                            textColor = Color.White,
+                            background = examTypeBrush(item),
                         )
-                        val status = imageStatusPresentation(item.status)
                         StatusChip(
                             text = status.text,
                             textColor = status.textColor,
                             background = status.background,
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AppIcon(
+                            glyph = IconToken.CALENDAR,
+                            tint = SpineTheme.colors.textTertiary,
+                            modifier = Modifier.size(13.dp),
+                        )
+                        Text(
+                            text = imageTimeLabel(item),
+                            style = SpineTheme.typography.subhead,
+                            color = SpineTheme.colors.textTertiary,
+                            maxLines = 1,
                         )
                     }
                 }
@@ -148,6 +158,27 @@ fun ImageTaskCard(
                             modifier = Modifier.width(118.dp),
                             onClick = action.onClick,
                         )
+                    } else if (actions.size == 3 && actions.firstOrNull()?.style == ImageTaskActionStyle.PRIMARY) {
+                        val primaryAction = actions[0]
+                        val secondaryActions = actions.drop(1)
+                        ImageActionButton(
+                            text = primaryAction.text,
+                            glyph = primaryAction.glyph,
+                            style = primaryAction.style,
+                            compactText = compactActionText,
+                            modifier = Modifier.weight(1f),
+                            onClick = primaryAction.onClick,
+                        )
+                        secondaryActions.forEach { action ->
+                            ImageActionButton(
+                                text = action.text,
+                                glyph = action.glyph,
+                                style = action.style,
+                                compactText = compactActionText,
+                                modifier = Modifier.width(44.dp),
+                                onClick = action.onClick,
+                            )
+                        }
                     } else {
                         actions.forEach { action ->
                             ImageActionButton(
@@ -170,12 +201,19 @@ fun ImageTaskCard(
 private fun StatusChip(
     text: String,
     textColor: Color,
-    background: Color,
+    background: Any,
 ) {
     Box(
         modifier = Modifier
-            .background(background, RoundedCornerShape(SpineTheme.radius.sm))
-            .padding(horizontal = 10.dp, vertical = 5.dp),
+            .clip(RoundedCornerShape(999.dp))
+            .then(
+                when (background) {
+                    is Brush -> Modifier.background(background)
+                    is Color -> Modifier.background(background)
+                    else -> Modifier
+                },
+            )
+            .padding(horizontal = 9.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -272,6 +310,7 @@ private fun ImageActionButton(
 ) {
     val colors = SpineTheme.colors
     val corner = RoundedCornerShape(SpineTheme.radius.md)
+    val iconOnly = style != ImageTaskActionStyle.PRIMARY
     val contentColor = when (style) {
         ImageTaskActionStyle.PRIMARY -> colors.onPrimary
         ImageTaskActionStyle.OUTLINE -> colors.textSecondary
@@ -290,7 +329,7 @@ private fun ImageActionButton(
 
     Row(
         modifier = modifier
-            .height(38.dp)
+            .height(44.dp)
             .clip(corner)
             .background(
                 if (style == ImageTaskActionStyle.PRIMARY) {
@@ -301,22 +340,28 @@ private fun ImageActionButton(
             )
             .border(width = 1.dp, color = border, shape = corner)
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = if (iconOnly) 0.dp else 12.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppIcon(glyph = glyph, tint = contentColor, modifier = Modifier.size(14.dp))
-        Text(
-            text = text,
-            style = if (compactText) {
-                SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold)
-            } else {
-                SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
-            },
-            color = contentColor,
-            modifier = Modifier.padding(start = 5.dp),
-            maxLines = 1,
+        AppIcon(
+            glyph = glyph,
+            tint = contentColor,
+            modifier = Modifier.size(if (iconOnly) 16.dp else 15.dp),
         )
+        if (!iconOnly) {
+            Text(
+                text = text,
+                style = if (compactText) {
+                    SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
+                } else {
+                    SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
+                },
+                color = contentColor,
+                modifier = Modifier.padding(start = 6.dp),
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -390,7 +435,26 @@ fun imageTimeLabel(item: ImageFileSummary): String {
     if (source.isNullOrBlank()) {
         return "时间未知"
     }
-    return source.replace("T", " ").take(19)
+    return source.replace("T", " ").take(16).replace("-", "/")
+}
+
+private fun compactCardExamType(item: ImageFileSummary): String {
+    val exam = inferExamType(item)
+    return when {
+        exam.contains("左", ignoreCase = true) -> "左侧曲位"
+        exam.contains("右", ignoreCase = true) -> "右侧曲位"
+        exam.contains("侧", ignoreCase = true) -> "侧面"
+        else -> "正面"
+    }
+}
+
+private fun examTypeBrush(item: ImageFileSummary): Brush {
+    return when (compactCardExamType(item)) {
+        "侧面" -> Brush.horizontalGradient(listOf(Color(0xFFFB923C), Color(0xFFF59E0B)))
+        "左侧曲位" -> Brush.horizontalGradient(listOf(Color(0xFF34D399), Color(0xFF22C55E)))
+        "右侧曲位" -> Brush.horizontalGradient(listOf(Color(0xFF60A5FA), Color(0xFF38BDF8)))
+        else -> Brush.horizontalGradient(listOf(Color(0xFF22D3EE), Color(0xFF14B8A6)))
+    }
 }
 
 private fun modalityLabel(modality: String): String {
@@ -401,4 +465,3 @@ private fun modalityLabel(modality: String): String {
         else -> modality
     }
 }
-
