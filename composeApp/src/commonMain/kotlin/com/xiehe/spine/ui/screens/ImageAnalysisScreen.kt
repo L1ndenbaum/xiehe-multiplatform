@@ -42,12 +42,12 @@ import com.xiehe.spine.ui.components.AnalysisReportPanel
 import com.xiehe.spine.ui.components.AnalysisSettingsPanel
 import com.xiehe.spine.ui.components.AnalysisTopBar
 import com.xiehe.spine.ui.components.ImageViewport
-import com.xiehe.spine.ui.components.LoadingOverlay
+import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.MeasureToolPanel
 import com.xiehe.spine.ui.components.MeasurementResultsPanel
-import com.xiehe.spine.ui.components.OperationVerifyCard
-import com.xiehe.spine.ui.components.PickerDialog
-import com.xiehe.spine.ui.components.Text
+import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
+import com.xiehe.spine.ui.components.form.picker.PickerDialog
+import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.FileSaveResult
 import com.xiehe.spine.ui.components.rememberDownloadedFileSaver
 import com.xiehe.spine.ui.components.rememberJsonFilePickerLauncher

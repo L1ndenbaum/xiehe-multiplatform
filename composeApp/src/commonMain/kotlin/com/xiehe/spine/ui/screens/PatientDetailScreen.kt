@@ -24,13 +24,13 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.ImageFileRepository
 import com.xiehe.spine.data.PatientRepository
-import com.xiehe.spine.ui.components.Card
-import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.card.shared.Card
+import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.ImageTaskAction
 import com.xiehe.spine.ui.components.ImageTaskActionStyle
 import com.xiehe.spine.ui.components.ImageTaskCard
-import com.xiehe.spine.ui.components.LoadingOverlay
-import com.xiehe.spine.ui.components.Text
+import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
+import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.inferExamType
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel

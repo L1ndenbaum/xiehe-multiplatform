@@ -1,7 +1,7 @@
 package com.xiehe.spine.ui.components.message
 
 import androidx.compose.ui.graphics.Color
-import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineAppColors
 
 data class MessageTypeStyle(

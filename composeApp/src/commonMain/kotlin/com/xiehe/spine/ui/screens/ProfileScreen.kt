@@ -19,12 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.ui.components.Avatar
-import com.xiehe.spine.ui.components.Button
-import com.xiehe.spine.ui.components.Card
-import com.xiehe.spine.ui.components.IconToken
-import com.xiehe.spine.ui.components.AppIcon
-import com.xiehe.spine.ui.components.Text
+import com.xiehe.spine.ui.components.avatar.shared.Avatar
+import com.xiehe.spine.ui.components.button.shared.Button
+import com.xiehe.spine.ui.components.card.shared.Card
+import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.components.icon.shared.AppIcon
+import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
