@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +34,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -123,14 +125,14 @@ fun ImagesScreen(
                     active = state.typeFilter != ImageTypeFilter.ALL,
                     glyph = IconToken.IMAGE,
                     onClick = { picker = ImagesPicker.TYPE },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.width(110.dp),
                 )
                 FilterChip(
                     text = state.statusFilter.label,
                     active = state.statusFilter != ImageStatusFilter.ALL,
                     glyph = IconToken.CHECK,
                     onClick = { picker = ImagesPicker.STATUS },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.width(110.dp),
                 )
             }
 
@@ -415,17 +417,19 @@ private fun FilterChip(
     modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
+    val shape = RoundedCornerShape(SpineTheme.radius.full)
     Row(
         modifier = modifier
             .height(40.dp)
+            .clip(shape)
             .border(
                 width = 1.dp,
                 color = if (active) colors.primary.copy(alpha = 0.28f) else colors.borderSubtle,
-                shape = RoundedCornerShape(SpineTheme.radius.full),
+                shape = shape,
             )
             .background(
                 if (active) colors.primaryMuted else colors.surface,
-                RoundedCornerShape(SpineTheme.radius.full),
+                shape,
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
