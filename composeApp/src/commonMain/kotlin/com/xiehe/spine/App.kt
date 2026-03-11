@@ -401,7 +401,8 @@ fun App(
                             onTabSelected = onTabSelected,
                             headerContent = {
                                 SimpleShellHeader(
-                                    title = "患者信息",
+                                    title = "患者详情",
+                                    subtitle = "查看和管理患者完整信息",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
                                 )
@@ -414,6 +415,9 @@ fun App(
                                 patientRepository = appContainer.patientRepository,
                                 imageRepository = appContainer.imageFileRepository,
                                 onSessionUpdated = { session = it },
+                                onEditPatient = { patientId ->
+                                    route = OverlayRoute.PatientEdit(patientId)
+                                },
                                 onOpenAnalysis = { fileId, patientId, examType ->
                                     route = OverlayRoute.ImageAnalysis(
                                         fileId = fileId,
@@ -421,6 +425,7 @@ fun App(
                                         examType = examType,
                                     )
                                 },
+                                onOpenImageUpload = { route = OverlayRoute.ImageUpload },
                             )
                         }
                     }

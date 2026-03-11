@@ -46,6 +46,9 @@ data class PatientDetail(
     @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
     @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
     @SerialName("id_card") val idCard: String? = null,
+    @SerialName("insurance_number") val insuranceNumber: String? = null,
+    @SerialName("medical_history") val medicalHistory: String? = null,
+    val status: String? = null,
 )
 
 @Serializable

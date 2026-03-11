@@ -5,32 +5,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.patient.PatientRepository
+import com.xiehe.spine.ui.components.card.patient.PatientBasicInfoCard
+import com.xiehe.spine.ui.components.card.patient.PatientDetailActionsCard
+import com.xiehe.spine.ui.components.card.patient.PatientImageRecordsCard
+import com.xiehe.spine.ui.components.card.patient.PatientOverviewCards
 import com.xiehe.spine.ui.components.card.shared.Card
-import com.xiehe.spine.ui.components.icon.shared.IconToken
-import com.xiehe.spine.ui.components.card.image.ImageTaskAction
-import com.xiehe.spine.ui.components.card.image.ImageTaskActionStyle
-import com.xiehe.spine.ui.components.card.image.ImageTaskCard
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.card.image.inferExamType
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel
 
@@ -42,7 +34,9 @@ fun PatientDetailScreen(
     patientRepository: PatientRepository,
     imageRepository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onEditPatient: (Int) -> Unit,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
+    onOpenImageUpload: () -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
 
@@ -64,13 +58,16 @@ fun PatientDetailScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item {
-                state.errorMessage?.let {
+            state.errorMessage?.let {
+                item {
                     Card(modifier = Modifier.fillMaxWidth()) {
-                        Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
+                        Text(
+                            text = it,
+                            style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error),
+                        )
                     }
                 }
             }
@@ -84,89 +81,29 @@ fun PatientDetailScreen(
                 }
             } else {
                 item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Text("基本信息", style = SpineTheme.typography.title)
-                        PatientInfoRow("姓名", detail.name)
-                        PatientInfoRow("患者ID", detail.patientId)
-                        PatientInfoRow("性别", detail.gender)
-                        PatientInfoRow("年龄", "${detail.age}岁")
-                        PatientInfoRow("出生日期", detail.birthDate)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text("联系电话", color = SpineTheme.colors.textSecondary)
-                            val (phonePrefix, phoneNumber) = splitPhone(detail.phone)
-                            if (phoneNumber == null) {
-                                Text("-")
-                            } else {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    if (phonePrefix != null) {
-                                        Text(
-                                            text = phonePrefix,
-                                            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-                                            color = SpineTheme.colors.onPrimary,
-                                            modifier = Modifier
-                                                .background(
-                                                    color = SpineTheme.colors.primary,
-                                                    shape = RoundedCornerShape(SpineTheme.radius.full),
-                                                )
-                                                .padding(horizontal = 8.dp, vertical = 3.dp),
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                    }
-                                    Text(phoneNumber)
-                                }
-                            }
-                        }
-                        PatientInfoRow("身份证号", detail.idCard ?: "-")
-                        PatientInfoRow("地址", detail.address ?: "-")
-                        PatientInfoRow("紧急联系人", detail.emergencyContactName ?: "-")
-                        PatientInfoRow("紧急联系人电话", detail.emergencyContactPhone ?: "-")
-                    }
+                    PatientBasicInfoCard(detail = detail)
                 }
 
                 item {
-                    Text(
-                        text = "影像记录",
-                        style = SpineTheme.typography.title,
-                        color = SpineTheme.colors.textPrimary,
-                        modifier = Modifier.padding(top = 2.dp),
+                    PatientDetailActionsCard(
+                        onEditPatient = { onEditPatient(detail.id) },
+                        onOpenImageUpload = onOpenImageUpload,
                     )
                 }
 
-                if (state.relatedImages.isEmpty()) {
-                    item {
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = if (state.relatedLoading) "加载影像中..." else "暂无影像记录",
-                                color = SpineTheme.colors.textSecondary,
-                            )
-                        }
-                    }
-                } else {
-                    items(state.relatedImages, key = { it.id }) { file ->
-                        ImageTaskCard(
-                            item = file,
-                            session = session,
-                            repository = imageRepository,
-                            onSessionUpdated = onSessionUpdated,
-                            compactActionText = true,
-                            singleActionBottomRight = true,
-                            actions = listOf(
-                                ImageTaskAction(
-                                    text = "立即处理",
-                                    glyph = IconToken.EYE,
-                                    style = ImageTaskActionStyle.PRIMARY,
-                                    onClick = {
-                                        onOpenAnalysis(file.id, file.patientId, inferExamType(file))
-                                    },
-                                ),
-                            ),
-                            patientNameOverride = detail.name,
-                        )
-                    }
+                item {
+                    PatientOverviewCards(
+                        detail = detail,
+                        relatedImages = state.relatedImages,
+                    )
+                }
+
+                item {
+                    PatientImageRecordsCard(
+                        images = state.relatedImages,
+                        onOpenImageUpload = onOpenImageUpload,
+                        onOpenAnalysis = onOpenAnalysis,
+                    )
                 }
             }
         }
@@ -176,33 +113,3 @@ fun PatientDetailScreen(
         }
     }
 }
-
-@Composable
-private fun PatientInfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = label, color = SpineTheme.colors.textSecondary)
-        Text(text = value)
-    }
-}
-
-private fun splitPhone(rawPhone: String?): Pair<String?, String?> {
-    val phone = rawPhone?.trim().orEmpty()
-    if (phone.isBlank()) {
-        return null to null
-    }
-    if (phone.startsWith("+")) {
-        val knownPrefix = listOf("+886", "+853", "+852", "+86").firstOrNull { phone.startsWith(it) }
-        if (knownPrefix != null) {
-            return knownPrefix to phone.removePrefix(knownPrefix).ifBlank { null }
-        }
-        val genericPrefix = "+" + phone.drop(1).takeWhile { it.isDigit() }.take(4)
-        return genericPrefix to phone.removePrefix(genericPrefix).ifBlank { null }
-    }
-    return "+86" to phone
-}
-
-
