@@ -52,6 +52,7 @@ fun PatientsScreen(
     repository: PatientRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onOpenPatient: (Int) -> Unit,
+    showInlineSearch: Boolean = true,
     onEditPatient: (Int) -> Unit,
 ) {
     val state by vm.state.collectAsState()
@@ -80,13 +81,15 @@ fun PatientsScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            TextField(
-                value = state.search,
-                onValueChange = vm::updateSearch,
-                placeholder = "搜索患者姓名、ID或手机号",
-                modifier = Modifier.fillMaxWidth(),
-                leadingGlyph = IconToken.SEARCH,
-            )
+            if (showInlineSearch) {
+                TextField(
+                    value = state.search,
+                    onValueChange = vm::updateSearch,
+                    placeholder = "搜索患者姓名、ID或手机号",
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingGlyph = IconToken.SEARCH,
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

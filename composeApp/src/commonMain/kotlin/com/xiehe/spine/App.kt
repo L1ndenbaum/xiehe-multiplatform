@@ -21,11 +21,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
+import com.xiehe.spine.ui.components.DashboardShellHeader
 import com.xiehe.spine.ui.components.IconToken
+import com.xiehe.spine.ui.components.SearchShellHeader
+import com.xiehe.spine.ui.components.SimpleShellHeader
 import com.xiehe.spine.ui.screens.AppearanceScreen
 import com.xiehe.spine.ui.screens.ChangePasswordScreen
 import com.xiehe.spine.ui.screens.DashboardScreen
-import com.xiehe.spine.ui.screens.PatientEditScreen
 import com.xiehe.spine.ui.screens.ImageAnalysisScreen
 import com.xiehe.spine.ui.screens.ImageUploadScreen
 import com.xiehe.spine.ui.screens.ImagesScreen
@@ -33,6 +35,7 @@ import com.xiehe.spine.ui.screens.LoginScreen
 import com.xiehe.spine.ui.screens.MessagesScreen
 import com.xiehe.spine.ui.screens.MobileShell
 import com.xiehe.spine.ui.screens.PatientDetailScreen
+import com.xiehe.spine.ui.screens.PatientEditScreen
 import com.xiehe.spine.ui.screens.PatientFormScreen
 import com.xiehe.spine.ui.screens.PatientsScreen
 import com.xiehe.spine.ui.screens.PersonalInfoScreen
@@ -41,16 +44,16 @@ import com.xiehe.spine.ui.screens.RegisterScreen
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.AppearanceViewModel
 import com.xiehe.spine.ui.viewmodel.DashboardViewModel
-import com.xiehe.spine.ui.viewmodel.ImagesViewModel
 import com.xiehe.spine.ui.viewmodel.ImageAnalysisViewModel
 import com.xiehe.spine.ui.viewmodel.ImageUploadViewModel
+import com.xiehe.spine.ui.viewmodel.ImagesViewModel
 import com.xiehe.spine.ui.viewmodel.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.MessagesViewModel
 import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.PatientEditViewModel
 import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
-import com.xiehe.spine.ui.viewmodel.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.PatientsViewModel
+import com.xiehe.spine.ui.viewmodel.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.RegisterViewModel
 import kotlinx.coroutines.delay
 
@@ -66,6 +69,7 @@ private sealed interface OverlayRoute {
         val patientId: Int?,
         val examType: String,
     ) : OverlayRoute
+
     data object PatientForm : OverlayRoute
     data class PatientEdit(val patientId: Int) : OverlayRoute
     data object Appearance : OverlayRoute
@@ -109,6 +113,8 @@ fun App(
     }
 
     val themePreference by appContainer.themeRepository.preference.collectAsState()
+    val patientsState by patientsVm.state.collectAsState()
+    val imagesState by imagesVm.state.collectAsState()
 
     SpineTheme(preference = themePreference) {
         if (session == null) {
@@ -212,37 +218,44 @@ fun App(
             label = "scene_transition",
         ) { currentRoute ->
             if (currentRoute == null) {
-                val shellTitle = when (selectedTab) {
-                    0 -> "工作台"
-                    1 -> "患者中心"
-                    2 -> "影像中心"
-                    else -> "个人中心"
-                }
-                val rightGlyph = when (selectedTab) {
-                    0 -> IconToken.BELL
-                    1 -> null
-                    2 -> null
-                    else -> null
-                }
-                val rightText = when (selectedTab) {
-                    1 -> "新增患者"
-                    2 -> "上传影像"
-                    else -> null
-                }
-                val onRightAction: (() -> Unit)? = when (selectedTab) {
-                    0 -> ({ route = OverlayRoute.Messages })
-                    1 -> ({ route = OverlayRoute.PatientForm })
-                    2 -> ({ route = OverlayRoute.ImageUpload })
-                    else -> null
-                }
-
                 MobileShell(
-                    title = shellTitle,
                     selectedTab = selectedTab,
                     onTabSelected = onTabSelected,
-                    rightActionGlyph = rightGlyph,
-                    rightActionText = rightText,
-                    onRightAction = onRightAction,
+                    headerContent = {
+                        when (selectedTab) {
+                            0 -> DashboardShellHeader(
+                                userName = activeSession.fullName ?: activeSession.username,
+                                primaryMeta = "工作台",
+                                secondaryMeta = "脊柱影像分析系统",
+                                onMessages = { route = OverlayRoute.Messages },
+                            )
+
+                            1 -> SearchShellHeader(
+                                title = "患者中心",
+                                subtitle = "${patientsState.items.size} 位患者",
+                                searchValue = patientsState.search,
+                                onSearchValueChange = patientsVm::updateSearch,
+                                searchPlaceholder = "搜索患者姓名、ID或手机号",
+                                actionGlyph = IconToken.USER_PLUS,
+                                onAction = { route = OverlayRoute.PatientForm },
+                            )
+
+                            2 -> SearchShellHeader(
+                                title = "影像中心",
+                                subtitle = "${imagesState.filteredItems.size} 份影像",
+                                searchValue = imagesState.search,
+                                onSearchValueChange = imagesVm::updateSearch,
+                                searchPlaceholder = "搜索患者姓名、检查类型或文件名",
+                                actionGlyph = IconToken.UPLOAD,
+                                onAction = { route = OverlayRoute.ImageUpload },
+                            )
+
+                            else -> SimpleShellHeader(
+                                title = "个人中心",
+                                subtitle = activeSession.fullName ?: activeSession.username,
+                            )
+                        }
+                    },
                 ) {
                     AnimatedContent(
                         targetState = selectedTab,
@@ -264,6 +277,7 @@ fun App(
                                 session = activeSession,
                                 dashboardRepository = appContainer.dashboardRepository,
                                 imageRepository = appContainer.imageFileRepository,
+                                notificationRepository = appContainer.notificationRepository,
                                 authRepository = appContainer.authRepository,
                                 onSessionUpdated = { session = it },
                                 onOpenAnalysis = { fileId, patientId, examType ->
@@ -273,6 +287,10 @@ fun App(
                                         examType = examType,
                                     )
                                 },
+                                onOpenPatientForm = { route = OverlayRoute.PatientForm },
+                                onOpenImageUpload = { route = OverlayRoute.ImageUpload },
+                                onOpenImagesTab = { onTabSelected(2) },
+                                onOpenMessages = { route = OverlayRoute.Messages },
                             )
 
                             1 -> PatientsScreen(
@@ -282,6 +300,7 @@ fun App(
                                 onSessionUpdated = { session = it },
                                 onOpenPatient = { route = OverlayRoute.PatientDetail(it) },
                                 onEditPatient = { route = OverlayRoute.PatientEdit(it) },
+                                showInlineSearch = false,
                             )
 
                             2 -> ImagesScreen(
@@ -289,6 +308,7 @@ fun App(
                                 session = activeSession,
                                 repository = appContainer.imageFileRepository,
                                 onSessionUpdated = { session = it },
+                                showInlineSearch = false,
                                 onOpenAnalysis = { fileId, patientId, examType ->
                                     route = OverlayRoute.ImageAnalysis(
                                         fileId = fileId,
@@ -319,10 +339,15 @@ fun App(
                 when (current) {
                     is OverlayRoute.PatientDetail -> {
                         MobileShell(
-                            title = "患者信息",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "患者信息",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             PatientDetailScreen(
                                 patientId = current.patientId,
@@ -359,10 +384,15 @@ fun App(
 
                     OverlayRoute.PatientForm -> {
                         MobileShell(
-                            title = "添加患者",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "添加患者",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             PatientFormScreen(
                                 vm = patientFormVm,
@@ -379,10 +409,15 @@ fun App(
 
                     is OverlayRoute.PatientEdit -> {
                         MobileShell(
-                            title = "编辑患者",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "编辑患者",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             PatientEditScreen(
                                 patientId = current.patientId,
@@ -399,10 +434,15 @@ fun App(
 
                     OverlayRoute.Appearance -> {
                         MobileShell(
-                            title = "外观设置",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "外观设置",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             AppearanceScreen(vm = appearanceVm)
                         }
@@ -410,10 +450,15 @@ fun App(
 
                     OverlayRoute.PersonalInfo -> {
                         MobileShell(
-                            title = "个人信息",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "个人信息",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             PersonalInfoScreen(
                                 vm = personalInfoVm,
@@ -426,10 +471,15 @@ fun App(
 
                     OverlayRoute.ChangePassword -> {
                         MobileShell(
-                            title = "修改密码",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "修改密码",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             ChangePasswordScreen()
                         }
@@ -437,10 +487,15 @@ fun App(
 
                     OverlayRoute.Messages -> {
                         MobileShell(
-                            title = "消息中心",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "消息中心",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             MessagesScreen(
                                 vm = messagesVm,
@@ -453,10 +508,15 @@ fun App(
 
                     OverlayRoute.ImageUpload -> {
                         MobileShell(
-                            title = "上传影像",
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            onBack = { route = null },
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "上传影像",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                )
+                            },
                         ) {
                             ImageUploadScreen(
                                 vm = imageUploadVm,

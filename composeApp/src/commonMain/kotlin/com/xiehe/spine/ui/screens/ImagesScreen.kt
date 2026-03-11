@@ -69,6 +69,7 @@ fun ImagesScreen(
     session: UserSession,
     repository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    showInlineSearch: Boolean = true,
     onOpenAnalysis: (Int, Int?, String) -> Unit = { _, _, _ -> },
 ) {
     val state by vm.state.collectAsState()
@@ -99,13 +100,15 @@ fun ImagesScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            TextField(
-                value = state.search,
-                onValueChange = vm::updateSearch,
-                placeholder = "搜索患者姓名、检查类型或文件名",
-                modifier = Modifier.fillMaxWidth(),
-                leadingGlyph = IconToken.SEARCH,
-            )
+            if (showInlineSearch) {
+                TextField(
+                    value = state.search,
+                    onValueChange = vm::updateSearch,
+                    placeholder = "搜索患者姓名、检查类型或文件名",
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingGlyph = IconToken.SEARCH,
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

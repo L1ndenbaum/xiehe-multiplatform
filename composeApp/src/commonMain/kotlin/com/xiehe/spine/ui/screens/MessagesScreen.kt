@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,12 +23,14 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.NotificationMessage
 import com.xiehe.spine.data.NotificationRepository
+import com.xiehe.spine.ui.components.AppIcon
 import com.xiehe.spine.ui.components.Card
 import com.xiehe.spine.ui.components.IconToken
-import com.xiehe.spine.ui.components.AppIcon
 import com.xiehe.spine.ui.components.LoadingOverlay
 import com.xiehe.spine.ui.components.PeriodicTaskTrigger
 import com.xiehe.spine.ui.components.Text
+import com.xiehe.spine.ui.components.message.messageTimeLabel
+import com.xiehe.spine.ui.components.message.messageTypeStyle
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.MessagesViewModel
 
@@ -130,7 +132,7 @@ fun MessagesScreen(
 @Composable
 private fun MessageCard(item: NotificationMessage) {
     val colors = SpineTheme.colors
-    val style = typeStyle(item)
+    val style = messageTypeStyle(item.messageType, colors)
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -156,7 +158,7 @@ private fun MessageCard(item: NotificationMessage) {
                         style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
                     )
                     Text(
-                        text = messageTimeLabel(item),
+                        text = messageTimeLabel(item.createdAt),
                         style = SpineTheme.typography.caption,
                         color = colors.textTertiary,
                     )
@@ -175,40 +177,4 @@ private fun MessageCard(item: NotificationMessage) {
             }
         }
     }
-}
-
-private data class MessageTypeStyle(
-    val icon: IconToken,
-    val iconTint: androidx.compose.ui.graphics.Color,
-    val background: androidx.compose.ui.graphics.Color,
-)
-
-@Composable
-private fun typeStyle(message: NotificationMessage): MessageTypeStyle {
-    val colors = SpineTheme.colors
-    val type = message.messageType.orEmpty()
-    return when {
-        type.contains("系统") -> MessageTypeStyle(
-            icon = IconToken.BELL,
-            iconTint = colors.primary,
-            background = colors.primaryMuted,
-        )
-
-        type.contains("审核") -> MessageTypeStyle(
-            icon = IconToken.CHECK,
-            iconTint = colors.warning,
-            background = colors.warning.copy(alpha = 0.16f),
-        )
-
-        else -> MessageTypeStyle(
-            icon = IconToken.MESSAGE,
-            iconTint = colors.textSecondary,
-            background = colors.surfaceMuted,
-        )
-    }
-}
-
-private fun messageTimeLabel(message: NotificationMessage): String {
-    val source = message.createdAt ?: return ""
-    return source.replace("T", " ").take(16)
 }
