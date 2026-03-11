@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -329,6 +330,7 @@ private fun PendingTaskCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
+                .border(1.dp, Color(0xFFC4B5FD), RoundedCornerShape(14.dp))
                 .background(Color.White)
                 .clickable(onClick = onOpenImagesTab)
                 .padding(horizontal = 14.dp, vertical = 12.dp),
@@ -354,9 +356,12 @@ private fun PendingTaskRow(
     item: ImageFileSummary,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
 ) {
-    val patientName = item.patientName?.takeIf { it.isNotBlank() } ?: item.originalFilename
+    val patientName = item.patientName?.trim().takeUnless { it.isNullOrBlank() }
+        ?: item.patientId?.let { "患者 $it" }
+        ?: "未绑定患者"
     val examType = inferExamType(item)
-    val priorityColor = if (item.status.equals("PROCESSING", ignoreCase = true)) Color(0xFFF59E0B) else Color(0xFFEF4444)
+    val examStyle = pendingTaskExamStyle(examType)
+    val priority = pendingTaskPriority(item)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -366,7 +371,7 @@ private fun PendingTaskRow(
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(priorityColor),
+                .background(priority.dotColor),
         )
         Box(
             modifier = Modifier
@@ -379,32 +384,51 @@ private fun PendingTaskRow(
         }
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     text = patientName,
-                    style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier.weight(1f, fill = false),
+                    style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
                     color = Color(0xFF0F172A),
+                    maxLines = 1,
                 )
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFFF0F9FF))
-                        .padding(horizontal = 6.dp, vertical = 3.dp),
+                        .background(examStyle.background)
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
                 ) {
                     Text(
                         text = examType,
                         style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color(0xFF0284C7),
+                        color = examStyle.textColor,
+                        maxLines = 1,
                     )
                 }
             }
-            Text(
-                text = buildTaskMeta(item = item),
-                style = SpineTheme.typography.caption,
-                color = SpineTheme.colors.textTertiary,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = buildTaskMeta(item),
+                    modifier = Modifier.weight(1f),
+                    style = SpineTheme.typography.caption,
+                    color = Color(0xFF94A3B8),
+                    maxLines = 1,
+                )
+                Text(
+                    text = priority.label,
+                    style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
+                    color = priority.textColor,
+                )
+            }
         }
         Box(
             modifier = Modifier
@@ -419,24 +443,67 @@ private fun PendingTaskRow(
     }
 }
 
-private fun buildTaskMeta(item: ImageFileSummary): String {
-    val parts = mutableListOf<String>()
-    item.patientId?.let { parts += it.toString() }
-    val createdAt = item.createdAt?.replace("T", " ")?.take(16)
-    if (!createdAt.isNullOrBlank()) {
-        parts += createdAt
+private data class PendingTaskExamStyle(
+    val background: Color,
+    val textColor: Color,
+)
+
+private data class PendingTaskPriority(
+    val dotColor: Color,
+    val textColor: Color,
+    val label: String,
+)
+
+private fun pendingTaskExamStyle(examType: String): PendingTaskExamStyle {
+    return when {
+        examType.contains("体态") -> PendingTaskExamStyle(Color(0xFFFFF1F2), Color(0xFFE11D48))
+        examType.contains("侧") -> PendingTaskExamStyle(Color(0xFFFFF7ED), Color(0xFFEA580C))
+        examType.contains("曲") -> PendingTaskExamStyle(Color(0xFFECFDF5), Color(0xFF059669))
+        examType.contains("CT") -> PendingTaskExamStyle(Color(0xFFF0F9FF), Color(0xFF0284C7))
+        examType.contains("MRI") -> PendingTaskExamStyle(Color(0xFFF5F3FF), Color(0xFF7C3AED))
+        else -> PendingTaskExamStyle(Color(0xFFF0FDFA), Color(0xFF0D9488))
     }
-    val statusLabel = when {
-        item.status.equals("PROCESSING", ignoreCase = true) -> "处理中"
-        item.status.equals("UPLOADED", ignoreCase = true) -> "待审核"
-        else -> item.status.orEmpty()
-    }
-    if (statusLabel.isNotBlank()) {
-        parts += statusLabel
-    }
-    return parts.joinToString(" · ")
 }
 
+private fun pendingTaskPriority(item: ImageFileSummary): PendingTaskPriority {
+    return when (item.status?.uppercase()) {
+        "PROCESSING" -> PendingTaskPriority(
+            dotColor = Color(0xFFF59E0B),
+            textColor = Color(0xFFFB923C),
+            label = "普通",
+        )
+
+        "UPLOADED" -> PendingTaskPriority(
+            dotColor = Color(0xFFEF4444),
+            textColor = Color(0xFFF87171),
+            label = "紧急",
+        )
+
+        else -> PendingTaskPriority(
+            dotColor = Color(0xFFCBD5E1),
+            textColor = Color(0xFF94A3B8),
+            label = "常规",
+        )
+    }
+}
+
+private fun buildTaskMeta(item: ImageFileSummary): String {
+    val patientCode = item.patientId?.let { "P$it" } ?: "未分配编号"
+    val timeLabel = extractTaskTime(item.createdAt)
+    return if (timeLabel.isBlank()) {
+        patientCode
+    } else {
+        "$patientCode · $timeLabel"
+    }
+}
+
+private fun extractTaskTime(createdAt: String?): String {
+    val normalized = createdAt?.replace("T", " ")?.trim().orEmpty()
+    if (normalized.isBlank()) {
+        return ""
+    }
+    return Regex("""(\d{2}:\d{2})""").find(normalized)?.value ?: normalized.take(16)
+}
 @Composable
 private fun ActivityCard(items: List<NotificationMessage>) {
     Card(modifier = Modifier.fillMaxWidth()) {

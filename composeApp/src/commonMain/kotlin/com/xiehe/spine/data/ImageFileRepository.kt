@@ -131,7 +131,28 @@ class ImageFileRepository(
             }
         }
 
-        val merged = withPatientNameCache(aggregate.values.toList())
+        var merged = withPatientNameCache(aggregate.values.toList())
+        val unresolvedIds = merged
+            .asSequence()
+            .filter { it.patientId != null && it.patientName.isNullOrBlank() }
+            .mapNotNull { it.patientId }
+            .toSet()
+        if (unresolvedIds.isNotEmpty()) {
+            val resolvedById = resolvePatientNamesByIds(activeSession, unresolvedIds)
+            activeSession = resolvedById.first
+            if (resolvedById.second.isNotEmpty()) {
+                cacheRepository.putPatientNameMap(resolvedById.second)
+                merged = merged.map { item ->
+                    val patientId = item.patientId
+                    if (patientId == null || !item.patientName.isNullOrBlank()) {
+                        item
+                    } else {
+                        val resolvedName = resolvedById.second[patientId]
+                        if (resolvedName.isNullOrBlank()) item else item.copy(patientName = resolvedName)
+                    }
+                }
+            }
+        }
         cacheRepository.putImageListSnapshot(merged)
         cacheRepository.putPatientNameMap(
             merged
