@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.screens
+package com.xiehe.spine.ui.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -244,3 +244,4 @@ private fun StepNode(
         )
     }
 }
+

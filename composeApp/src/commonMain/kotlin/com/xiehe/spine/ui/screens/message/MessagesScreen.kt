@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.screens
+package com.xiehe.spine.ui.screens.message
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,10 +29,10 @@ import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.PeriodicTaskTrigger
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.message.messageTimeLabel
-import com.xiehe.spine.ui.components.message.messageTypeStyle
+import com.xiehe.spine.ui.components.message.shared.MessageCard
+import com.xiehe.spine.ui.components.message.shared.messageTypeStyle
 import com.xiehe.spine.ui.theme.SpineTheme
-import com.xiehe.spine.ui.viewmodel.MessagesViewModel
+import com.xiehe.spine.ui.viewmodel.message.MessagesViewModel
 
 @Composable
 fun MessagesScreen(
@@ -129,52 +129,5 @@ fun MessagesScreen(
     }
 }
 
-@Composable
-private fun MessageCard(item: NotificationMessage) {
-    val colors = SpineTheme.colors
-    val style = messageTypeStyle(item.messageType, colors)
 
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(style.background, RoundedCornerShape(SpineTheme.radius.md)),
-                contentAlignment = Alignment.Center,
-            ) {
-                AppIcon(glyph = style.icon, tint = style.iconTint, modifier = Modifier.size(16.dp))
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(
-                        text = item.title,
-                        style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
-                    )
-                    Text(
-                        text = messageTimeLabel(item.createdAt),
-                        style = SpineTheme.typography.caption,
-                        color = colors.textTertiary,
-                    )
-                }
-                item.messageType?.takeIf { it.isNotBlank() }?.let { type ->
-                    Text(
-                        text = type,
-                        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-                        color = style.iconTint,
-                        modifier = Modifier
-                            .background(style.background, RoundedCornerShape(SpineTheme.radius.full))
-                            .padding(horizontal = 8.dp, vertical = 3.dp),
-                    )
-                }
-                Text(text = item.content, style = SpineTheme.typography.subhead, color = colors.textSecondary)
-            }
-        }
-    }
-}
+

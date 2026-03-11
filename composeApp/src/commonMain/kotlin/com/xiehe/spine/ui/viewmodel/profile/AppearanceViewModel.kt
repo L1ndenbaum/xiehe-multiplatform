@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.viewmodel
+package com.xiehe.spine.ui.viewmodel.profile
 
 import com.xiehe.spine.core.store.ThemePreferenceRepository
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
@@ -19,3 +19,4 @@ class AppearanceViewModel(
         repository.updateMode(mode)
     }
 }
+

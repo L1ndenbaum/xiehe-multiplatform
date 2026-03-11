@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.screens
+package com.xiehe.spine.ui.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +30,7 @@ import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.theme.SpineTheme
-import com.xiehe.spine.ui.viewmodel.PersonalInfoViewModel
+import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 
 @Composable
 fun PersonalInfoScreen(
@@ -218,3 +218,5 @@ private fun EditableField(
         )
     }
 }
+
+

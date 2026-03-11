@@ -1,4 +1,5 @@
-package com.xiehe.spine.ui.viewmodel
+package com.xiehe.spine.ui.viewmodel.dashboard
+import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession

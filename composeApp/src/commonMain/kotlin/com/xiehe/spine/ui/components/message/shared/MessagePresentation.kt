@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.components.message
+package com.xiehe.spine.ui.components.message.shared
 
 import androidx.compose.ui.graphics.Color
 import com.xiehe.spine.ui.components.icon.shared.IconToken

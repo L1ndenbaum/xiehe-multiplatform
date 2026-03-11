@@ -1,0 +1,111 @@
+package com.xiehe.spine.ui.components.card.dashboard
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.xiehe.spine.data.NotificationMessage
+import com.xiehe.spine.ui.components.card.shared.Card
+import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.icon.shared.AppIcon
+import com.xiehe.spine.ui.components.message.shared.messageTimeLabel
+import com.xiehe.spine.ui.components.message.shared.messageTypeStyle
+import com.xiehe.spine.ui.theme.SpineTheme
+
+@Composable
+fun ActivityCard(items: List<NotificationMessage>) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 4.dp, height = 18.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(Brush.verticalGradient(listOf(Color(0xFF38BDF8), Color(0xFF2563EB)))),
+            )
+            Text(
+                text = "近期动态",
+                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
+                color = Color(0xFF0F172A),
+            )
+        }
+
+        if (items.isEmpty()) {
+            Text(
+                text = "暂无动态",
+                style = SpineTheme.typography.subhead,
+                color = SpineTheme.colors.textSecondary,
+            )
+        } else {
+            items.forEachIndexed { index, activity ->
+                ActivityRow(activity = activity)
+                if (index != items.lastIndex) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(Color(0xFFF8FAFC)),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActivityRow(activity: NotificationMessage) {
+    val style = messageTypeStyle(activity.messageType, SpineTheme.colors)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(style.background),
+            contentAlignment = Alignment.Center,
+        ) {
+            AppIcon(glyph = style.icon, tint = style.iconTint, modifier = Modifier.size(16.dp))
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Text(
+                text = activity.title,
+                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
+                color = Color(0xFF334155),
+            )
+            Text(
+                text = activity.content,
+                style = SpineTheme.typography.caption,
+                color = SpineTheme.colors.textSecondary,
+                maxLines = 1,
+            )
+        }
+        Text(
+            text = messageTimeLabel(activity.createdAt),
+            style = SpineTheme.typography.caption,
+            color = SpineTheme.colors.textTertiary,
+        )
+    }
+}

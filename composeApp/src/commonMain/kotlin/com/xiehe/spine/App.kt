@@ -25,35 +25,35 @@ import com.xiehe.spine.ui.components.navigation.shared.DashboardShellHeader
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.navigation.shared.SearchShellHeader
 import com.xiehe.spine.ui.components.navigation.shared.SimpleShellHeader
-import com.xiehe.spine.ui.screens.AppearanceScreen
-import com.xiehe.spine.ui.screens.ChangePasswordScreen
-import com.xiehe.spine.ui.screens.DashboardScreen
+import com.xiehe.spine.ui.screens.profile.AppearanceScreen
+import com.xiehe.spine.ui.screens.profile.ChangePasswordScreen
+import com.xiehe.spine.ui.screens.dashboard.DashboardScreen
 import com.xiehe.spine.ui.screens.image.ImageAnalysisScreen
 import com.xiehe.spine.ui.screens.image.ImageUploadScreen
 import com.xiehe.spine.ui.screens.image.ImagesScreen
 import com.xiehe.spine.ui.screens.auth.LoginScreen
-import com.xiehe.spine.ui.screens.MessagesScreen
+import com.xiehe.spine.ui.screens.message.MessagesScreen
 import com.xiehe.spine.ui.screens.shared.MobileShell
 import com.xiehe.spine.ui.screens.patient.PatientDetailScreen
 import com.xiehe.spine.ui.screens.patient.PatientEditScreen
 import com.xiehe.spine.ui.screens.patient.PatientFormScreen
 import com.xiehe.spine.ui.screens.patient.PatientsScreen
-import com.xiehe.spine.ui.screens.PersonalInfoScreen
-import com.xiehe.spine.ui.screens.ProfileScreen
+import com.xiehe.spine.ui.screens.profile.PersonalInfoScreen
+import com.xiehe.spine.ui.screens.profile.ProfileScreen
 import com.xiehe.spine.ui.screens.auth.RegisterScreen
 import com.xiehe.spine.ui.theme.SpineTheme
-import com.xiehe.spine.ui.viewmodel.AppearanceViewModel
-import com.xiehe.spine.ui.viewmodel.DashboardViewModel
+import com.xiehe.spine.ui.viewmodel.profile.AppearanceViewModel
+import com.xiehe.spine.ui.viewmodel.dashboard.DashboardViewModel
 import com.xiehe.spine.ui.viewmodel.image.ImageAnalysisViewModel
 import com.xiehe.spine.ui.viewmodel.image.ImageUploadViewModel
 import com.xiehe.spine.ui.viewmodel.image.ImagesViewModel
 import com.xiehe.spine.ui.viewmodel.auth.LoginViewModel
-import com.xiehe.spine.ui.viewmodel.MessagesViewModel
+import com.xiehe.spine.ui.viewmodel.message.MessagesViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientEditViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
-import com.xiehe.spine.ui.viewmodel.PersonalInfoViewModel
+import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
 import kotlinx.coroutines.delay
 
@@ -550,3 +550,4 @@ fun App(
         }
     }
 }
+

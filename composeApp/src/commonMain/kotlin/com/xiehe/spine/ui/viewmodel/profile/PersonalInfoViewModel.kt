@@ -1,4 +1,5 @@
-package com.xiehe.spine.ui.viewmodel
+package com.xiehe.spine.ui.viewmodel.profile
+import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
@@ -186,3 +187,4 @@ class PersonalInfoViewModel : BaseViewModel() {
         )
     }
 }
+

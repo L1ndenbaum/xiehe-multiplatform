@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.screens
+package com.xiehe.spine.ui.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +23,7 @@ import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.theme.ThemeMode
-import com.xiehe.spine.ui.viewmodel.AppearanceViewModel
+import com.xiehe.spine.ui.viewmodel.profile.AppearanceViewModel
 
 @Composable
 fun AppearanceScreen(vm: AppearanceViewModel) {
@@ -146,3 +146,5 @@ private fun ModeOption(
         }
     }
 }
+
+
