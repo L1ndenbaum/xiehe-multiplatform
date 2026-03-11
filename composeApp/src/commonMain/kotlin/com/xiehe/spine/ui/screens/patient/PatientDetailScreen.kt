@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.screens
+package com.xiehe.spine.ui.screens.patient
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +33,7 @@ import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.inferExamType
 import com.xiehe.spine.ui.theme.SpineTheme
-import com.xiehe.spine.ui.viewmodel.PatientDetailViewModel
+import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel
 
 @Composable
 fun PatientDetailScreen(

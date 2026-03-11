@@ -1,4 +1,4 @@
-package com.xiehe.spine.ui.screens
+package com.xiehe.spine.ui.screens.patient
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +32,7 @@ import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.theme.SpineTheme
-import com.xiehe.spine.ui.viewmodel.PatientFormViewModel
+import com.xiehe.spine.ui.viewmodel.patient.PatientFormViewModel
 
 private data class GenderOption(
     val label: String,
