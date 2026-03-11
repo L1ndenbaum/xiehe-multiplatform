@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +43,7 @@ import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.form.file.FileSaveResult
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.card.image.ImageTaskAction
 import com.xiehe.spine.ui.components.card.image.ImageTaskActionStyle
 import com.xiehe.spine.ui.components.card.image.ImageTaskCard
@@ -117,12 +121,14 @@ fun ImagesScreen(
                 FilterChip(
                     text = state.typeFilter.label,
                     active = state.typeFilter != ImageTypeFilter.ALL,
+                    glyph = IconToken.IMAGE,
                     onClick = { picker = ImagesPicker.TYPE },
                     modifier = Modifier.weight(1f),
                 )
                 FilterChip(
                     text = state.statusFilter.label,
                     active = state.statusFilter != ImageStatusFilter.ALL,
+                    glyph = IconToken.CHECK,
                     onClick = { picker = ImagesPicker.STATUS },
                     modifier = Modifier.weight(1f),
                 )
@@ -404,31 +410,38 @@ fun ImagesScreen(
 private fun FilterChip(
     text: String,
     active: Boolean,
+    glyph: IconToken,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
     Row(
         modifier = modifier
+            .height(40.dp)
+            .border(
+                width = 1.dp,
+                color = if (active) colors.primary.copy(alpha = 0.28f) else colors.borderSubtle,
+                shape = RoundedCornerShape(SpineTheme.radius.full),
+            )
             .background(
-                if (active) colors.primary else colors.surface,
+                if (active) colors.primaryMuted else colors.surface,
                 RoundedCornerShape(SpineTheme.radius.full),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 9.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Text(
-            text = text,
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-            color = if (active) colors.onPrimary else colors.textSecondary,
-            modifier = Modifier.weight(1f),
+        AppIcon(
+            glyph = glyph,
+            tint = if (active) colors.primary else colors.textSecondary,
+            modifier = Modifier.size(16.dp),
         )
         Text(
-            text = "▾",
-            style = SpineTheme.typography.subhead,
-            color = if (active) colors.onPrimary else colors.textSecondary,
+            text = text,
+            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+            color = if (active) colors.primary else colors.textSecondary,
+            maxLines = 1,
         )
     }
 }
@@ -476,6 +489,3 @@ private fun OptionPickerOverlay(
         }
     }
 }
-
-
-
