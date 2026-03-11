@@ -127,7 +127,7 @@ fun ImageTaskCard(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppIcon(
-                            glyph = IconToken.CALENDAR,
+                            glyph = IconToken.CLOCK,
                             tint = SpineTheme.colors.textTertiary,
                             modifier = Modifier.size(13.dp),
                         )

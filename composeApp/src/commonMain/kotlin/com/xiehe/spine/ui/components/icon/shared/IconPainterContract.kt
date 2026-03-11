@@ -8,6 +8,7 @@ import spine.composeapp.generated.resources.icons_action_icon_add
 import spine.composeapp.generated.resources.icons_action_icon_back
 import spine.composeapp.generated.resources.icons_action_icon_bell
 import spine.composeapp.generated.resources.icons_action_icon_calendar
+import spine.composeapp.generated.resources.icons_action_icon_clock
 import spine.composeapp.generated.resources.icons_action_icon_chevron_down
 import spine.composeapp.generated.resources.icons_action_icon_chevron_right
 import spine.composeapp.generated.resources.icons_action_icon_delete
@@ -93,6 +94,7 @@ internal fun IconToken.composeDrawable(): DrawableResource {
         IconToken.SCAN_SEARCH -> Res.drawable.icons_status_icon_scan_search
         IconToken.SEARCH -> Res.drawable.icons_action_icon_search
         IconToken.CALENDAR -> Res.drawable.icons_action_icon_calendar
+        IconToken.CLOCK -> Res.drawable.icons_action_icon_clock
         IconToken.LOCK -> Res.drawable.icons_status_icon_lock
         IconToken.SETTINGS -> Res.drawable.icons_status_icon_settings
         IconToken.ARROW_RIGHT,

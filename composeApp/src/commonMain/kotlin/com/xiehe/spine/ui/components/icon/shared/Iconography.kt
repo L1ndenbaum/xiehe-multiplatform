@@ -53,6 +53,7 @@ enum class IconToken {
     SCAN_SEARCH,
     SEARCH,
     CALENDAR,
+    CLOCK,
     LOCK,
     SETTINGS,
     ARROW_RIGHT,
