@@ -126,7 +126,7 @@ fun DashboardScreen(
                         DashboardStatCard(
                             title = "总影像数",
                             value = overview.totalImages.toString(),
-                            icon = IconToken.SCAN_SEARCH,
+                            icon = IconToken.IMAGE,
                             colors = imageStatGradient(colors),
                             modifier = Modifier.weight(1f),
                         )
