@@ -15,18 +15,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.notification.NotificationRepository
-import com.xiehe.spine.ui.components.icon.shared.AppIcon
+import com.xiehe.spine.ui.components.card.message.MessageNoticeCard
 import com.xiehe.spine.ui.components.card.shared.Card
-import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.PeriodicTaskTrigger
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.message.shared.MessageCard
+import com.xiehe.spine.ui.components.icon.shared.AppIcon
+import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.message.MessagesViewModel
 
@@ -38,6 +41,7 @@ fun MessagesScreen(
     onSessionUpdated: (UserSession) -> Unit,
 ) {
     val state by vm.state.collectAsState()
+    var localNotice by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(session.accessToken) {
         vm.load(
@@ -65,19 +69,31 @@ fun MessagesScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpineTheme.colors.background),
+            .background(SpineTheme.colors.backgroundElevated),
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (state.errorMessage != null) {
+            localNotice?.let {
                 item {
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = state.errorMessage ?: "",
+                            text = it,
+                            style = SpineTheme.typography.subhead,
+                            color = SpineTheme.colors.warning,
+                        )
+                    }
+                }
+            }
+
+            state.errorMessage?.let {
+                item {
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = it,
                             style = SpineTheme.typography.subhead,
                             color = SpineTheme.colors.error,
                         )
@@ -115,7 +131,12 @@ fun MessagesScreen(
             }
 
             items(state.items, key = { it.id }) { item ->
-                MessageCard(item)
+                MessageNoticeCard(
+                    item = item,
+                    onDelete = {
+                        localNotice = "当前版本尚未接入删除消息接口"
+                    },
+                )
             }
         }
 
@@ -124,6 +145,3 @@ fun MessagesScreen(
         }
     }
 }
-
-
-

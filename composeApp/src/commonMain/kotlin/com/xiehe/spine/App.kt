@@ -127,6 +127,7 @@ fun App(
     val themePreference by appContainer.themeRepository.preference.collectAsState()
     val patientsState by patientsVm.state.collectAsState()
     val imagesState by imagesVm.state.collectAsState()
+    val messagesState by messagesVm.state.collectAsState()
 
     SpineTheme(preference = themePreference) {
         if (session == null) {
@@ -574,6 +575,7 @@ fun App(
                             headerContent = {
                                 SimpleShellHeader(
                                     title = "消息中心",
+                                    subtitle = "${messagesState.items.size}条消息",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
                                 )
