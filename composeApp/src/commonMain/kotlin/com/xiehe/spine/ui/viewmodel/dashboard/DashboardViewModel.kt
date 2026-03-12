@@ -161,14 +161,13 @@ class DashboardViewModel : BaseViewModel() {
                     ImageWorkflowStatus.PROCESSING,
                 )
             }
-            .map { image ->
-                val linkedPatient = image.patientId?.let(patientsById::get)
-                val patientName = linkedPatient?.name?.trim().orEmpty()
+            .mapNotNull { image ->
+                // Avoid fabricating "患者 27" style entries from orphan image rows.
+                val linkedPatient = image.patientId?.let(patientsById::get) ?: return@mapNotNull null
+                val patientName = linkedPatient.name.trim()
                     .ifBlank { image.patientName?.trim().orEmpty() }
-                    .ifBlank { image.patientId?.let { "患者 $it" }.orEmpty() }
-                    .ifBlank { "未绑定患者" }
-                val patientCode = linkedPatient?.patientId?.trim().orEmpty()
-                    .ifBlank { image.patientId?.let { "P$it" }.orEmpty() }
+                    .ifBlank { "未命名患者" }
+                val patientCode = linkedPatient.patientId.trim()
                     .ifBlank { "未分配编号" }
                 DashboardPendingTask(
                     image = image,
@@ -225,3 +224,4 @@ class DashboardViewModel : BaseViewModel() {
         )
     }
 }
+
