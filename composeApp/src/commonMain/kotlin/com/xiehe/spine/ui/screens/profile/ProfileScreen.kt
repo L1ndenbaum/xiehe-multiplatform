@@ -40,10 +40,6 @@ import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
 
-private val ProfilePageBackground = Color(0xFFF1F5F9)
-private val ProfileCardBorder = Color(0xFFE2E8F0)
-private val ProfileCardShadow = Color(0x120F172A)
-
 @Composable
 fun ProfileScreen(
     session: UserSession,
@@ -52,14 +48,18 @@ fun ProfileScreen(
     onOpenChangePassword: () -> Unit,
     onLogout: () -> Unit,
 ) {
+    val colors = SpineTheme.colors
     val displayName = session.fullName?.takeIf { it.isNotBlank() } ?: session.username
     val scrollState = rememberScrollState()
     val cardShape = RoundedCornerShape(24.dp)
+    val shadowColor = if (colors.isDark) Color.Black.copy(alpha = 0.28f) else Color(0x120F172A)
+    val avatarGlow = colors.primary.copy(alpha = if (colors.isDark) 0.34f else 0.22f)
+    val avatarBrush = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.8f), colors.primary))
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ProfilePageBackground)
+            .background(colors.background)
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -68,10 +68,10 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = 620.dp)
-                .shadow(18.dp, cardShape, ambientColor = ProfileCardShadow, spotColor = ProfileCardShadow)
+                .shadow(18.dp, cardShape, ambientColor = shadowColor, spotColor = shadowColor)
                 .clip(cardShape)
-                .background(Color.White)
-                .border(1.dp, ProfileCardBorder, cardShape)
+                .background(colors.surface)
+                .border(1.dp, colors.borderSubtle, cardShape)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
@@ -87,9 +87,9 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(72.dp)
-                            .shadow(16.dp, RoundedCornerShape(20.dp), ambientColor = Color(0x408B5CF6), spotColor = Color(0x408B5CF6))
+                            .shadow(16.dp, RoundedCornerShape(20.dp), ambientColor = avatarGlow, spotColor = avatarGlow)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(Brush.linearGradient(listOf(Color(0xFFA78BFA), Color(0xFF8B5CF6)))),
+                            .background(avatarBrush),
                         contentAlignment = Alignment.Center,
                     ) {
                         AppIcon(glyph = IconToken.USER_ROUND, tint = Color.White, modifier = Modifier.size(28.dp))
@@ -99,7 +99,7 @@ fun ProfileScreen(
                         Text(
                             text = displayName,
                             style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                            color = Color(0xFF0F172A),
+                            color = colors.textPrimary,
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             ProfileTag(text = "医生", active = true)
@@ -112,11 +112,11 @@ fun ProfileScreen(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFF8FAFC))
-                        .border(1.dp, ProfileCardBorder, RoundedCornerShape(12.dp)),
+                        .background(colors.surfaceMuted)
+                        .border(1.dp, colors.borderSubtle, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    AppIcon(glyph = IconToken.SCAN_SEARCH, tint = Color(0xFF94A3B8), modifier = Modifier.size(18.dp))
+                    AppIcon(glyph = IconToken.SCAN_SEARCH, tint = colors.textTertiary, modifier = Modifier.size(18.dp))
                 }
             }
 
@@ -124,7 +124,7 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(ProfileCardBorder),
+                    .background(colors.borderSubtle),
             )
 
             Row(
@@ -132,9 +132,9 @@ fun ProfileScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ProfileStat(label = "管理患者", value = "128", modifier = Modifier.weight(1f))
-                ProfileStatDivider()
+                ProfileStatDivider(color = colors.borderSubtle)
                 ProfileStat(label = "本月审核", value = "56", modifier = Modifier.weight(1f))
-                ProfileStatDivider()
+                ProfileStatDivider(color = colors.borderSubtle)
                 ProfileStat(label = "完成率", value = "98%", modifier = Modifier.weight(1f))
             }
         }
@@ -143,10 +143,10 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = 620.dp)
-                .shadow(16.dp, cardShape, ambientColor = ProfileCardShadow, spotColor = ProfileCardShadow)
+                .shadow(16.dp, cardShape, ambientColor = shadowColor, spotColor = shadowColor)
                 .clip(cardShape)
-                .background(Color.White)
-                .border(1.dp, ProfileCardBorder, cardShape),
+                .background(colors.surface)
+                .border(1.dp, colors.borderSubtle, cardShape),
         ) {
             ProfileMenuRow(
                 label = "个人信息",
@@ -183,10 +183,10 @@ fun ProfileScreen(
                 .fillMaxWidth()
                 .widthIn(max = 620.dp)
                 .height(56.dp)
-                .shadow(10.dp, RoundedCornerShape(20.dp), ambientColor = ProfileCardShadow, spotColor = ProfileCardShadow)
+                .shadow(10.dp, RoundedCornerShape(20.dp), ambientColor = shadowColor, spotColor = shadowColor)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
-                .border(1.dp, ProfileCardBorder, RoundedCornerShape(20.dp))
+                .background(colors.surface)
+                .border(1.dp, colors.borderSubtle, RoundedCornerShape(20.dp))
                 .clickable(onClick = onLogout),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -195,11 +195,11 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AppIcon(glyph = IconToken.BACK, tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
+                AppIcon(glyph = IconToken.BACK, tint = colors.error, modifier = Modifier.size(16.dp))
                 Text(
                     text = "退出登录",
                     style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFFEF4444),
+                    color = colors.error,
                 )
             }
         }
@@ -209,11 +209,11 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileStatDivider() {
+private fun ProfileStatDivider(color: Color) {
     Box(
         modifier = Modifier
             .width(1.dp)
             .height(46.dp)
-            .background(ProfileCardBorder),
+            .background(color),
     )
 }

@@ -55,15 +55,19 @@ fun ProfileTag(
     text: String,
     active: Boolean,
 ) {
+    val colors = SpineTheme.colors
     val shape = RoundedCornerShape(999.dp)
-    val textColor = if (active) Color.White else Color(0xFF059669)
+    val textColor = if (active) colors.onPrimary else colors.success
     val modifier = if (active) {
         Modifier.background(
-            brush = Brush.linearGradient(listOf(Color(0xFF8B5CF6), Color(0xFF7C3AED))),
+            brush = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.82f), colors.primary)),
             shape = shape,
         )
     } else {
-        Modifier.background(color = Color(0xFFECFDF5), shape = shape)
+        Modifier.background(
+            color = colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+            shape = shape,
+        )
     }
     Text(
         text = text,
@@ -79,6 +83,7 @@ fun ProfileStat(
     value: String,
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineTheme.colors
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -87,12 +92,12 @@ fun ProfileStat(
         Text(
             text = value,
             style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-            color = Color(0xFF0F172A),
+            color = colors.textPrimary,
         )
         Text(
             text = label,
             style = SpineTheme.typography.caption,
-            color = Color(0xFF64748B),
+            color = colors.textSecondary,
         )
     }
 }
@@ -105,6 +110,7 @@ fun ProfileMenuRow(
     onClick: (() -> Unit)?,
     showDivider: Boolean,
 ) {
+    val colors = SpineTheme.colors
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -137,12 +143,12 @@ fun ProfileMenuRow(
                 Text(
                     text = label,
                     style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-                    color = Color(0xFF0F172A),
+                    color = colors.textPrimary,
                 )
             }
             AppIcon(
                 glyph = IconToken.CHEVRON_RIGHT,
-                tint = Color(0xFFCBD5E1),
+                tint = colors.textTertiary,
                 modifier = Modifier.size(16.dp),
             )
         }
@@ -153,7 +159,7 @@ fun ProfileMenuRow(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .height(1.dp)
-                    .background(Color(0xFFE2E8F0)),
+                    .background(colors.borderSubtle),
             )
         }
     }

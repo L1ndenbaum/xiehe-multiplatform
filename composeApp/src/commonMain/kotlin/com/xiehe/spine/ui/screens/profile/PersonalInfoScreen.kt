@@ -44,10 +44,6 @@ import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 
-private val ProfileInfoBackground = Color(0xFFF1F5F9)
-private val ProfileInfoCardBorder = Color(0xFFE2E8F0)
-private val ProfileInfoCardShadow = Color(0x120F172A)
-
 private enum class PersonalInfoEditField {
     NAME,
     ROLE,
@@ -62,10 +58,15 @@ fun PersonalInfoScreen(
     onSessionUpdated: (UserSession) -> Unit,
 ) {
     val state by vm.state.collectAsState()
+    val colors = SpineTheme.colors
     val scrollState = rememberScrollState()
     var editingField by remember { mutableStateOf<PersonalInfoEditField?>(null) }
     var localNotice by remember { mutableStateOf<String?>(null) }
     val cardShape = RoundedCornerShape(24.dp)
+    val shadowColor = if (colors.isDark) Color.Black.copy(alpha = 0.28f) else Color(0x120F172A)
+    val avatarGlow = colors.primary.copy(alpha = if (colors.isDark) 0.34f else 0.22f)
+    val avatarBrush = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.8f), colors.primary))
+    val accentBrush = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.86f), colors.primary))
 
     LaunchedEffect(session.accessToken) {
         vm.seedFromSession(session)
@@ -85,7 +86,7 @@ fun PersonalInfoScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ProfileInfoBackground),
+            .background(colors.background),
     ) {
         Column(
             modifier = Modifier
@@ -98,10 +99,10 @@ fun PersonalInfoScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 620.dp)
-                    .shadow(16.dp, cardShape, ambientColor = ProfileInfoCardShadow, spotColor = ProfileInfoCardShadow)
+                    .shadow(16.dp, cardShape, ambientColor = shadowColor, spotColor = shadowColor)
                     .clip(cardShape)
-                    .background(Color.White)
-                    .border(1.dp, ProfileInfoCardBorder, cardShape)
+                    .background(colors.surface)
+                    .border(1.dp, colors.borderSubtle, cardShape)
                     .padding(horizontal = 16.dp, vertical = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -110,9 +111,9 @@ fun PersonalInfoScreen(
                     Box(
                         modifier = Modifier
                             .size(84.dp)
-                            .shadow(16.dp, RoundedCornerShape(20.dp), ambientColor = Color(0x408B5CF6), spotColor = Color(0x408B5CF6))
+                            .shadow(16.dp, RoundedCornerShape(20.dp), ambientColor = avatarGlow, spotColor = avatarGlow)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(Brush.linearGradient(listOf(Color(0xFFA78BFA), Color(0xFF8B5CF6)))),
+                            .background(avatarBrush),
                         contentAlignment = Alignment.Center,
                     ) {
                         AppIcon(glyph = IconToken.USER_ROUND, tint = Color.White, modifier = Modifier.size(28.dp))
@@ -122,8 +123,8 @@ fun PersonalInfoScreen(
                             .align(Alignment.BottomEnd)
                             .size(28.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Brush.linearGradient(listOf(Color(0xFF8B5CF6), Color(0xFF7C3AED))))
-                            .border(2.dp, Color.White, RoundedCornerShape(14.dp)),
+                            .background(accentBrush)
+                            .border(2.dp, colors.surface, RoundedCornerShape(14.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
                         AppIcon(glyph = IconToken.IMAGE, tint = Color.White, modifier = Modifier.size(13.dp))
@@ -133,7 +134,7 @@ fun PersonalInfoScreen(
                 Text(
                     text = displayName,
                     style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFF0F172A),
+                    color = colors.textPrimary,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ProfileTag(text = roleLabel, active = true)
@@ -145,10 +146,10 @@ fun PersonalInfoScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 620.dp)
-                    .shadow(16.dp, cardShape, ambientColor = ProfileInfoCardShadow, spotColor = ProfileInfoCardShadow)
+                    .shadow(16.dp, cardShape, ambientColor = shadowColor, spotColor = shadowColor)
                     .clip(cardShape)
-                    .background(Color.White)
-                    .border(1.dp, ProfileInfoCardBorder, cardShape),
+                    .background(colors.surface)
+                    .border(1.dp, colors.borderSubtle, cardShape),
             ) {
                 Row(
                     modifier = Modifier
@@ -161,19 +162,19 @@ fun PersonalInfoScreen(
                         modifier = Modifier
                             .size(width = 4.dp, height = 18.dp)
                             .clip(RoundedCornerShape(999.dp))
-                            .background(Brush.linearGradient(listOf(Color(0xFFA855F7), Color(0xFF7C3AED)))),
+                            .background(accentBrush),
                     )
                     Text(
                         text = "基本资料",
                         style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF0F172A),
+                        color = colors.textPrimary,
                     )
                 }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(ProfileInfoCardBorder),
+                        .background(colors.borderSubtle),
                 )
 
                 ProfileInfoRow(
@@ -224,13 +225,25 @@ fun PersonalInfoScreen(
             }
 
             localNotice?.let {
-                InlineMessageCard(message = it, color = Color(0xFF7C3AED), background = Color(0xFFF5F3FF))
+                InlineMessageCard(
+                    message = it,
+                    color = colors.primary,
+                    background = colors.primaryMuted,
+                )
             }
             state.errorMessage?.let {
-                InlineMessageCard(message = it, color = Color(0xFFDC2626), background = Color(0xFFFEF2F2))
+                InlineMessageCard(
+                    message = it,
+                    color = colors.error,
+                    background = colors.error.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+                )
             }
             state.successMessage?.let {
-                InlineMessageCard(message = it, color = Color(0xFF059669), background = Color(0xFFECFDF5))
+                InlineMessageCard(
+                    message = it,
+                    color = colors.success,
+                    background = colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -290,6 +303,7 @@ private fun ProfileInfoRow(
     onClick: () -> Unit,
     showDivider: Boolean = true,
 ) {
+    val colors = SpineTheme.colors
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -308,21 +322,21 @@ private fun ProfileInfoRow(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFF5F3FF)),
+                        .background(colors.primaryMuted),
                     contentAlignment = Alignment.Center,
                 ) {
-                    AppIcon(glyph = glyph, tint = Color(0xFF8B5CF6), modifier = Modifier.size(15.dp))
+                    AppIcon(glyph = glyph, tint = colors.primary, modifier = Modifier.size(15.dp))
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = label,
                         style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
-                        color = Color(0xFF94A3B8),
+                        color = colors.textTertiary,
                     )
                     Text(
                         text = value,
                         style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF0F172A),
+                        color = colors.textPrimary,
                         maxLines = 1,
                     )
                 }
@@ -331,13 +345,13 @@ private fun ProfileInfoRow(
                 modifier = Modifier
                     .size(30.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFF8FAFC))
-                    .border(1.dp, ProfileInfoCardBorder, RoundedCornerShape(10.dp)),
+                    .background(colors.surfaceMuted)
+                    .border(1.dp, colors.borderSubtle, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center,
             ) {
                 AppIcon(
                     glyph = if (editable) IconToken.EDIT else IconToken.CHEVRON_RIGHT,
-                    tint = Color(0xFF94A3B8),
+                    tint = colors.textTertiary,
                     modifier = Modifier.size(14.dp),
                 )
             }
@@ -349,7 +363,7 @@ private fun ProfileInfoRow(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .height(1.dp)
-                    .background(Color(0xFFF1F5F9)),
+                    .background(colors.borderSubtle),
             )
         }
     }
