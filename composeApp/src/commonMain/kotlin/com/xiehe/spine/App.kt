@@ -398,10 +398,12 @@ fun App(
                 val current = requireNotNull(currentRoute)
                 when (current) {
                     is OverlayRoute.PatientDetail -> {
+                        var patientDetailNotice by remember(current.patientId) { mutableStateOf<String?>(null) }
                         MobileShell(
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
                             headerContent = {
+                                val colors = SpineTheme.colors
                                 SimpleShellHeader(
                                     title = "患者详情",
                                     subtitle = "查看和管理患者完整信息",
@@ -413,8 +415,13 @@ fun App(
                                             onClick = { route = OverlayRoute.PatientEdit(current.patientId) },
                                         )
                                         HeaderTextAction(
-                                            text = "上传影像",
-                                            onClick = { route = OverlayRoute.ImageUpload },
+                                            text = "删除",
+                                            onClick = {
+                                                patientDetailNotice = "当前版本尚未接入删除患者接口"
+                                            },
+                                            fill = colors.error,
+                                            borderColor = colors.error,
+                                            textColor = colors.onPrimary,
                                         )
                                     },
                                 )
@@ -434,6 +441,8 @@ fun App(
                                         examType = examType,
                                     )
                                 },
+                                onOpenImageUpload = { route = OverlayRoute.ImageUpload },
+                                noticeMessage = patientDetailNotice,
                             )
                         }
                     }

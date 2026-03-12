@@ -34,6 +34,8 @@ fun PatientDetailScreen(
     imageRepository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
+    onOpenImageUpload: () -> Unit,
+    noticeMessage: String? = null,
 ) {
     val state by vm.state.collectAsState()
 
@@ -58,6 +60,17 @@ fun PatientDetailScreen(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            noticeMessage?.let {
+                item {
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = it,
+                            style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.warning),
+                        )
+                    }
+                }
+            }
+
             state.errorMessage?.let {
                 item {
                     Card(modifier = Modifier.fillMaxWidth()) {
@@ -92,6 +105,7 @@ fun PatientDetailScreen(
                     PatientImageRecordsCard(
                         images = state.relatedImages,
                         onOpenAnalysis = onOpenAnalysis,
+                        onUploadImage = onOpenImageUpload,
                     )
                 }
             }

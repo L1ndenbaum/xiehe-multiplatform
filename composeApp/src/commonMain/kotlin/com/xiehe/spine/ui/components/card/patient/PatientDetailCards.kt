@@ -26,8 +26,10 @@ import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.patient.PatientDetail
 import com.xiehe.spine.ui.components.card.image.imageStatusPresentation
 import com.xiehe.spine.ui.components.card.image.inferExamType
+import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
@@ -167,16 +169,29 @@ fun PatientOverviewCards(
 fun PatientImageRecordsCard(
     images: List<ImageFileSummary>,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
+    onUploadImage: () -> Unit,
 ) {
     val colors = SpineTheme.colors
     val records = images.sortedByDescending { it.createdAt ?: it.uploadedAt ?: it.studyDate.orEmpty() }
 
     Card(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "影像记录",
-            style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-            color = colors.textPrimary,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "影像记录",
+                style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+                color = colors.textPrimary,
+            )
+            Button(
+                text = "上传图片",
+                onClick = onUploadImage,
+                leadingGlyph = IconToken.UPLOAD,
+                modifier = Modifier.height(40.dp),
+            )
+        }
 
         if (records.isEmpty()) {
             Box(

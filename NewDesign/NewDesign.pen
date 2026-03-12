@@ -14398,13 +14398,14 @@
           "x": 32,
           "y": 470,
           "name": "confirm",
-          "width": 311,
-          "height": 220,
+          "width": 321,
+          "height": 254,
           "fill": "#FFFFFF",
           "cornerRadius": 24,
           "layout": "vertical",
           "gap": 16,
           "padding": 24,
+          "justifyContent": "center",
           "alignItems": "center",
           "children": [
             {
@@ -14414,17 +14415,19 @@
               "height": 56,
               "fill": "#FEF2F2",
               "cornerRadius": 28,
+              "layout": "vertical",
               "justifyContent": "center",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "qMt5v",
-                  "fill": "#EF4444",
-                  "content": "!",
-                  "fontFamily": "Inter",
-                  "fontSize": 18,
-                  "fontWeight": "700"
+                  "type": "icon_font",
+                  "id": "v3GgC",
+                  "name": "trashIconA",
+                  "width": 21,
+                  "height": 18,
+                  "iconFontName": "trash-2",
+                  "iconFontFamily": "lucide",
+                  "fill": "#EF4444"
                 }
               ]
             },
