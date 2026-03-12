@@ -36,7 +36,7 @@ import com.xiehe.spine.data.patient.PatientSummary
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.form.picker.PickerDialog
+import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.patient.GenderFilter
 import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
@@ -331,49 +331,5 @@ private fun patientCardStyle(gender: String): PatientCardStyle {
             badgeBackground = colors.primaryMuted,
             badgeText = colors.primary,
         )
-    }
-}
-
-@Composable
-private fun OptionPickerOverlay(
-    title: String,
-    options: List<String>,
-    selected: String,
-    onDismiss: () -> Unit,
-    onSelect: (String) -> Unit,
-) {
-    PickerDialog(
-        title = "",
-        onDismissRequest = onDismiss,
-        showActionRow = false,
-    ) { dismiss ->
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = title, style = SpineTheme.typography.title)
-            options.forEach { item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = if (item == selected) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
-                            shape = RoundedCornerShape(SpineTheme.radius.md),
-                        )
-                        .clickable {
-                            onSelect(item)
-                            dismiss()
-                        }
-                        .padding(horizontal = 12.dp, vertical = 11.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = item,
-                        color = if (item == selected) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary,
-                    )
-                    if (item == selected) {
-                        Text(text = "✓", color = SpineTheme.colors.onPrimary)
-                    }
-                }
-            }
-        }
     }
 }
