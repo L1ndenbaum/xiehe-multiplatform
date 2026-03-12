@@ -13,6 +13,7 @@ import spine.composeapp.generated.resources.icons_action_icon_chevron_down
 import spine.composeapp.generated.resources.icons_action_icon_chevron_right
 import spine.composeapp.generated.resources.icons_action_icon_delete
 import spine.composeapp.generated.resources.icons_action_icon_download
+import spine.composeapp.generated.resources.icons_action_icon_edit
 import spine.composeapp.generated.resources.icons_action_icon_export
 import spine.composeapp.generated.resources.icons_action_icon_eye
 import spine.composeapp.generated.resources.icons_action_icon_eye_off
@@ -93,6 +94,7 @@ internal fun IconToken.composeDrawable(): DrawableResource {
         IconToken.IMAGE -> Res.drawable.icons_status_icon_image
         IconToken.SCAN_SEARCH -> Res.drawable.icons_status_icon_scan_search
         IconToken.SEARCH -> Res.drawable.icons_action_icon_search
+        IconToken.EDIT -> Res.drawable.icons_action_icon_edit
         IconToken.CALENDAR -> Res.drawable.icons_action_icon_calendar
         IconToken.CLOCK -> Res.drawable.icons_action_icon_clock
         IconToken.LOCK -> Res.drawable.icons_status_icon_lock
@@ -129,3 +131,4 @@ internal fun IconToken.composeDrawable(): DrawableResource {
         IconToken.MEASURE_AUX_POLYGON -> Res.drawable.icons_measure_toolkit_aux_polygon
     }
 }
+

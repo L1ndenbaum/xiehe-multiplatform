@@ -309,7 +309,8 @@ fun App(
 
                             else -> SimpleShellHeader(
                                 title = "个人中心",
-                                subtitle = activeSession.fullName ?: activeSession.username,
+                                actionGlyph = IconToken.BELL,
+                                onAction = { route = OverlayRoute.Messages },
                             )
                         }
                     },
@@ -525,6 +526,7 @@ fun App(
                             headerContent = {
                                 SimpleShellHeader(
                                     title = "个人信息",
+                                    subtitle = "查看和修改您的个人资料",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
                                 )
@@ -620,3 +622,4 @@ fun App(
         }
     }
 }
+
