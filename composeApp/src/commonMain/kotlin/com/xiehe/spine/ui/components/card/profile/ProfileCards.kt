@@ -23,32 +23,27 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.theme.SpineAppColors
 import com.xiehe.spine.ui.theme.SpineTheme
 
+enum class ProfileMenuTone {
+    PRIMARY,
+    INFO,
+    WARNING,
+    SUCCESS,
+}
+
 data class ProfileMenuPalette(
-    val colors: List<Color>,
-    val glow: Color,
-)
+    private val tone: ProfileMenuTone,
+) {
+    @Composable
+    fun baseColor(): Color = resolveToneColor(tone, SpineTheme.colors)
+}
 
-val ProfilePersonalInfoPalette = ProfileMenuPalette(
-    colors = listOf(Color(0xFFA78BFA), Color(0xFF8B5CF6)),
-    glow = Color(0x408B5CF6),
-)
-
-val ProfileOrganizationPalette = ProfileMenuPalette(
-    colors = listOf(Color(0xFFC084FC), Color(0xFFA855F7)),
-    glow = Color(0x40A855F7),
-)
-
-val ProfilePasswordPalette = ProfileMenuPalette(
-    colors = listOf(Color(0xFFFBBF24), Color(0xFFF59E0B)),
-    glow = Color(0x40F59E0B),
-)
-
-val ProfileSettingsPalette = ProfileMenuPalette(
-    colors = listOf(Color(0xFF34D399), Color(0xFF10B981)),
-    glow = Color(0x4010B981),
-)
+val ProfilePersonalInfoPalette = ProfileMenuPalette(ProfileMenuTone.PRIMARY)
+val ProfileOrganizationPalette = ProfileMenuPalette(ProfileMenuTone.INFO)
+val ProfilePasswordPalette = ProfileMenuPalette(ProfileMenuTone.WARNING)
+val ProfileSettingsPalette = ProfileMenuPalette(ProfileMenuTone.SUCCESS)
 
 @Composable
 fun ProfileTag(
@@ -111,6 +106,8 @@ fun ProfileMenuRow(
     showDivider: Boolean,
 ) {
     val colors = SpineTheme.colors
+    val baseColor = palette.baseColor()
+    val shadowColor = baseColor.copy(alpha = if (colors.isDark) 0.26f else 0.18f)
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -131,14 +128,18 @@ fun ProfileMenuRow(
                         .shadow(
                             elevation = 14.dp,
                             shape = RoundedCornerShape(12.dp),
-                            ambientColor = palette.glow,
-                            spotColor = palette.glow,
+                            ambientColor = shadowColor,
+                            spotColor = shadowColor,
                         )
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Brush.linearGradient(palette.colors)),
+                        .background(
+                            Brush.linearGradient(
+                                listOf(baseColor.copy(alpha = 0.78f), baseColor),
+                            ),
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    AppIcon(glyph = glyph, tint = Color.White, modifier = Modifier.size(18.dp))
+                    AppIcon(glyph = glyph, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
                 }
                 Text(
                     text = label,
@@ -163,4 +164,14 @@ fun ProfileMenuRow(
             )
         }
     }
+}
+
+private fun resolveToneColor(
+    tone: ProfileMenuTone,
+    colors: SpineAppColors,
+): Color = when (tone) {
+    ProfileMenuTone.PRIMARY -> colors.primary
+    ProfileMenuTone.INFO -> colors.info
+    ProfileMenuTone.WARNING -> colors.warning
+    ProfileMenuTone.SUCCESS -> colors.success
 }

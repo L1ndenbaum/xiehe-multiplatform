@@ -52,8 +52,8 @@ fun ProfileScreen(
     val displayName = session.fullName?.takeIf { it.isNotBlank() } ?: session.username
     val scrollState = rememberScrollState()
     val cardShape = RoundedCornerShape(24.dp)
-    val shadowColor = if (colors.isDark) Color.Black.copy(alpha = 0.28f) else Color(0x120F172A)
-    val avatarGlow = colors.primary.copy(alpha = if (colors.isDark) 0.34f else 0.22f)
+    val shadowColor = colors.textPrimary.copy(alpha = if (colors.isDark) 0.22f else 0.08f)
+    val avatarGlow = colors.primary.copy(alpha = if (colors.isDark) 0.32f else 0.2f)
     val avatarBrush = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.8f), colors.primary))
 
     Column(
@@ -92,7 +92,7 @@ fun ProfileScreen(
                             .background(avatarBrush),
                         contentAlignment = Alignment.Center,
                     ) {
-                        AppIcon(glyph = IconToken.USER_ROUND, tint = Color.White, modifier = Modifier.size(28.dp))
+                        AppIcon(glyph = IconToken.USER_ROUND, tint = colors.onPrimary, modifier = Modifier.size(28.dp))
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -69,3 +69,8 @@ internal fun darkPalette(brand: AppThemeBrandColor): SpineAppColors {
         tabInactive = Color(0xFF94A3B8),
     )
 }
+
+fun previewBrandPrimaryColor(
+    brand: AppThemeBrandColor,
+    isDark: Boolean,
+): Color = if (isDark) darkPalette(brand).primary else lightPalette(brand).primary

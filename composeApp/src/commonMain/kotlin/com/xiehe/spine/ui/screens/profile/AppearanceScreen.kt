@@ -40,15 +40,10 @@ import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
+import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.theme.ThemeMode
+import com.xiehe.spine.ui.theme.previewBrandPrimaryColor
 import com.xiehe.spine.ui.viewmodel.profile.AppearanceViewModel
-
-private val SettingsBackground = Color(0xFFF1F5F9)
-private val SettingsCardBorder = Color(0xFFE2E8F0)
-private val SettingsCardShadow = Color(0x120F172A)
-private val SettingsTitle = Color(0xFF0F172A)
-private val SettingsBody = Color(0xFF94A3B8)
-private val SettingsPurple = Color(0xFF8B5CF6)
 
 private enum class SettingsPickerType {
     LANGUAGE,
@@ -58,6 +53,8 @@ private enum class SettingsPickerType {
 @Composable
 fun AppearanceScreen(vm: AppearanceViewModel) {
     val preference by vm.state.collectAsState()
+    val colors = SpineTheme.colors
+    val shadowColor = colors.textPrimary.copy(alpha = if (colors.isDark) 0.22f else 0.08f)
     var selectedBrand by remember(preference.brand) { mutableStateOf(preference.brand) }
     var darkModeEnabled by remember(preference.mode) { mutableStateOf(preference.mode == ThemeMode.DARK) }
     var notificationsEnabled by rememberSaveable { mutableStateOf(true) }
@@ -76,7 +73,7 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SettingsBackground)
+            .background(colors.background)
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -87,13 +84,14 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
                 selectedBrand = it
                 successMessage = null
             },
+            shadowColor = shadowColor,
         )
 
-        SettingsSectionCard(title = "界面设置") {
+        SettingsSectionCard(title = "界面设置", shadowColor = shadowColor) {
             SettingsToggleRow(
                 iconGlyph = IconToken.EYE,
-                iconTint = SettingsPurple,
-                iconBackground = Color(0xFFF1F5F9),
+                iconTint = colors.primary,
+                iconBackground = colors.primaryMuted,
                 title = "启用暗色主题",
                 subtitle = "切换深色界面风格",
                 checked = darkModeEnabled,
@@ -105,8 +103,8 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
             SettingsDivider()
             SettingsToggleRow(
                 iconGlyph = IconToken.BELL,
-                iconTint = SettingsPurple,
-                iconBackground = Color(0xFFF5F3FF),
+                iconTint = colors.info,
+                iconBackground = colors.info.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
                 title = "显示系统通知",
                 subtitle = "接收消息和提醒推送",
                 checked = notificationsEnabled,
@@ -118,8 +116,8 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
             SettingsDivider()
             SettingsToggleRow(
                 iconGlyph = IconToken.SAVE,
-                iconTint = Color(0xFFF59E0B),
-                iconBackground = Color(0xFFFFFBEB),
+                iconTint = colors.warning,
+                iconBackground = colors.warning.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
                 title = "自动保存草稿",
                 subtitle = "编辑内容自动暂存",
                 checked = autoSaveEnabled,
@@ -130,8 +128,13 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
             )
         }
 
-        SettingsSectionCard(title = "语言和地区") {
-            SettingsFieldLabel(text = "语言", iconGlyph = IconToken.MESSAGE, iconTint = Color(0xFF3B82F6), iconBackground = Color(0xFFEFF6FF))
+        SettingsSectionCard(title = "语言和地区", shadowColor = shadowColor) {
+            SettingsFieldLabel(
+                text = "语言",
+                iconGlyph = IconToken.MESSAGE,
+                iconTint = colors.info,
+                iconBackground = colors.info.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+            )
             SettingsDropdownField(
                 text = language,
                 onClick = {
@@ -140,7 +143,12 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
                 },
             )
             Spacer(modifier = Modifier.height(8.dp))
-            SettingsFieldLabel(text = "时区", iconGlyph = IconToken.CLOCK, iconTint = Color(0xFF10B981), iconBackground = Color(0xFFECFDF5))
+            SettingsFieldLabel(
+                text = "时区",
+                iconGlyph = IconToken.CLOCK,
+                iconTint = colors.success,
+                iconBackground = colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+            )
             SettingsDropdownField(
                 text = timezone,
                 onClick = {
@@ -198,33 +206,27 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
 private fun SettingsBrandCard(
     selectedBrand: AppThemeBrandColor,
     onBrandSelected: (AppThemeBrandColor) -> Unit,
+    shadowColor: Color,
 ) {
-    SettingsSectionCard(title = "主色体系") {
+    val colors = SpineTheme.colors
+    SettingsSectionCard(title = "主色体系", shadowColor = shadowColor) {
         Text(
             text = "选择应用品牌色",
-            style = com.xiehe.spine.ui.theme.SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
-            color = SettingsBody,
+            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
+            color = colors.textSecondary,
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(18.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SettingsBrandDot(
-                color = SettingsPurple,
-                selected = selectedBrand == AppThemeBrandColor.PURPLE,
-                onClick = { onBrandSelected(AppThemeBrandColor.PURPLE) },
-            )
-            SettingsBrandDot(
-                color = Color(0xFF3B82F6),
-                selected = selectedBrand == AppThemeBrandColor.BLUE,
-                onClick = { onBrandSelected(AppThemeBrandColor.BLUE) },
-            )
-            SettingsBrandDot(
-                color = Color(0xFF10B981),
-                selected = selectedBrand == AppThemeBrandColor.GREEN,
-                onClick = { onBrandSelected(AppThemeBrandColor.GREEN) },
-            )
+            AppThemeBrandColor.entries.forEach { brand ->
+                SettingsBrandDot(
+                    color = previewBrandPrimaryColor(brand = brand, isDark = colors.isDark),
+                    selected = selectedBrand == brand,
+                    onClick = { onBrandSelected(brand) },
+                )
+            }
         }
     }
 }
@@ -235,13 +237,19 @@ private fun SettingsBrandDot(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val colors = SpineTheme.colors
     Box(
         modifier = Modifier
             .size(40.dp)
-            .shadow(if (selected) 10.dp else 0.dp, CircleShape, ambientColor = color.copy(alpha = 0.3f), spotColor = color.copy(alpha = 0.3f))
+            .shadow(
+                if (selected) 10.dp else 0.dp,
+                CircleShape,
+                ambientColor = color.copy(alpha = if (colors.isDark) 0.28f else 0.2f),
+                spotColor = color.copy(alpha = if (colors.isDark) 0.28f else 0.2f),
+            )
             .clip(CircleShape)
             .background(color)
-            .border(if (selected) 4.dp else 0.dp, Color.White, CircleShape)
+            .border(if (selected) 4.dp else 0.dp, colors.surface, CircleShape)
             .clickable(onClick = onClick),
     )
 }
@@ -249,24 +257,26 @@ private fun SettingsBrandDot(
 @Composable
 private fun SettingsSectionCard(
     title: String,
+    shadowColor: Color,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val colors = SpineTheme.colors
     val shape = RoundedCornerShape(24.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 620.dp)
-            .shadow(14.dp, shape, ambientColor = SettingsCardShadow, spotColor = SettingsCardShadow)
+            .shadow(14.dp, shape, ambientColor = shadowColor, spotColor = shadowColor)
             .clip(shape)
-            .background(Color.White)
-            .border(1.dp, SettingsCardBorder, shape)
+            .background(colors.surface)
+            .border(1.dp, colors.borderSubtle, shape)
             .padding(horizontal = 16.dp, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
         content = {
             Text(
                 text = title,
-                style = com.xiehe.spine.ui.theme.SpineTheme.typography.caption.copy(fontWeight = FontWeight.Bold),
-                color = SettingsBody,
+                style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Bold),
+                color = colors.textSecondary,
             )
             content()
         },
@@ -283,6 +293,7 @@ private fun SettingsToggleRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val colors = SpineTheme.colors
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -305,13 +316,13 @@ private fun SettingsToggleRow(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = title,
-                    style = com.xiehe.spine.ui.theme.SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-                    color = SettingsTitle,
+                    style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
+                    color = colors.textPrimary,
                 )
                 Text(
                     text = subtitle,
-                    style = com.xiehe.spine.ui.theme.SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
-                    color = SettingsBody,
+                    style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
+                    color = colors.textSecondary,
                 )
             }
         }
@@ -324,11 +335,12 @@ private fun SettingsSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val colors = SpineTheme.colors
     Box(
         modifier = Modifier
             .size(width = 44.dp, height = 28.dp)
             .clip(RoundedCornerShape(999.dp))
-            .background(if (checked) SettingsPurple else Color(0xFFE2E8F0))
+            .background(if (checked) colors.primary else colors.borderStrong)
             .clickable(onClick = { onCheckedChange(!checked) })
             .padding(horizontal = 3.dp),
         contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
@@ -337,7 +349,7 @@ private fun SettingsSwitch(
             modifier = Modifier
                 .size(22.dp)
                 .clip(CircleShape)
-                .background(Color.White),
+                .background(colors.surface),
         )
     }
 }
@@ -349,6 +361,7 @@ private fun SettingsFieldLabel(
     iconTint: Color,
     iconBackground: Color,
 ) {
+    val colors = SpineTheme.colors
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -364,8 +377,8 @@ private fun SettingsFieldLabel(
         }
         Text(
             text = text,
-            style = com.xiehe.spine.ui.theme.SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-            color = SettingsTitle,
+            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
+            color = colors.textPrimary,
         )
     }
 }
@@ -375,12 +388,13 @@ private fun SettingsDropdownField(
     text: String,
     onClick: () -> Unit,
 ) {
+    val colors = SpineTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFFF8FAFC))
-            .border(1.dp, SettingsCardBorder, RoundedCornerShape(14.dp))
+            .background(colors.surfaceMuted)
+            .border(1.dp, colors.borderSubtle, RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -388,38 +402,40 @@ private fun SettingsDropdownField(
     ) {
         Text(
             text = text,
-            style = com.xiehe.spine.ui.theme.SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-            color = SettingsTitle,
+            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
+            color = colors.textPrimary,
         )
-        AppIcon(glyph = IconToken.CHEVRON_DOWN, tint = SettingsBody, modifier = Modifier.size(16.dp))
+        AppIcon(glyph = IconToken.CHEVRON_DOWN, tint = colors.textTertiary, modifier = Modifier.size(16.dp))
     }
 }
 
 @Composable
 private fun SettingsDivider() {
+    val colors = SpineTheme.colors
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(Color(0xFFEEF2F7)),
+            .background(colors.borderSubtle),
     )
 }
 
 @Composable
 private fun SettingsInlineMessage(message: String) {
+    val colors = SpineTheme.colors
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 620.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFFECFDF5))
-            .border(1.dp, Color(0xFFBBF7D0), RoundedCornerShape(18.dp))
+            .background(colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f))
+            .border(1.dp, colors.success.copy(alpha = 0.22f), RoundedCornerShape(18.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
     ) {
         Text(
             text = message,
-            style = com.xiehe.spine.ui.theme.SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
-            color = Color(0xFF059669),
+            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
+            color = colors.success,
         )
     }
 }
@@ -432,6 +448,7 @@ private fun SettingsPickerDialog(
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit,
 ) {
+    val colors = SpineTheme.colors
     PickerDialog(
         title = title,
         onDismissRequest = onDismiss,
@@ -443,10 +460,10 @@ private fun SettingsPickerDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (option == currentValue) Color(0xFFF5F3FF) else Color(0xFFF8FAFC))
+                        .background(if (option == currentValue) colors.primaryMuted else colors.surfaceMuted)
                         .border(
                             1.dp,
-                            if (option == currentValue) Color(0xFFE9D5FF) else SettingsCardBorder,
+                            if (option == currentValue) colors.primary.copy(alpha = 0.22f) else colors.borderSubtle,
                             RoundedCornerShape(14.dp),
                         )
                         .clickable {
@@ -459,14 +476,14 @@ private fun SettingsPickerDialog(
                 ) {
                     Text(
                         text = option,
-                        style = com.xiehe.spine.ui.theme.SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-                        color = SettingsTitle,
+                        style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
+                        color = colors.textPrimary,
                     )
                     if (option == currentValue) {
                         Text(
                             text = "✓",
-                            style = com.xiehe.spine.ui.theme.SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                            color = SettingsPurple,
+                            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
+                            color = colors.primary,
                         )
                     }
                 }

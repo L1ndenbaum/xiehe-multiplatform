@@ -63,8 +63,8 @@ fun PersonalInfoScreen(
     var editingField by remember { mutableStateOf<PersonalInfoEditField?>(null) }
     var localNotice by remember { mutableStateOf<String?>(null) }
     val cardShape = RoundedCornerShape(24.dp)
-    val shadowColor = if (colors.isDark) Color.Black.copy(alpha = 0.28f) else Color(0x120F172A)
-    val avatarGlow = colors.primary.copy(alpha = if (colors.isDark) 0.34f else 0.22f)
+    val shadowColor = colors.textPrimary.copy(alpha = if (colors.isDark) 0.22f else 0.08f)
+    val avatarGlow = colors.primary.copy(alpha = if (colors.isDark) 0.32f else 0.2f)
     val avatarBrush = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.8f), colors.primary))
     val accentBrush = Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.86f), colors.primary))
 
@@ -116,7 +116,7 @@ fun PersonalInfoScreen(
                             .background(avatarBrush),
                         contentAlignment = Alignment.Center,
                     ) {
-                        AppIcon(glyph = IconToken.USER_ROUND, tint = Color.White, modifier = Modifier.size(28.dp))
+                        AppIcon(glyph = IconToken.USER_ROUND, tint = colors.onPrimary, modifier = Modifier.size(28.dp))
                     }
                     Box(
                         modifier = Modifier
@@ -127,7 +127,7 @@ fun PersonalInfoScreen(
                             .border(2.dp, colors.surface, RoundedCornerShape(14.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        AppIcon(glyph = IconToken.IMAGE, tint = Color.White, modifier = Modifier.size(13.dp))
+                        AppIcon(glyph = IconToken.IMAGE, tint = colors.onPrimary, modifier = Modifier.size(13.dp))
                     }
                 }
 

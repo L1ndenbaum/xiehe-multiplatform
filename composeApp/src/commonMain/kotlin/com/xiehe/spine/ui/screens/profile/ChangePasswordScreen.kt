@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
+import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.theme.SpineAppColors
 import com.xiehe.spine.ui.theme.SpineTheme
 
 private enum class PasswordStep {
@@ -46,27 +48,14 @@ private enum class PasswordStep {
 
 private data class PasswordStrength(
     val label: String,
-    val color: Color,
     val score: Int,
 )
-
-private val PasswordPageBackground = Color(0xFFF1F5F9)
-private val PasswordCardBorder = Color(0xFFE2E8F0)
-private val PasswordCardShadow = Color(0x120F172A)
-private val PasswordMutedText = Color(0xFF94A3B8)
-private val PasswordBodyText = Color(0xFF64748B)
-private val PasswordTitleText = Color(0xFF0F172A)
-private val PasswordPurple = Color(0xFF8B5CF6)
-private val PasswordPurpleDark = Color(0xFF7C3AED)
-private val PasswordSuccess = Color(0xFF10B981)
-private val PasswordSuccessLight = Color(0xFF34D399)
-private val PasswordWarning = Color(0xFFF59E0B)
-private val PasswordNeutralLine = Color(0xFFE2E8F0)
 
 @Composable
 fun ChangePasswordScreen(
     onFinished: () -> Unit = {},
 ) {
+    val colors = SpineTheme.colors
     var step by remember { mutableStateOf(PasswordStep.VERIFY) }
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
@@ -82,7 +71,7 @@ fun ChangePasswordScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PasswordPageBackground),
+            .background(colors.background),
     ) {
         Column(
             modifier = Modifier
@@ -178,15 +167,17 @@ fun ChangePasswordScreen(
 
 @Composable
 private fun PasswordStepCard(step: PasswordStep) {
+    val colors = SpineTheme.colors
     val shape = RoundedCornerShape(20.dp)
+    val shadowColor = colors.textPrimary.copy(alpha = if (colors.isDark) 0.22f else 0.08f)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 620.dp)
-            .shadow(12.dp, shape, ambientColor = PasswordCardShadow, spotColor = PasswordCardShadow)
+            .shadow(12.dp, shape, ambientColor = shadowColor, spotColor = shadowColor)
             .clip(shape)
-            .background(Color.White)
-            .border(1.dp, PasswordCardBorder, shape)
+            .background(colors.surface)
+            .border(1.dp, colors.borderSubtle, shape)
             .padding(horizontal = 14.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top,
@@ -234,16 +225,17 @@ private fun PasswordStepNode(
     state: StepNodeState,
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineTheme.colors
     val container = when (state) {
-        StepNodeState.ACTIVE -> Brush.linearGradient(listOf(PasswordPurple, PasswordPurpleDark))
-        StepNodeState.DONE -> Brush.linearGradient(listOf(PasswordSuccessLight, PasswordSuccess))
-        StepNodeState.INACTIVE -> Brush.linearGradient(listOf(Color(0xFFF1F5F9), Color(0xFFF1F5F9)))
+        StepNodeState.ACTIVE -> Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.82f), colors.primary))
+        StepNodeState.DONE -> Brush.linearGradient(listOf(colors.success.copy(alpha = 0.82f), colors.success))
+        StepNodeState.INACTIVE -> Brush.linearGradient(listOf(colors.surfaceMuted, colors.surfaceMuted))
     }
-    val textColor = if (state == StepNodeState.INACTIVE) PasswordMutedText else Color.White
+    val textColor = if (state == StepNodeState.INACTIVE) colors.textTertiary else colors.onPrimary
     val labelColor = when (state) {
-        StepNodeState.ACTIVE -> PasswordPurple
-        StepNodeState.DONE -> PasswordMutedText
-        StepNodeState.INACTIVE -> PasswordMutedText
+        StepNodeState.ACTIVE -> colors.primary
+        StepNodeState.DONE -> colors.textSecondary
+        StepNodeState.INACTIVE -> colors.textTertiary
     }
     Column(
         modifier = modifier,
@@ -273,12 +265,13 @@ private fun PasswordStepNode(
 
 @Composable
 private fun PasswordStepConnector(completed: Boolean) {
+    val colors = SpineTheme.colors
     Box(
         modifier = Modifier
             .padding(top = 15.dp)
             .width(44.dp)
             .height(2.dp)
-            .background(if (completed) PasswordSuccessLight else PasswordNeutralLine, RoundedCornerShape(999.dp)),
+            .background(if (completed) colors.success else colors.borderSubtle, RoundedCornerShape(999.dp)),
     )
 }
 
@@ -291,6 +284,7 @@ private fun PasswordVerifyCard(
     onToggleVisibility: () -> Unit,
     onNext: () -> Unit,
 ) {
+    val colors = SpineTheme.colors
     PasswordSurfaceCard {
         PasswordCardTitle(title = "验证当前密码")
         PasswordInputBlock(
@@ -302,7 +296,7 @@ private fun PasswordVerifyCard(
             onToggleVisibility = onToggleVisibility,
         )
         errorMessage?.let {
-            PasswordInlineMessage(message = it, color = Color(0xFFDC2626), background = Color(0xFFFEF2F2))
+            PasswordInlineMessage(message = it, color = colors.error, background = colors.error.copy(alpha = if (colors.isDark) 0.18f else 0.1f))
         }
         Button(
             text = "下一步",
@@ -328,6 +322,7 @@ private fun PasswordResetCard(
     onBack: () -> Unit,
     onConfirm: () -> Unit,
 ) {
+    val colors = SpineTheme.colors
     PasswordSurfaceCard {
         PasswordCardTitle(title = "设置新密码")
         PasswordInputBlock(
@@ -356,25 +351,25 @@ private fun PasswordResetCard(
                     modifier = Modifier
                         .size(16.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFDCFCE7)),
+                        .background(colors.success.copy(alpha = if (colors.isDark) 0.2f else 0.12f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = "✓",
                         style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF16A34A),
+                        color = colors.success,
                     )
                 }
                 Text(
                     text = "两次密码一致",
                     style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color(0xFF16A34A),
+                    color = colors.success,
                 )
             }
         }
         PasswordRequirementCard(password = newPassword)
         errorMessage?.let {
-            PasswordInlineMessage(message = it, color = Color(0xFFDC2626), background = Color(0xFFFEF2F2))
+            PasswordInlineMessage(message = it, color = colors.error, background = colors.error.copy(alpha = if (colors.isDark) 0.18f else 0.1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -399,6 +394,7 @@ private fun PasswordDoneCard(
     onBackToProfile: () -> Unit,
     onReset: () -> Unit,
 ) {
+    val colors = SpineTheme.colors
     PasswordSurfaceCard {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -408,26 +404,26 @@ private fun PasswordDoneCard(
             Box(
                 modifier = Modifier
                     .size(96.dp)
-                    .shadow(18.dp, CircleShape, ambientColor = Color(0x3310B981), spotColor = Color(0x3310B981))
+                    .shadow(18.dp, CircleShape, ambientColor = colors.success.copy(alpha = if (colors.isDark) 0.3f else 0.2f), spotColor = colors.success.copy(alpha = if (colors.isDark) 0.3f else 0.2f))
                     .clip(CircleShape)
-                    .background(Brush.linearGradient(listOf(PasswordSuccessLight, PasswordSuccess))),
+                    .background(Brush.linearGradient(listOf(colors.success.copy(alpha = 0.82f), colors.success))),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = "✓",
                     style = SpineTheme.typography.display.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White,
+                    color = colors.onPrimary,
                 )
             }
             Text(
                 text = "密码修改成功",
                 style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFF1E293B),
+                color = colors.textPrimary,
             )
             Text(
                 text = "您的密码已更新，请妥善保管新密码",
                 style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
-                color = PasswordBodyText,
+                color = colors.textSecondary,
             )
             Button(
                 text = "返回个人中心",
@@ -445,15 +441,17 @@ private fun PasswordDoneCard(
 
 @Composable
 private fun PasswordSurfaceCard(content: @Composable ColumnScope.() -> Unit) {
+    val colors = SpineTheme.colors
     val shape = RoundedCornerShape(24.dp)
+    val shadowColor = colors.textPrimary.copy(alpha = if (colors.isDark) 0.22f else 0.08f)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 620.dp)
-            .shadow(16.dp, shape, ambientColor = PasswordCardShadow, spotColor = PasswordCardShadow)
+            .shadow(16.dp, shape, ambientColor = shadowColor, spotColor = shadowColor)
             .clip(shape)
-            .background(Color.White)
-            .border(1.dp, PasswordCardBorder, shape)
+            .background(colors.surface)
+            .border(1.dp, colors.borderSubtle, shape)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
         content = content,
@@ -462,6 +460,7 @@ private fun PasswordSurfaceCard(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun PasswordCardTitle(title: String) {
+    val colors = SpineTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -472,19 +471,19 @@ private fun PasswordCardTitle(title: String) {
                     .width(4.dp)
                     .height(18.dp)
                     .clip(RoundedCornerShape(999.dp))
-                    .background(Brush.linearGradient(listOf(Color(0xFFA855F7), PasswordPurpleDark))),
+                    .background(Brush.linearGradient(listOf(colors.primary.copy(alpha = 0.82f), colors.primary))),
             )
             Text(
                 text = title,
                 style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                color = PasswordTitleText,
+                color = colors.textPrimary,
             )
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(Color(0xFFEEF2F7)),
+                .background(colors.borderSubtle),
         )
     }
 }
@@ -498,11 +497,12 @@ private fun PasswordInputBlock(
     onValueChange: (String) -> Unit,
     onToggleVisibility: () -> Unit,
 ) {
+    val colors = SpineTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = label,
             style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
-            color = PasswordBodyText,
+            color = colors.textSecondary,
         )
         TextField(
             value = value,
@@ -510,8 +510,8 @@ private fun PasswordInputBlock(
             placeholder = placeholder,
             modifier = Modifier.fillMaxWidth(),
             password = !visible,
-            leadingGlyph = com.xiehe.spine.ui.components.icon.shared.IconToken.LOCK,
-            trailingGlyph = if (visible) com.xiehe.spine.ui.components.icon.shared.IconToken.EYE_OFF else com.xiehe.spine.ui.components.icon.shared.IconToken.EYE,
+            leadingGlyph = IconToken.LOCK,
+            trailingGlyph = if (visible) IconToken.EYE_OFF else IconToken.EYE,
             onTrailingClick = onToggleVisibility,
         )
     }
@@ -519,6 +519,8 @@ private fun PasswordInputBlock(
 
 @Composable
 private fun PasswordStrengthBar(strength: PasswordStrength) {
+    val colors = SpineTheme.colors
+    val strengthColor = resolveStrengthColor(strength, colors)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             repeat(4) { index ->
@@ -527,34 +529,35 @@ private fun PasswordStrengthBar(strength: PasswordStrength) {
                         .weight(1f)
                         .height(4.dp)
                         .clip(RoundedCornerShape(999.dp))
-                        .background(if (index < strength.score) strength.color else Color(0xFFE5E7EB)),
+                        .background(if (index < strength.score) strengthColor else colors.borderStrong),
                 )
             }
         }
         Text(
             text = "密码强度: ${strength.label}",
             style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-            color = strength.color,
+            color = strengthColor,
         )
     }
 }
 
 @Composable
 private fun PasswordRequirementCard(password: String) {
+    val colors = SpineTheme.colors
     val shape = RoundedCornerShape(16.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color(0xFFF5F3FF))
-            .border(1.dp, Color(0xFFE9D5FF), shape)
+            .background(colors.primaryMuted)
+            .border(1.dp, colors.primary.copy(alpha = 0.18f), shape)
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
             text = "密码要求",
             style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Bold),
-            color = PasswordPurpleDark,
+            color = colors.primary,
         )
         PasswordRequirementRow(label = "至少8个字符", met = password.length >= 8)
         PasswordRequirementRow(label = "包含大写字母", met = password.any { it.isUpperCase() })
@@ -565,6 +568,7 @@ private fun PasswordRequirementCard(password: String) {
 
 @Composable
 private fun PasswordRequirementRow(label: String, met: Boolean) {
+    val colors = SpineTheme.colors
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -574,40 +578,41 @@ private fun PasswordRequirementRow(label: String, met: Boolean) {
                 modifier = Modifier
                     .size(16.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFDCFCE7)),
+                    .background(colors.success.copy(alpha = if (colors.isDark) 0.2f else 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = "✓",
                     style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFF16A34A),
+                    color = colors.success,
                 )
             }
         } else {
             Text(
                 text = "-",
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFFCBD5E1),
+                color = colors.textTertiary,
             )
         }
         Text(
             text = label,
             style = SpineTheme.typography.subhead.copy(fontWeight = if (met) FontWeight.SemiBold else FontWeight.Medium),
-            color = if (met) Color(0xFF16A34A) else PasswordMutedText,
+            color = if (met) colors.success else colors.textSecondary,
         )
     }
 }
 
 @Composable
 private fun PasswordSafetyTipCard() {
+    val colors = SpineTheme.colors
     val shape = RoundedCornerShape(24.dp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 620.dp)
             .clip(shape)
-            .background(Color(0xFFFFF7ED))
-            .border(1.dp, Color(0xFFFED7AA), shape)
+            .background(colors.warning.copy(alpha = if (colors.isDark) 0.18f else 0.1f))
+            .border(1.dp, colors.warning.copy(alpha = 0.24f), shape)
             .padding(horizontal = 16.dp, vertical = 18.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Top,
@@ -616,25 +621,25 @@ private fun PasswordSafetyTipCard() {
             modifier = Modifier
                 .size(30.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFFEF3C7)),
+                .background(colors.warning.copy(alpha = if (colors.isDark) 0.24f else 0.16f)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "!",
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFFF59E0B),
+                color = colors.warning,
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
                 text = "安全提示",
                 style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFFC2410C),
+                color = colors.warning,
             )
             Text(
                 text = "请勿使用生日、手机号等易猜测的密码，建议定期更换密码以保障账号安全。",
                 style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
-                color = Color(0xFFD97706),
+                color = colors.textSecondary,
             )
         }
     }
@@ -646,18 +651,19 @@ private fun PasswordSecondaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = SpineTheme.colors
     Box(
         modifier = modifier
             .height(52.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFFF1F5F9))
+            .background(colors.surfaceMuted)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
             style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-            color = Color(0xFF475569),
+            color = colors.textSecondary,
         )
     }
 }
@@ -692,9 +698,19 @@ private fun evaluatePasswordStrength(password: String): PasswordStrength {
     )
     val score = checks.count { it }.coerceAtLeast(if (password.isBlank()) 0 else 1)
     return when {
-        score >= 4 -> PasswordStrength(label = "强", color = PasswordSuccess, score = 4)
-        score >= 2 -> PasswordStrength(label = "中", color = PasswordWarning, score = 2)
-        score >= 1 -> PasswordStrength(label = "弱", color = Color(0xFFEF4444), score = 1)
-        else -> PasswordStrength(label = "弱", color = Color(0xFFE5E7EB), score = 0)
+        score >= 4 -> PasswordStrength(label = "强", score = 4)
+        score >= 2 -> PasswordStrength(label = "中", score = 2)
+        score >= 1 -> PasswordStrength(label = "弱", score = 1)
+        else -> PasswordStrength(label = "弱", score = 0)
     }
+}
+
+private fun resolveStrengthColor(
+    strength: PasswordStrength,
+    colors: SpineAppColors,
+): Color = when {
+    strength.score >= 4 -> colors.success
+    strength.score >= 2 -> colors.warning
+    strength.score >= 1 -> colors.error
+    else -> colors.borderStrong
 }
