@@ -509,7 +509,7 @@ fun App(
                             onTabSelected = onTabSelected,
                             headerContent = {
                                 SimpleShellHeader(
-                                    title = "外观设置",
+                                    title = "系统设置",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
                                 )
@@ -548,12 +548,13 @@ fun App(
                             headerContent = {
                                 SimpleShellHeader(
                                     title = "修改密码",
+                                    subtitle = "定期更换密码保障账号安全",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
                                 )
                             },
                         ) {
-                            ChangePasswordScreen()
+                            ChangePasswordScreen(onFinished = { route = null })
                         }
                     }
 
