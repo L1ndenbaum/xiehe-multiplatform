@@ -27,7 +27,6 @@ data class ImageUploadUiState(
     val selectedExamType: ImageCategory = ImageCategory.FRONT,
     val examTypes: List<ImageCategory> = ImageCategory.entries,
     val selectedFile: UploadFilePayload? = null,
-    val note: String = "",
     val errorMessage: String? = null,
     val successMessage: String? = null,
 )
@@ -98,10 +97,6 @@ class ImageUploadViewModel : BaseViewModel() {
         _state.update { it.copy(selectedExamType = examType, errorMessage = null) }
     }
 
-    fun updateNote(value: String) {
-        _state.update { it.copy(note = value) }
-    }
-
     fun setSelectedFile(file: UploadFilePayload?) {
         _state.update { it.copy(selectedFile = file, errorMessage = null) }
     }
@@ -134,7 +129,7 @@ class ImageUploadViewModel : BaseViewModel() {
                     fileName = file.name,
                     bytes = file.bytes,
                     mimeType = file.mimeType,
-                    description = _state.value.note,
+                    description = _state.value.selectedExamType.label,
                 )
             ) {
                 is AppResult.Success -> {
@@ -144,7 +139,6 @@ class ImageUploadViewModel : BaseViewModel() {
                             uploading = false,
                             successMessage = "影像上传成功",
                             selectedFile = null,
-                            note = "",
                         )
                     }
                     onSuccess()
@@ -162,4 +156,3 @@ class ImageUploadViewModel : BaseViewModel() {
         }
     }
 }
-

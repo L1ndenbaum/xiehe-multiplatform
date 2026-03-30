@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,8 +31,8 @@ import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.form.file.rememberImageFilePickerLauncher
+import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.image.ImageUploadViewModel
 import com.xiehe.spine.ui.viewmodel.image.UploadFilePayload
@@ -130,17 +129,6 @@ fun ImageUploadScreen(
                     color = SpineTheme.colors.primary,
                 )
             }
-
-            TextField(
-                value = state.note,
-                onValueChange = vm::updateNote,
-                placeholder = "备注信息(可选)",
-                singleLine = false,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(112.dp),
-                leadingGlyph = IconToken.MESSAGE,
-            )
 
             state.errorMessage?.let {
                 Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
@@ -264,4 +252,3 @@ private fun PickerField(
         onTrailingClick = onClick,
     )
 }
-

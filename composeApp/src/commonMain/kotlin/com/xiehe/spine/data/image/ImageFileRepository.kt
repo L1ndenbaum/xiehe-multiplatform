@@ -306,10 +306,7 @@ class ImageFileRepository(
         mimeType: String,
         description: String? = null,
     ): AppResult<Pair<UserSession, UploadSingleImageData>> {
-        val safeDescription = encodeImageUploadDescription(
-            category = ImageCategory.fromLabel(examType) ?: ImageCategory.FRONT,
-            note = description,
-        )
+        val safeDescription = description?.trim().orEmpty().ifBlank { examType.trim() }
         return withRefresh(session) { activeSession ->
             val requestUrl = "${apiClient.baseUrl}/upload/single"
             try {

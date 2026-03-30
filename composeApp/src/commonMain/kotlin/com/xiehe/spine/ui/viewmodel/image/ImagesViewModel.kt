@@ -9,7 +9,6 @@ import com.xiehe.spine.data.image.ImageWorkflowStatus
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.image.normalizeImageStatus
-import com.xiehe.spine.data.image.resolveImageCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,8 +20,8 @@ enum class ImageTypeFilter(
     val category: ImageCategory? = null,
 ) {
     ALL("全部类型"),
-    FRONT("正面", ImageCategory.FRONT),
-    SIDE("侧面", ImageCategory.SIDE),
+    FRONT("正位X光片", ImageCategory.FRONT),
+    SIDE("侧位X光片", ImageCategory.SIDE),
     LEFT_BENDING("左侧曲位", ImageCategory.LEFT_BENDING),
     RIGHT_BENDING("右侧曲位", ImageCategory.RIGHT_BENDING),
     POSTURE_PHOTO("体态照片", ImageCategory.POSTURE_PHOTO),
@@ -130,8 +129,8 @@ class ImagesViewModel : BaseViewModel() {
         val keyword = state.search.trim().lowercase()
         return state.items.filter { item ->
             val matchesSearch = keyword.isBlank() || item.matchesSearch(keyword)
-            val matchesType = state.typeFilter.category?.let { category ->
-                resolveImageCategory(item) == category
+            val matchesType = state.typeFilter.category?.let {
+                item.description?.trim() == state.typeFilter.label
             } ?: true
             val matchesStatus = when (state.statusFilter) {
                 ImageStatusFilter.ALL -> true
@@ -150,7 +149,6 @@ class ImagesViewModel : BaseViewModel() {
             patientId?.toString(),
             originalFilename,
             description,
-            resolveImageCategory(this).label,
             modality,
             bodyPart,
             uploaderName,
