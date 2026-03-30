@@ -38,6 +38,7 @@ private data class MessageNoticeStyle(
 @Composable
 fun MessageNoticeCard(
     item: NotificationMessage,
+    onMarkRead: (NotificationMessage) -> Unit,
     onDelete: (NotificationMessage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -105,7 +106,7 @@ fun MessageNoticeCard(
                 Text(
                     text = item.title,
                     style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                    color = colors.textPrimary,
+                    color = if (item.isRead) colors.textSecondary else colors.textPrimary,
                 )
                 Text(
                     text = item.content,
@@ -125,9 +126,37 @@ fun MessageNoticeCard(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (item.isRead) {
+                Text(
+                    text = "已读",
+                    style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.textTertiary,
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onMarkRead(item) }
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppIcon(
+                        glyph = IconToken.CHECK,
+                        tint = colors.primary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Text(
+                        text = "标记已读",
+                        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+                        color = colors.primary,
+                    )
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
