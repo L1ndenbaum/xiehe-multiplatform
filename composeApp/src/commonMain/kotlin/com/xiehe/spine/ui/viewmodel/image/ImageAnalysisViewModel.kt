@@ -18,6 +18,7 @@ import com.xiehe.spine.data.measurement.MeasurementPoint
 import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.data.measurement.SaveMeasurementItem
 import com.xiehe.spine.data.measurement.SaveMeasurementsRequest
+import com.xiehe.spine.data.report.mapImageCategoryToReportExamType
 import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.abs
@@ -545,6 +546,16 @@ class ImageAnalysisViewModel : BaseViewModel() {
     ) {
         val snapshot = _state.value
         val fileId = snapshot.fileId ?: return
+        val reportExamType = mapImageCategoryToReportExamType(examType)
+        if (reportExamType == null) {
+            _state.update {
+                it.copy(
+                    bannerMessage = "体态照片暂不支持AI报告生成",
+                    errorMessage = "体态照片暂不支持AI报告生成",
+                )
+            }
+            return
+        }
         val reportItems = snapshot.measurements.mapNotNull(::toGenerateReportItem)
         if (reportItems.isEmpty()) {
             _state.update { it.copy(bannerMessage = "暂无可用于生成报告的测量数据") }
@@ -554,7 +565,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
         scope.launch {
             _state.update { it.copy(reportGenerating = true, bannerMessage = null, errorMessage = null) }
             val request = GenerateReportRequest(
-                examType = examType,
+                examType = reportExamType,
                 imageId = fileId.toString(),
                 measurements = reportItems,
             )
@@ -1795,7 +1806,6 @@ class ImageAnalysisViewModel : BaseViewModel() {
         val auxiliary: Boolean? = null,
     )
 }
-
 
 
 
