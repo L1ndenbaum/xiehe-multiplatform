@@ -8,6 +8,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
 import io.ktor.client.request.header
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -124,6 +125,25 @@ class ApiClient(
             requestUrl = requestUrl,
         ) {
             put {
+                url(requestUrl)
+                attachAuth(accessToken)
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
+    internal suspend inline fun <reified T, reified B : Any> patch(
+        path: String,
+        body: B,
+        accessToken: String? = null,
+    ): AppResult<T> {
+        val requestUrl = "$baseUrl$path"
+        return request(
+            requestName = "PATCH",
+            requestUrl = requestUrl,
+        ) {
+            patch {
                 url(requestUrl)
                 attachAuth(accessToken)
                 contentType(ContentType.Application.Json)

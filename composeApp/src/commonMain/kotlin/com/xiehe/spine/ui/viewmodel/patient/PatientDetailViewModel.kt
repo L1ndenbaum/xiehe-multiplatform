@@ -49,11 +49,11 @@ class PatientDetailViewModel : BaseViewModel() {
                 }
             }
 
-            val relatedImages = when (val imageResult = imageRepository.loadAllImageFiles(activeSession)) {
+            val relatedImages = when (val imageResult = imageRepository.loadAllPatientImageFiles(activeSession, patientId)) {
                 is AppResult.Success -> {
                     activeSession = imageResult.data.first
                     onSessionUpdated(activeSession)
-                    imageResult.data.second.filter { it.patientId == patientId }
+                    imageResult.data.second
                 }
 
                 is AppResult.Failure -> emptyList()

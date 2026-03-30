@@ -35,3 +35,28 @@ data class ImageFileSummary(
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("uploaded_at") val uploadedAt: String? = null,
 )
+
+@Serializable
+data class UploadSingleImageData(
+    @SerialName("file_id") val fileId: String,
+    val filename: String,
+    val size: Long? = null,
+    @SerialName("mime_type") val mimeType: String? = null,
+    @SerialName("upload_url") val uploadUrl: String? = null,
+    val status: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+)
+
+@Serializable
+data class ImageStatsSummary(
+    @SerialName("total_files") val totalFiles: Int,
+    @SerialName("total_size") val totalSize: Long,
+    @SerialName("by_type") val byType: Map<String, Int> = emptyMap(),
+    @SerialName("by_status") val byStatus: Map<String, Int> = emptyMap(),
+    @SerialName("by_modality") val byModality: Map<String, Int> = emptyMap(),
+)
+
+@Serializable
+data class UpdateAnnotationRequest(
+    val annotation: String,
+)

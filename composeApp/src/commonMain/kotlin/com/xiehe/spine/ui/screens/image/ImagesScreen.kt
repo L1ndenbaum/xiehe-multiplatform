@@ -364,7 +364,7 @@ fun ImagesScreen(
                                                 repository = repository,
                                                 onSessionUpdated = onSessionUpdated,
                                             )
-                                            actionSuccess = "删除成功"
+                                            actionSuccess = result.data.second
                                         }
 
                                         is AppResult.Failure -> {

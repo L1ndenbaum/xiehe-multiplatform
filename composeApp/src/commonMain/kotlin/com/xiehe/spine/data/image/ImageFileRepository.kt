@@ -11,7 +11,6 @@ import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.cache.ImageCacheRepository
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
@@ -24,7 +23,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.JsonObject
 import kotlin.collections.orEmpty
 
 class ImageFileRepository(
@@ -173,6 +171,60 @@ class ImageFileRepository(
         return AppResult.Success(activeSession to merged)
     }
 
+    suspend fun loadAllPatientImageFiles(
+        session: UserSession,
+        patientId: Int,
+    ): AppResult<Pair<UserSession, List<ImageFileSummary>>> {
+        var activeSession = session
+        var page = 1
+        var totalPages = 1
+        val aggregate = linkedMapOf<Int, ImageFileSummary>()
+
+        while (page <= totalPages) {
+            val path = "/image-files/patient/$patientId?page=$page&page_size=50"
+            when (
+                val result = withRefresh(activeSession) { candidate ->
+                    apiClient.get<ImageFilePageData>(path = path, accessToken = candidate.accessToken)
+                }
+            ) {
+                is AppResult.Success -> {
+                    activeSession = result.data.first
+                    val payload = result.data.second
+                    payload.items.forEach { aggregate[it.id] = it }
+                    totalPages = payload.pagination.totalPages.coerceAtLeast(1)
+                    page += 1
+                }
+
+                is AppResult.Failure -> return result
+            }
+        }
+
+        return AppResult.Success(activeSession to aggregate.values.toList())
+    }
+
+    suspend fun getImageFileDetail(
+        session: UserSession,
+        fileId: Int,
+    ): AppResult<Pair<UserSession, ImageFileSummary>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.get(
+                path = "/image-files/$fileId",
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
+    suspend fun getImageStatsSummary(
+        session: UserSession,
+    ): AppResult<Pair<UserSession, ImageStatsSummary>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.get(
+                path = "/image-files/stats/summary",
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
     suspend fun downloadImageBytes(
         session: UserSession,
         fileId: Int,
@@ -253,8 +305,8 @@ class ImageFileRepository(
         bytes: ByteArray,
         mimeType: String,
         description: String? = null,
-    ): AppResult<Pair<UserSession, JsonObject>> {
-        val safeDescription = examType.trim().ifBlank { description?.trim().orEmpty() }
+    ): AppResult<Pair<UserSession, UploadSingleImageData>> {
+        val safeDescription = description?.trim().orEmpty().ifBlank { examType.trim() }
         return withRefresh(session) { activeSession ->
             val requestUrl = "${apiClient.baseUrl}/upload/single"
             try {
@@ -264,8 +316,6 @@ class ImageFileRepository(
                         MultiPartFormDataContent(
                             formData {
                                 append("patient_id", patientId.toString())
-                                // Keep this field for compatibility with older server variants.
-                                append("exam_type", examType)
                                 if (safeDescription.isNotBlank()) {
                                     append("description", safeDescription)
                                 }
@@ -283,7 +333,7 @@ class ImageFileRepository(
                             },
                         ),
                     )
-                }.body<ApiEnvelope<JsonObject>>()
+                }.body<ApiEnvelope<UploadSingleImageData>>()
                 val payload = envelope.data
                 if (payload == null) {
                     AppResult.Failure(
@@ -317,40 +367,13 @@ class ImageFileRepository(
     suspend fun deleteImageFile(
         session: UserSession,
         imageId: Int,
-    ): AppResult<Pair<UserSession, Unit>> {
+    ): AppResult<Pair<UserSession, String>> {
         return when (
             val result = withRefresh(session) { activeSession ->
-                val requestUrl = "${apiClient.baseUrl}/image-files/$imageId"
-                try {
-                    val response = apiClient.httpClient.delete(requestUrl) {
-                        header(HttpHeaders.Authorization, "Bearer ${activeSession.accessToken}")
-                    }
-                    val ok = response.status.value in 200..299
-                    if (ok) {
-                        AppResult.Success(Unit)
-                    } else {
-                        val bodyText = runCatching { response.bodyAsText() }.getOrNull()
-                        AppResult.Failure(
-                            message = "删除影像失败",
-                            code = response.status.value,
-                            isUnauthorized = response.status == HttpStatusCode.Unauthorized,
-                            debugDetails = "[DELETE] $requestUrl status=${response.status.value} body=${bodyText ?: "N/A"}",
-                        )
-                    }
-                } catch (e: ClientRequestException) {
-                    val status = e.response.status
-                    AppResult.Failure(
-                        message = "删除影像失败",
-                        code = status.value,
-                        isUnauthorized = status == HttpStatusCode.Unauthorized,
-                        debugDetails = "[DELETE] $requestUrl status=${status.value}",
-                    )
-                } catch (e: Exception) {
-                    AppResult.Failure(
-                        message = apiClient.classifyNetworkError(e.message),
-                        debugDetails = "[DELETE] $requestUrl message=${e.message ?: "N/A"}",
-                    )
-                }
+                apiClient.deleteForMessage(
+                    path = "/image-files/$imageId",
+                    accessToken = activeSession.accessToken,
+                )
             }
         ) {
             is AppResult.Success -> {
@@ -361,6 +384,20 @@ class ImageFileRepository(
             }
 
             is AppResult.Failure -> result
+        }
+    }
+
+    suspend fun updateAnnotation(
+        session: UserSession,
+        fileId: Int,
+        annotation: String,
+    ): AppResult<Pair<UserSession, ImageFileSummary>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.patch<ImageFileSummary, UpdateAnnotationRequest>(
+                path = "/image-files/$fileId/annotation",
+                body = UpdateAnnotationRequest(annotation = annotation),
+                accessToken = activeSession.accessToken,
+            )
         }
     }
 
