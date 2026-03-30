@@ -1,14 +1,24 @@
 package com.xiehe.spine
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,12 +28,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
 import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.patient.PatientSummary
+import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.feedback.shared.AppStartupScreen
 import com.xiehe.spine.ui.components.navigation.shared.DashboardShellHeader
 import com.xiehe.spine.ui.components.icon.shared.IconToken
@@ -405,6 +420,8 @@ fun App(
                 when (current) {
                     is OverlayRoute.PatientDetail -> {
                         var patientDetailNotice by remember(current.patientId) { mutableStateOf<String?>(null) }
+                        var showDeletePatientConfirm by remember(current.patientId) { mutableStateOf(false) }
+                        var deletePatientConfirmVisible by remember(current.patientId) { mutableStateOf(false) }
                         MobileShell(
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
@@ -423,8 +440,99 @@ fun App(
                                         HeaderTextAction(
                                             text = "删除",
                                             onClick = {
-                                                patientDetailNotice = "正在删除患者..."
+                                                patientDetailNotice = null
+                                                showDeletePatientConfirm = true
+                                                deletePatientConfirmVisible = false
+                                            },
+                                            fill = colors.error,
+                                            borderColor = colors.error,
+                                            textColor = colors.onPrimary,
+                                        )
+                                    },
+                                )
+                            },
+                        ) {
+                            PatientDetailScreen(
+                                patientId = current.patientId,
+                                vm = patientDetailVm,
+                                session = activeSession,
+                                patientRepository = appContainer.patientRepository,
+                                imageRepository = appContainer.imageFileRepository,
+                                onSessionUpdated = { session = it },
+                                onOpenAnalysis = { fileId, patientId, examType ->
+                                    route = OverlayRoute.ImageAnalysis(
+                                        fileId = fileId,
+                                        patientId = patientId,
+                                        examType = examType,
+                                    )
+                                },
+                                onOpenImageUpload = { route = OverlayRoute.ImageUpload },
+                                noticeMessage = patientDetailNotice,
+                            )
+                        }
+                        if (showDeletePatientConfirm) {
+                            LaunchedEffect(showDeletePatientConfirm) {
+                                if (showDeletePatientConfirm) {
+                                    delay(16)
+                                    deletePatientConfirmVisible = true
+                                }
+                            }
+                            val overlayAlpha by animateFloatAsState(
+                                targetValue = if (deletePatientConfirmVisible) 0.35f else 0f,
+                                animationSpec = tween(220),
+                                label = "patient_delete_confirm_overlay_alpha",
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = overlayAlpha))
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                deletePatientConfirmVisible = false
+                                                delay(220)
+                                                showDeletePatientConfirm = false
+                                            }
+                                        },
+                                    ),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                AnimatedVisibility(
+                                    visible = deletePatientConfirmVisible,
+                                    enter = fadeIn(animationSpec = tween(220)) + slideInVertically(animationSpec = tween(220)) { it / 4 },
+                                    exit = fadeOut(animationSpec = tween(220)) + slideOutVertically(animationSpec = tween(220)) { it / 5 },
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(horizontal = 20.dp)
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                                onClick = {},
+                                            ),
+                                    ) {
+                                        OperationVerifyCard(
+                                            title = "删除患者",
+                                            message = "确认删除该患者吗？该操作会执行软删除，患者记录将不再显示在列表中。",
+                                            confirmText = "删除",
+                                            cancelText = "取消",
+                                            confirmButtonColor = SpineTheme.colors.error,
+                                            cancelButtonColor = SpineTheme.colors.textSecondary,
+                                            onCancel = {
                                                 coroutineScope.launch {
+                                                    deletePatientConfirmVisible = false
+                                                    delay(220)
+                                                    showDeletePatientConfirm = false
+                                                }
+                                            },
+                                            onConfirm = {
+                                                coroutineScope.launch {
+                                                    deletePatientConfirmVisible = false
+                                                    delay(220)
+                                                    showDeletePatientConfirm = false
+                                                    patientDetailNotice = "正在删除患者..."
                                                     when (
                                                         val result = appContainer.patientRepository.deletePatient(
                                                             session = activeSession,
@@ -456,31 +564,10 @@ fun App(
                                                     }
                                                 }
                                             },
-                                            fill = colors.error,
-                                            borderColor = colors.error,
-                                            textColor = colors.onPrimary,
                                         )
-                                    },
-                                )
-                            },
-                        ) {
-                            PatientDetailScreen(
-                                patientId = current.patientId,
-                                vm = patientDetailVm,
-                                session = activeSession,
-                                patientRepository = appContainer.patientRepository,
-                                imageRepository = appContainer.imageFileRepository,
-                                onSessionUpdated = { session = it },
-                                onOpenAnalysis = { fileId, patientId, examType ->
-                                    route = OverlayRoute.ImageAnalysis(
-                                        fileId = fileId,
-                                        patientId = patientId,
-                                        examType = examType,
-                                    )
-                                },
-                                onOpenImageUpload = { route = OverlayRoute.ImageUpload },
-                                noticeMessage = patientDetailNotice,
-                            )
+                                    }
+                                }
+                            }
                         }
                     }
 
