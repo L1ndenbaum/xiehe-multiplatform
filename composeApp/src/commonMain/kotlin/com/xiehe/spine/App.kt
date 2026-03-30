@@ -58,6 +58,7 @@ import com.xiehe.spine.ui.screens.patient.PatientDetailScreen
 import com.xiehe.spine.ui.screens.patient.PatientEditScreen
 import com.xiehe.spine.ui.screens.patient.PatientFormScreen
 import com.xiehe.spine.ui.screens.patient.PatientsScreen
+import com.xiehe.spine.ui.screens.profile.OrganizationScreen
 import com.xiehe.spine.ui.screens.profile.PersonalInfoScreen
 import com.xiehe.spine.ui.screens.profile.ProfileScreen
 import com.xiehe.spine.ui.screens.auth.RegisterScreen
@@ -73,6 +74,7 @@ import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientEditViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
+import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
 import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
 import kotlinx.coroutines.async
@@ -96,6 +98,7 @@ private sealed interface OverlayRoute {
     data class PatientEdit(val patientId: Int) : OverlayRoute
     data object Appearance : OverlayRoute
     data object PersonalInfo : OverlayRoute
+    data object Organization : OverlayRoute
     data object ChangePassword : OverlayRoute
     data object Messages : OverlayRoute
     data object ImageUpload : OverlayRoute
@@ -126,6 +129,7 @@ fun App(
     val patientEditVm = remember { PatientEditViewModel() }
     val patientFormVm = remember { PatientFormViewModel() }
     val personalInfoVm = remember { PersonalInfoViewModel() }
+    val organizationVm = remember { OrganizationViewModel() }
     val appearanceVm = remember { AppearanceViewModel(appContainer.themeRepository) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -402,6 +406,7 @@ fun App(
                                 session = activeSession,
                                 onOpenAppearance = { route = OverlayRoute.Appearance },
                                 onOpenPersonalInfo = { route = OverlayRoute.PersonalInfo },
+                                onOpenOrganization = { route = OverlayRoute.Organization },
                                 onOpenChangePassword = { route = OverlayRoute.ChangePassword },
                                 onLogout = {
                                     coroutineScope.launch {
@@ -671,6 +676,22 @@ fun App(
                                 session = activeSession,
                                 authRepository = appContainer.authRepository,
                                 onSessionUpdated = { session = it },
+                            )
+                        }
+                    }
+
+                    OverlayRoute.Organization -> {
+                        MobileShell(
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            headerContent = {},
+                        ) {
+                            OrganizationScreen(
+                                vm = organizationVm,
+                                session = activeSession,
+                                repository = appContainer.organizationRepository,
+                                onSessionUpdated = { session = it },
+                                onBack = { route = null },
                             )
                         }
                     }

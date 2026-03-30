@@ -45,6 +45,7 @@ fun ProfileScreen(
     session: UserSession,
     onOpenAppearance: () -> Unit,
     onOpenPersonalInfo: () -> Unit,
+    onOpenOrganization: () -> Unit,
     onOpenChangePassword: () -> Unit,
     onLogout: () -> Unit,
 ) {
@@ -159,7 +160,7 @@ fun ProfileScreen(
                 label = "组织管理",
                 glyph = IconToken.USERS,
                 palette = ProfileOrganizationPalette,
-                onClick = null,
+                onClick = onOpenOrganization,
                 showDivider = true,
             )
             ProfileMenuRow(

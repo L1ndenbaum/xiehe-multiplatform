@@ -13,6 +13,7 @@ import com.xiehe.spine.data.dashboard.DashboardRepository
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.data.notification.NotificationRepository
+import com.xiehe.spine.data.organization.OrganizationRepository
 import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.data.report.ReportRepository
 import io.ktor.client.HttpClient
@@ -32,6 +33,7 @@ class AppContainer private constructor(
     val imageFileRepository: ImageFileRepository,
     val imageCacheRepository: ImageCacheRepository,
     val notificationRepository: NotificationRepository,
+    val organizationRepository: OrganizationRepository,
     val measurementRepository: MeasurementRepository,
     val reportRepository: ReportRepository,
     val aiInferenceRepository: AiInferenceRepository,
@@ -85,6 +87,10 @@ class AppContainer private constructor(
                 notificationRepository = NotificationRepository(
                     apiClient = instrumentedApiClient,
                     authRepository = authRepository
+                ),
+                organizationRepository = OrganizationRepository(
+                    apiClient = instrumentedApiClient,
+                    authRepository = authRepository,
                 ),
                 measurementRepository = MeasurementRepository(
                     apiClient = instrumentedApiClient,
