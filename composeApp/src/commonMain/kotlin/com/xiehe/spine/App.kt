@@ -74,6 +74,7 @@ import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientEditViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
+import com.xiehe.spine.ui.viewmodel.organization.OrganizationTab
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
 import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
@@ -684,14 +685,26 @@ fun App(
                         MobileShell(
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
-                            headerContent = {},
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "组织管理",
+                                    subtitle = "查看和管理组织成员",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = null },
+                                    actionsContent = {
+                                        HeaderTextAction(
+                                            text = "邀请成员",
+                                            onClick = { organizationVm.selectTab(OrganizationTab.INVITES) },
+                                        )
+                                    },
+                                )
+                            },
                         ) {
                             OrganizationScreen(
                                 vm = organizationVm,
                                 session = activeSession,
                                 repository = appContainer.organizationRepository,
                                 onSessionUpdated = { session = it },
-                                onBack = { route = null },
                             )
                         }
                     }

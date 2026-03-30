@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -53,7 +52,6 @@ fun OrganizationScreen(
     session: UserSession,
     repository: OrganizationRepository,
     onSessionUpdated: (UserSession) -> Unit,
-    onBack: () -> Unit,
 ) {
     val state by vm.state.collectAsState()
     val team = state.selectedTeam
@@ -72,17 +70,9 @@ fun OrganizationScreen(
             .fillMaxSize()
             .background(SpineTheme.colors.backgroundElevated),
     ) {
-        OrganizationHeroHeader(
-            activeTab = state.activeTab,
-            onBack = onBack,
-            onToggleTab = { target ->
-                vm.selectTab(target)
-            },
-        )
-
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 118.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             state.noticeMessage?.let {
@@ -230,87 +220,6 @@ fun OrganizationScreen(
 }
 
 @Composable
-private fun OrganizationHeroHeader(
-    activeTab: OrganizationTab,
-    onBack: () -> Unit,
-    onToggleTab: (OrganizationTab) -> Unit,
-) {
-    val colors = SpineTheme.colors
-    val nextTab = if (activeTab == OrganizationTab.MEMBERS) {
-        OrganizationTab.INVITES
-    } else {
-        OrganizationTab.MEMBERS
-    }
-    val actionLabel = if (activeTab == OrganizationTab.MEMBERS) "我的邀请" else "成员列表"
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(144.dp)
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        colors.primary,
-                        colors.primary.copy(alpha = 0.9f),
-                        colors.info.copy(alpha = 0.82f),
-                    ),
-                ),
-            )
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            HeaderPillButton(
-                glyph = IconToken.BACK,
-                label = null,
-                onClick = onBack,
-            )
-            Text(
-                text = "组织管理",
-                style = SpineTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                color = colors.onPrimary,
-            )
-            HeaderPillButton(
-                glyph = if (nextTab == OrganizationTab.INVITES) IconToken.MESSAGE else IconToken.USERS,
-                label = actionLabel,
-                onClick = { onToggleTab(nextTab) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun HeaderPillButton(
-    glyph: IconToken,
-    label: String?,
-    onClick: () -> Unit,
-) {
-    val colors = SpineTheme.colors
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(colors.onPrimary.copy(alpha = 0.16f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = if (label == null) 9.dp else 12.dp, vertical = 9.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppIcon(glyph = glyph, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
-        label?.let {
-            Text(
-                text = it,
-                style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),
-                color = colors.onPrimary,
-            )
-        }
-    }
-}
-
-@Composable
 private fun OrganizationSummaryCard(
     team: OrganizationTeamSummary?,
     currentMember: OrganizationMember?,
@@ -339,7 +248,7 @@ private fun OrganizationSummaryCard(
                     color = colors.textPrimary,
                 )
                 Text(
-                    text = "接口已接入，但当前账号还没有加入可展示的组织。",
+                    text = "当前账号还没有加入组织。",
                     style = SpineTheme.typography.subhead,
                     color = colors.textSecondary,
                 )
