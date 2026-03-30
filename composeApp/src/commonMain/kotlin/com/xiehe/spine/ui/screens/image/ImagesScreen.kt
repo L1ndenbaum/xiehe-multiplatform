@@ -110,7 +110,7 @@ fun ImagesScreen(
                 TextField(
                     value = state.search,
                     onValueChange = vm::updateSearch,
-                    placeholder = "搜索患者姓名、检查类型或文件名",
+                    placeholder = "搜索患者姓名、影像类别或文件名",
                     modifier = Modifier.fillMaxWidth(),
                     leadingGlyph = IconToken.SEARCH,
                 )
@@ -383,7 +383,7 @@ fun ImagesScreen(
 
     when (picker) {
         ImagesPicker.TYPE -> OptionPickerOverlay(
-            title = "选择影像类型",
+            title = "选择影像类别",
             options = ImageTypeFilter.entries.map { it.label },
             selected = state.typeFilter.label,
             onDismiss = { picker = null },

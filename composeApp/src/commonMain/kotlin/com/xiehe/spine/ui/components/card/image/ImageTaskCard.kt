@@ -37,6 +37,7 @@ import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.image.ImageWorkflowStatus
 import com.xiehe.spine.data.image.normalizeImageStatus
+import com.xiehe.spine.data.image.resolveImageCategory
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
@@ -408,12 +409,7 @@ fun imageStatusPresentation(rawStatus: String?): ImageStatusPresentation {
 }
 
 fun inferExamType(item: ImageFileSummary): String {
-    return when (item.modality?.uppercase()) {
-        "XR", "X-RAY", "X_RAY" -> "正位X光片"
-        "CT" -> "CT"
-        "MRI", "MR" -> "MRI"
-        else -> item.description?.takeIf { it.isNotBlank() } ?: "正位X光片"
-    }
+    return resolveImageCategory(item).label
 }
 
 fun imageSubtitle(
@@ -424,9 +420,7 @@ fun imageSubtitle(
         ?: item.patientName?.takeIf { it.isNotBlank() }
         ?: item.patientId?.let { "患者#$it" }
         ?: "未关联患者"
-    val exam = item.description?.takeIf { it.isNotBlank() }
-        ?: item.modality?.let { modalityLabel(it) }
-        ?: "影像检查"
+    val exam = resolveImageCategory(item).label
     return "$patient · $exam"
 }
 
@@ -439,13 +433,7 @@ fun imageTimeLabel(item: ImageFileSummary): String {
 }
 
 private fun compactCardExamType(item: ImageFileSummary): String {
-    val exam = inferExamType(item)
-    return when {
-        exam.contains("左", ignoreCase = true) -> "左侧曲位"
-        exam.contains("右", ignoreCase = true) -> "右侧曲位"
-        exam.contains("侧", ignoreCase = true) -> "侧面"
-        else -> "正面"
-    }
+    return resolveImageCategory(item).label
 }
 
 private fun examTypeBrush(item: ImageFileSummary): Brush {
@@ -454,14 +442,5 @@ private fun examTypeBrush(item: ImageFileSummary): Brush {
         "左侧曲位" -> Brush.horizontalGradient(listOf(Color(0xFF34D399), Color(0xFF22C55E)))
         "右侧曲位" -> Brush.horizontalGradient(listOf(Color(0xFF60A5FA), Color(0xFF38BDF8)))
         else -> Brush.horizontalGradient(listOf(Color(0xFF22D3EE), Color(0xFF14B8A6)))
-    }
-}
-
-private fun modalityLabel(modality: String): String {
-    return when (modality.uppercase()) {
-        "XR" -> "X-ray"
-        "CT" -> "CT"
-        "MRI" -> "MRI"
-        else -> modality
     }
 }

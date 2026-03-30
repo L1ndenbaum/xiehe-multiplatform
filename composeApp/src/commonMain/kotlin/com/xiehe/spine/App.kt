@@ -321,7 +321,7 @@ fun App(
                                 subtitle = "${imagesState.filteredItems.size} 份影像",
                                 searchValue = imagesState.search,
                                 onSearchValueChange = imagesVm::updateSearch,
-                                searchPlaceholder = "搜索患者姓名、检查类型或文件名",
+                                searchPlaceholder = "搜索患者姓名、影像类别或文件名",
                                 actionGlyph = IconToken.UPLOAD,
                                 onAction = { route = OverlayRoute.ImageUpload },
                             )

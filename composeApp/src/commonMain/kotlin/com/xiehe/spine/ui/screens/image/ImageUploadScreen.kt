@@ -97,7 +97,7 @@ fun ImageUploadScreen(
             )
 
             PickerField(
-                text = state.selectedExamType,
+                text = state.selectedExamType.label,
                 leadingGlyph = IconToken.IMAGE,
                 onClick = { picker = ImageUploadPicker.EXAM_TYPE },
             )
@@ -132,9 +132,9 @@ fun ImageUploadScreen(
             }
 
             TextField(
-                value = state.description,
-                onValueChange = vm::updateDescription,
-                placeholder = "描述信息(可选)",
+                value = state.note,
+                onValueChange = vm::updateNote,
+                placeholder = "备注信息(可选)",
                 singleLine = false,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -176,6 +176,7 @@ fun ImageUploadScreen(
                 title = "",
                 onDismissRequest = { picker = null },
                 showActionRow = false,
+                edgeToEdge = true,
             ) { dismiss ->
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(text = "选择患者", style = SpineTheme.typography.title)
@@ -210,9 +211,10 @@ fun ImageUploadScreen(
                 title = "",
                 onDismissRequest = { picker = null },
                 showActionRow = false,
+                edgeToEdge = true,
             ) { dismiss ->
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "选择检查类型", style = SpineTheme.typography.title)
+                    Text(text = "选择影像类别", style = SpineTheme.typography.title)
                     state.examTypes.forEach { examType ->
                         Row(
                             modifier = Modifier
@@ -229,7 +231,7 @@ fun ImageUploadScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(examType, color = if (examType == state.selectedExamType) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
+                            Text(examType.label, color = if (examType == state.selectedExamType) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
                             if (examType == state.selectedExamType) {
                                 Text("✓", color = SpineTheme.colors.onPrimary)
                             }
@@ -262,5 +264,4 @@ private fun PickerField(
         onTrailingClick = onClick,
     )
 }
-
 

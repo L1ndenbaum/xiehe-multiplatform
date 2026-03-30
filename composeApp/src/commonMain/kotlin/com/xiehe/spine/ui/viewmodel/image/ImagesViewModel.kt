@@ -4,22 +4,28 @@ import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.image.ImageCategory
 import com.xiehe.spine.data.image.ImageWorkflowStatus
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.image.normalizeImageStatus
+import com.xiehe.spine.data.image.resolveImageCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class ImageTypeFilter(val label: String) {
+enum class ImageTypeFilter(
+    val label: String,
+    val category: ImageCategory? = null,
+) {
     ALL("全部类型"),
-    XR("X-Ray"),
-    CT("CT"),
-    MRI("MRI"),
-    OTHER("其他"),
+    FRONT("正面", ImageCategory.FRONT),
+    SIDE("侧面", ImageCategory.SIDE),
+    LEFT_BENDING("左侧曲位", ImageCategory.LEFT_BENDING),
+    RIGHT_BENDING("右侧曲位", ImageCategory.RIGHT_BENDING),
+    POSTURE_PHOTO("体态照片", ImageCategory.POSTURE_PHOTO),
 }
 
 enum class ImageStatusFilter(val label: String) {
@@ -124,16 +130,9 @@ class ImagesViewModel : BaseViewModel() {
         val keyword = state.search.trim().lowercase()
         return state.items.filter { item ->
             val matchesSearch = keyword.isBlank() || item.matchesSearch(keyword)
-            val matchesType = when (state.typeFilter) {
-                ImageTypeFilter.ALL -> true
-                ImageTypeFilter.XR -> item.modality.equals("XR", ignoreCase = true)
-                ImageTypeFilter.CT -> item.modality.equals("CT", ignoreCase = true)
-                ImageTypeFilter.MRI -> item.modality.equals("MRI", ignoreCase = true)
-                ImageTypeFilter.OTHER -> {
-                    val modality = item.modality?.uppercase()
-                    modality !in setOf("XR", "CT", "MRI")
-                }
-            }
+            val matchesType = state.typeFilter.category?.let { category ->
+                resolveImageCategory(item) == category
+            } ?: true
             val matchesStatus = when (state.statusFilter) {
                 ImageStatusFilter.ALL -> true
                 ImageStatusFilter.PENDING_REVIEW -> normalizeImageStatus(item.status) == ImageWorkflowStatus.UPLOADED
@@ -151,6 +150,7 @@ class ImagesViewModel : BaseViewModel() {
             patientId?.toString(),
             originalFilename,
             description,
+            resolveImageCategory(this).label,
             modality,
             bodyPart,
             uploaderName,
@@ -159,4 +159,3 @@ class ImagesViewModel : BaseViewModel() {
         }
     }
 }
-

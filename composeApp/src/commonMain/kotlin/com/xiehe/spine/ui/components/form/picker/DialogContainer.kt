@@ -49,6 +49,7 @@ fun PickerDialog(
     maxDialogWidth: Dp? = null,
     maxDialogHeightFraction: Float? = null,
     overlayMaxAlpha: Float = 0.26f,
+    edgeToEdge: Boolean = false,
     content: @Composable ColumnScope.(dismiss: () -> Unit) -> Unit,
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -104,7 +105,13 @@ fun PickerDialog(
                 modifier = modifier
                     .fillMaxWidth()
                     .then(sizeModifier)
-                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                    .then(
+                        if (edgeToEdge) {
+                            Modifier
+                        } else {
+                            Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                        },
+                    )
                     .background(SpineTheme.colors.surface, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                     .padding(horizontal = 16.dp, vertical = 14.dp)
                     .clickable(

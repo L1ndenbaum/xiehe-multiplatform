@@ -3,6 +3,7 @@ package com.xiehe.spine.ui.viewmodel.image
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.image.ImageCategory
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.data.patient.PatientSummary
@@ -11,14 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-private val examTypeOptions = listOf(
-    "正位X光片",
-    "侧位X光盘",
-    "左侧曲位",
-    "右侧曲位",
-    "体态照片",
-)
 
 data class UploadFilePayload(
     val name: String,
@@ -31,10 +24,10 @@ data class ImageUploadUiState(
     val uploading: Boolean = false,
     val patients: List<PatientSummary> = emptyList(),
     val selectedPatientId: Int? = null,
-    val selectedExamType: String = examTypeOptions.first(),
-    val examTypes: List<String> = examTypeOptions,
+    val selectedExamType: ImageCategory = ImageCategory.FRONT,
+    val examTypes: List<ImageCategory> = ImageCategory.entries,
     val selectedFile: UploadFilePayload? = null,
-    val description: String = "",
+    val note: String = "",
     val errorMessage: String? = null,
     val successMessage: String? = null,
 )
@@ -101,12 +94,12 @@ class ImageUploadViewModel : BaseViewModel() {
         _state.update { it.copy(selectedPatientId = patientId, errorMessage = null) }
     }
 
-    fun updateExamType(examType: String) {
+    fun updateExamType(examType: ImageCategory) {
         _state.update { it.copy(selectedExamType = examType, errorMessage = null) }
     }
 
-    fun updateDescription(value: String) {
-        _state.update { it.copy(description = value) }
+    fun updateNote(value: String) {
+        _state.update { it.copy(note = value) }
     }
 
     fun setSelectedFile(file: UploadFilePayload?) {
@@ -137,11 +130,11 @@ class ImageUploadViewModel : BaseViewModel() {
                 val result = repository.uploadSingleImage(
                     session = session,
                     patientId = patientId,
-                    examType = _state.value.selectedExamType,
+                    examType = _state.value.selectedExamType.label,
                     fileName = file.name,
                     bytes = file.bytes,
                     mimeType = file.mimeType,
-                    description = _state.value.description,
+                    description = _state.value.note,
                 )
             ) {
                 is AppResult.Success -> {
@@ -151,7 +144,7 @@ class ImageUploadViewModel : BaseViewModel() {
                             uploading = false,
                             successMessage = "影像上传成功",
                             selectedFile = null,
-                            description = "",
+                            note = "",
                         )
                     }
                     onSuccess()
@@ -169,5 +162,4 @@ class ImageUploadViewModel : BaseViewModel() {
         }
     }
 }
-
 

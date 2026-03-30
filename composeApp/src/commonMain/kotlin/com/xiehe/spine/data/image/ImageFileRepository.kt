@@ -306,7 +306,10 @@ class ImageFileRepository(
         mimeType: String,
         description: String? = null,
     ): AppResult<Pair<UserSession, UploadSingleImageData>> {
-        val safeDescription = description?.trim().orEmpty().ifBlank { examType.trim() }
+        val safeDescription = encodeImageUploadDescription(
+            category = ImageCategory.fromLabel(examType) ?: ImageCategory.FRONT,
+            note = description,
+        )
         return withRefresh(session) { activeSession ->
             val requestUrl = "${apiClient.baseUrl}/upload/single"
             try {
@@ -316,9 +319,7 @@ class ImageFileRepository(
                         MultiPartFormDataContent(
                             formData {
                                 append("patient_id", patientId.toString())
-                                if (safeDescription.isNotBlank()) {
-                                    append("description", safeDescription)
-                                }
+                                append("description", safeDescription)
                                 append(
                                     key = "file",
                                     value = bytes,
