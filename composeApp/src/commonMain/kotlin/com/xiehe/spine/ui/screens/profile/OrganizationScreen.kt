@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -322,13 +323,25 @@ private fun OrganizationSummaryCard(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            SummaryStat(title = "成员总数", value = team.memberCount.toString())
+            SummaryStat(
+                title = "成员总数",
+                value = team.memberCount.toString(),
+                modifier = Modifier.weight(1f),
+            )
             SummaryDivider()
-            SummaryStat(title = "待处理邀请", value = invitationCount.toString())
+            SummaryStat(
+                title = "待接受邀请",
+                value = invitationCount.toString(),
+                modifier = Modifier.weight(1f),
+            )
             SummaryDivider()
-            SummaryStat(title = "创建年份", value = team.createdYearLabel())
+            SummaryStat(
+                title = "创建年份",
+                value = team.createdYearLabel(),
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
@@ -634,9 +647,11 @@ private fun MetaBadge(
 private fun SummaryStat(
     title: String,
     value: String,
+    modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
     Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
