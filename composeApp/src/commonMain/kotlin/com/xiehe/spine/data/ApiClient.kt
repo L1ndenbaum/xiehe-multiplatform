@@ -11,11 +11,15 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlin.time.TimeSource
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 
 class ApiClient(
     @PublishedApi internal val httpClient: HttpClient,
@@ -53,6 +57,41 @@ class ApiClient(
                 attachAuth(accessToken)
                 contentType(ContentType.Application.Json)
                 setBody(body)
+            }
+        }
+    }
+
+    internal suspend inline fun <reified B : Any> postForMessage(
+        path: String,
+        body: B,
+        accessToken: String? = null,
+    ): AppResult<String> {
+        val requestUrl = "$baseUrl$path"
+        return requestMessage(
+            requestName = "POST",
+            requestUrl = requestUrl,
+        ) {
+            post {
+                url(requestUrl)
+                attachAuth(accessToken)
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
+    internal suspend fun postForMessage(
+        path: String,
+        accessToken: String? = null,
+    ): AppResult<String> {
+        val requestUrl = "$baseUrl$path"
+        return requestMessage(
+            requestName = "POST",
+            requestUrl = requestUrl,
+        ) {
+            post {
+                url(requestUrl)
+                attachAuth(accessToken)
             }
         }
     }
@@ -134,6 +173,77 @@ class ApiClient(
         }
     }
 
+    internal suspend fun requestMessage(
+        requestName: String,
+        requestUrl: String,
+        block: suspend HttpClient.() -> io.ktor.client.statement.HttpResponse,
+    ): AppResult<String> {
+        val mark = TimeSource.Monotonic.markNow()
+        if (enableDiagnostics) {
+            println("SpineNetwork [$requestName] START $requestUrl")
+        }
+        return try {
+            val response = httpClient.block()
+            val responseText = response.bodyAsText()
+            val parsedEnvelope = runCatching {
+                messageJson.decodeFromString(ApiEnvelope.serializer(JsonElement.serializer().nullable), responseText)
+            }.getOrNull()
+            val parsedRaw = if (parsedEnvelope == null) {
+                runCatching { messageJson.decodeFromString(ApiMessageResponse.serializer(), responseText) }.getOrNull()
+            } else {
+                null
+            }
+            when {
+                parsedEnvelope != null -> {
+                    logDone(mark, requestName, requestUrl, "success")
+                    AppResult.Success(parsedEnvelope.message)
+                }
+
+                parsedRaw != null -> {
+                    logDone(mark, requestName, requestUrl, "success")
+                    AppResult.Success(parsedRaw.message)
+                }
+
+                else -> {
+                    val result = AppResult.Failure(
+                        message = "响应格式不支持",
+                        debugDetails = "[$requestName] $requestUrl unexpected-success-body=$responseText",
+                    )
+                    logDone(mark, requestName, requestUrl, "failure(unexpected-success-body)")
+                    result
+                }
+            }
+        } catch (e: ClientRequestException) {
+            val status = e.response.status
+            val error = runCatching { e.response.body<ApiErrorEnvelope>() }.getOrNull()
+            val result = AppResult.Failure(
+                message = error?.message ?: "请求失败",
+                code = status.value,
+                isUnauthorized = status == HttpStatusCode.Unauthorized,
+                debugDetails = buildString {
+                    append("[$requestName] ")
+                    append(requestUrl)
+                    append(" status=")
+                    append(status.value)
+                    append(" errorCode=")
+                    append(error?.errorCode ?: "N/A")
+                },
+            )
+            logDone(mark, requestName, requestUrl, "http-error(status=${status.value})")
+            result
+        } catch (e: Exception) {
+            val exceptionType = e::class.simpleName ?: "Exception"
+            val details = "[$requestName] $requestUrl type=$exceptionType message=${e.message ?: "N/A"}"
+            val userMessage = classifyNetworkError(e.message)
+            val result = AppResult.Failure(
+                message = userMessage,
+                debugDetails = details,
+            )
+            logDone(mark, requestName, requestUrl, "exception(type=$exceptionType)")
+            result
+        }
+    }
+
     @PublishedApi
     internal fun HttpRequestBuilder.attachAuth(accessToken: String?) {
         if (!accessToken.isNullOrBlank()) {
@@ -173,6 +283,14 @@ class ApiClient(
                 "连接超时，请稍后重试"
 
             else -> message
+        }
+    }
+
+    private companion object {
+        val messageJson = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            explicitNulls = false
         }
     }
 }

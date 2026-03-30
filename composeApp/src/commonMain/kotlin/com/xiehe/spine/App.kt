@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.xiehe.spine.core.model.AppResult
@@ -61,6 +62,7 @@ import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private enum class AuthRoute {
     LOGIN,
@@ -110,6 +112,7 @@ fun App(
     val patientFormVm = remember { PatientFormViewModel() }
     val personalInfoVm = remember { PersonalInfoViewModel() }
     val appearanceVm = remember { AppearanceViewModel(appContainer.themeRepository) }
+    val coroutineScope = rememberCoroutineScope()
 
     var session by remember { mutableStateOf<UserSession?>(appContainer.authRepository.restoreSession()) }
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -385,11 +388,13 @@ fun App(
                                 onOpenPersonalInfo = { route = OverlayRoute.PersonalInfo },
                                 onOpenChangePassword = { route = OverlayRoute.ChangePassword },
                                 onLogout = {
-                                    appContainer.authRepository.logout()
-                                    session = null
-                                    route = null
-                                    selectedTab = 0
-                                    authRoute = AuthRoute.LOGIN
+                                    coroutineScope.launch {
+                                        appContainer.authRepository.logout(activeSession)
+                                        session = null
+                                        route = null
+                                        selectedTab = 0
+                                        authRoute = AuthRoute.LOGIN
+                                    }
                                 },
                             )
                         }
@@ -564,7 +569,12 @@ fun App(
                                 )
                             },
                         ) {
-                            ChangePasswordScreen(onFinished = { route = null })
+                            ChangePasswordScreen(
+                                session = activeSession,
+                                authRepository = appContainer.authRepository,
+                                onSessionUpdated = { session = it },
+                                onFinished = { route = null },
+                            )
                         }
                     }
 
@@ -634,4 +644,3 @@ fun App(
         }
     }
 }
-

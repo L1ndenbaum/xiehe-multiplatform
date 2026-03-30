@@ -63,7 +63,6 @@ fun LoginScreen(
     val state by vm.state.collectAsState()
     val colors = SpineTheme.colors
     var passwordVisible by remember { mutableStateOf(false) }
-    var rememberPassword by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -191,16 +190,16 @@ fun LoginScreen(
                                 .size(20.dp)
                                 .clip(RoundedCornerShape(6.dp))
                                 .background(
-                                    if (rememberPassword) {
+                                    if (state.rememberMe) {
                                         Brush.linearGradient(listOf(Color(0xFF8B5CF6), Color(0xFF9333EA)))
                                     } else {
                                         Brush.linearGradient(listOf(colors.surfaceMuted, colors.surfaceMuted))
                                     },
                                 )
-                                .clickable { rememberPassword = !rememberPassword },
+                                .clickable { vm.updateRememberMe(!state.rememberMe) },
                             contentAlignment = Alignment.Center,
                         ) {
-                            if (rememberPassword) {
+                            if (state.rememberMe) {
                                 AppIcon(
                                     glyph = IconToken.CHECK,
                                     tint = colors.onPrimary,

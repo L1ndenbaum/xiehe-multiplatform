@@ -12,6 +12,11 @@ data class ApiEnvelope<T>(
 )
 
 @Serializable
+data class ApiMessageResponse(
+    val message: String,
+)
+
+@Serializable
 data class ApiErrorEnvelope(
     val code: Int? = null,
     val message: String,

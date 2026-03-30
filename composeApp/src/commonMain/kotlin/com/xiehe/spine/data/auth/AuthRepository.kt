@@ -37,11 +37,15 @@ class AuthRepository(
         return patched
     }
 
-    suspend fun login(username: String, password: String): AppResult<UserSession> {
+    suspend fun login(
+        username: String,
+        password: String,
+        rememberMe: Boolean = false,
+    ): AppResult<UserSession> {
         return when (
             val result = apiClient.post<LoginData, LoginRequest>(
                 path = "/auth/login",
-                body = LoginRequest(username = username, password = password, rememberMe = false),
+                body = LoginRequest(username = username, password = password, rememberMe = rememberMe),
             )
         ) {
             is AppResult.Success -> {
@@ -149,6 +153,47 @@ class AuthRepository(
         }
     }
 
+    suspend fun requestPasswordReset(email: String): AppResult<String> {
+        return apiClient.postForMessage(
+            path = "/auth/password/reset",
+            body = PasswordResetRequest(email = email),
+        )
+    }
+
+    suspend fun confirmPasswordReset(
+        token: String,
+        newPassword: String,
+        confirmPassword: String,
+    ): AppResult<String> {
+        return apiClient.postForMessage(
+            path = "/auth/password/reset/confirm",
+            body = PasswordResetConfirmRequest(
+                token = token,
+                newPassword = newPassword,
+                confirmPassword = confirmPassword,
+            ),
+        )
+    }
+
+    suspend fun changePassword(
+        session: UserSession,
+        currentPassword: String,
+        newPassword: String,
+        confirmPassword: String,
+    ): AppResult<Pair<UserSession, String>> {
+        return withRefresh(session) { active ->
+            apiClient.postForMessage(
+                path = "/auth/password/change",
+                body = PasswordChangeRequest(
+                    currentPassword = currentPassword,
+                    newPassword = newPassword,
+                    confirmPassword = confirmPassword,
+                ),
+                accessToken = active.accessToken,
+            )
+        }
+    }
+
     suspend fun ensureFreshSession(session: UserSession): AppResult<UserSession> {
         val expiresAt = session.accessTokenExpiresAtEpochSeconds ?: return AppResult.Success(session)
         val remainingSeconds = expiresAt - currentEpochSeconds()
@@ -161,6 +206,20 @@ class AuthRepository(
 
     fun logout() {
         sessionStore.clear()
+    }
+
+    suspend fun logout(session: UserSession): AppResult<String> {
+        val result = withRefresh(session) { active ->
+            apiClient.postForMessage(
+                path = "/auth/logout",
+                accessToken = active.accessToken,
+            )
+        }
+        sessionStore.clear()
+        return when (result) {
+            is AppResult.Success -> AppResult.Success(result.data.second)
+            is AppResult.Failure -> result
+        }
     }
 
     private suspend inline fun <reified T> withRefresh(

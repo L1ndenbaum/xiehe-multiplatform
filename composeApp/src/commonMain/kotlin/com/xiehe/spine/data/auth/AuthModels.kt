@@ -26,6 +26,25 @@ data class RefreshRequest(
 )
 
 @Serializable
+data class PasswordResetRequest(
+    val email: String,
+)
+
+@Serializable
+data class PasswordResetConfirmRequest(
+    val token: String,
+    @SerialName("new_password") val newPassword: String,
+    @SerialName("confirm_password") val confirmPassword: String,
+)
+
+@Serializable
+data class PasswordChangeRequest(
+    @SerialName("current_password") val currentPassword: String,
+    @SerialName("new_password") val newPassword: String,
+    @SerialName("confirm_password") val confirmPassword: String,
+)
+
+@Serializable
 data class TokenPayload(
     @SerialName("access_token") val accessToken: String,
     @SerialName("refresh_token") val refreshToken: String,
@@ -84,6 +103,7 @@ data class UpdateCurrentUserRequest(
     @SerialName("full_name") val fullName: String? = null,
     @SerialName("real_name") val realName: String? = null,
     val phone: String? = null,
+    @SerialName("department_id") val departmentId: Int? = null,
     val position: String? = null,
     val title: String? = null,
 )

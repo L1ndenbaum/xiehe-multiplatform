@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 data class LoginUiState(
     val username: String = "",
     val password: String = "",
+    val rememberMe: Boolean = false,
     val loading: Boolean = false,
     val errorMessage: String? = null,
     val errorDetails: String? = null,
@@ -31,6 +32,10 @@ class LoginViewModel : BaseViewModel() {
 
     fun updatePassword(value: String) {
         _state.update { it.copy(password = value, errorMessage = null, errorDetails = null) }
+    }
+
+    fun updateRememberMe(value: Boolean) {
+        _state.update { it.copy(rememberMe = value, errorMessage = null, errorDetails = null) }
     }
 
     fun checkConnectivity(authRepository: AuthRepository) {
@@ -71,7 +76,13 @@ class LoginViewModel : BaseViewModel() {
         }
         scope.launch {
             _state.update { it.copy(loading = true, errorMessage = null, errorDetails = null) }
-            when (val result = authRepository.login(current.username.trim(), current.password)) {
+            when (
+                val result = authRepository.login(
+                    username = current.username.trim(),
+                    password = current.password,
+                    rememberMe = current.rememberMe,
+                )
+            ) {
                 is AppResult.Success -> {
                     _state.update { it.copy(loading = false) }
                     onSuccess(result.data)

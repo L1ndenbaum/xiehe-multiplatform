@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,12 +34,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.core.model.AppResult
+import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.ui.components.button.shared.Button
+import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineAppColors
 import com.xiehe.spine.ui.theme.SpineTheme
+import kotlinx.coroutines.launch
 
 private enum class PasswordStep {
     VERIFY,
@@ -53,9 +59,13 @@ private data class PasswordStrength(
 
 @Composable
 fun ChangePasswordScreen(
+    session: UserSession,
+    authRepository: AuthRepository,
+    onSessionUpdated: (UserSession) -> Unit,
     onFinished: () -> Unit = {},
 ) {
     val colors = SpineTheme.colors
+    val scope = rememberCoroutineScope()
     var step by remember { mutableStateOf(PasswordStep.VERIFY) }
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
@@ -63,6 +73,7 @@ fun ChangePasswordScreen(
     var showCurrent by remember { mutableStateOf(false) }
     var showNew by remember { mutableStateOf(false) }
     var showConfirm by remember { mutableStateOf(false) }
+    var submitting by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scrollState = rememberScrollState()
     val strength = remember(newPassword) { evaluatePasswordStrength(newPassword) }
@@ -125,8 +136,10 @@ fun ChangePasswordScreen(
                         onToggleNewVisibility = { showNew = !showNew },
                         onToggleConfirmVisibility = { showConfirm = !showConfirm },
                         onBack = {
-                            errorMessage = null
-                            step = PasswordStep.VERIFY
+                            if (!submitting) {
+                                errorMessage = null
+                                step = PasswordStep.VERIFY
+                            }
                         },
                         onConfirm = {
                             when {
@@ -135,10 +148,32 @@ fun ChangePasswordScreen(
                                 newPassword != confirmPassword -> errorMessage = "两次密码不一致"
                                 else -> {
                                     errorMessage = null
-                                    step = PasswordStep.DONE
+                                    scope.launch {
+                                        submitting = true
+                                        when (
+                                            val result = authRepository.changePassword(
+                                                session = session,
+                                                currentPassword = currentPassword,
+                                                newPassword = newPassword,
+                                                confirmPassword = confirmPassword,
+                                            )
+                                        ) {
+                                            is AppResult.Success -> {
+                                                onSessionUpdated(result.data.first)
+                                                submitting = false
+                                                step = PasswordStep.DONE
+                                            }
+
+                                            is AppResult.Failure -> {
+                                                submitting = false
+                                                errorMessage = result.message
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         },
+                        confirmEnabled = !submitting,
                     )
                     PasswordSafetyTipCard()
                 }
@@ -161,6 +196,10 @@ fun ChangePasswordScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (submitting) {
+            LoadingOverlay(message = "...正在提交中")
         }
     }
 }
@@ -321,6 +360,7 @@ private fun PasswordResetCard(
     onToggleConfirmVisibility: () -> Unit,
     onBack: () -> Unit,
     onConfirm: () -> Unit,
+    confirmEnabled: Boolean,
 ) {
     val colors = SpineTheme.colors
     PasswordSurfaceCard {
@@ -381,8 +421,9 @@ private fun PasswordResetCard(
                 modifier = Modifier.weight(1f),
             )
             Button(
-                text = "确认修改",
+                text = if (confirmEnabled) "确认修改" else "提交中...",
                 onClick = onConfirm,
+                enabled = confirmEnabled,
                 modifier = Modifier.weight(1f).height(52.dp),
             )
         }
