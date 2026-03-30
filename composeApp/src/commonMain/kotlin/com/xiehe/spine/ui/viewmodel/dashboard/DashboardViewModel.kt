@@ -11,6 +11,7 @@ import com.xiehe.spine.data.image.ImageWorkflowStatus
 import com.xiehe.spine.data.image.normalizeImageStatus
 import com.xiehe.spine.data.notification.NotificationMessage
 import com.xiehe.spine.data.notification.NotificationRepository
+import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.data.patient.PatientSummary
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import kotlinx.coroutines.async
@@ -43,6 +44,7 @@ class DashboardViewModel : BaseViewModel() {
         session: UserSession,
         dashboardRepository: DashboardRepository,
         imageRepository: ImageFileRepository,
+        patientRepository: PatientRepository,
         notificationRepository: NotificationRepository,
         authRepository: AuthRepository,
         onSessionUpdated: (UserSession) -> Unit,
@@ -69,36 +71,37 @@ class DashboardViewModel : BaseViewModel() {
             }
 
             val overviewDeferred = async { dashboardRepository.loadOverview(session) }
-            val imagesDeferred = async {
-                if (preloadedImages.isNotEmpty()) {
-                    AppResult.Success(session to preloadedImages)
-                } else {
-                    imageRepository.loadAllImageFiles(session)
-                }
-            }
+            val patientsDeferred = async { patientRepository.loadAllPatients(session) }
+            val imagesDeferred = async { imageRepository.loadAllImageFiles(session) }
             val messagesDeferred = async {
                 notificationRepository.loadMessages(session = session, page = 1, pageSize = 4)
             }
             val meDeferred = async { authRepository.getCurrentUser(session) }
 
             val overviewResult = overviewDeferred.await()
+            val patientsResult = patientsDeferred.await()
             val imagesResult = imagesDeferred.await()
             val messagesResult = messagesDeferred.await()
             val meResult = meDeferred.await()
 
             val latestSession = listOfNotNull(
                 (overviewResult as? AppResult.Success)?.data?.first,
+                (patientsResult as? AppResult.Success)?.data?.first,
                 (imagesResult as? AppResult.Success)?.data?.first,
                 (messagesResult as? AppResult.Success)?.data?.first,
                 (meResult as? AppResult.Success)?.data?.first,
             ).lastOrNull() ?: session
             onSessionUpdated(latestSession)
 
+            val latestPatients = when (patientsResult) {
+                is AppResult.Success -> patientsResult.data.second
+                else -> preloadedPatients
+            }
             val pendingItems = when (imagesResult) {
                 is AppResult.Success -> {
                     buildPendingTasks(
                         images = imagesResult.data.second,
-                        patients = preloadedPatients,
+                        patients = latestPatients,
                     )
                 }
 
@@ -224,4 +227,3 @@ class DashboardViewModel : BaseViewModel() {
         )
     }
 }
-

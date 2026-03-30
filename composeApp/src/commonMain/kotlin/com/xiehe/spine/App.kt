@@ -354,6 +354,7 @@ fun App(
                                 session = activeSession,
                                 dashboardRepository = appContainer.dashboardRepository,
                                 imageRepository = appContainer.imageFileRepository,
+                                patientRepository = appContainer.patientRepository,
                                 notificationRepository = appContainer.notificationRepository,
                                 authRepository = appContainer.authRepository,
                                 onSessionUpdated = { session = it },

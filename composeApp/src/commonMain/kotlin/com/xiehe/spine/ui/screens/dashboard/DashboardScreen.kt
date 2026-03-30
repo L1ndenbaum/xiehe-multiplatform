@@ -25,6 +25,7 @@ import com.xiehe.spine.data.dashboard.DashboardRepository
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.notification.NotificationRepository
+import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.data.patient.PatientSummary
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.icon.shared.IconToken
@@ -44,6 +45,7 @@ fun DashboardScreen(
     session: UserSession,
     dashboardRepository: DashboardRepository,
     imageRepository: ImageFileRepository,
+    patientRepository: PatientRepository,
     notificationRepository: NotificationRepository,
     authRepository: AuthRepository,
     onSessionUpdated: (UserSession) -> Unit,
@@ -62,6 +64,7 @@ fun DashboardScreen(
             session = session,
             dashboardRepository = dashboardRepository,
             imageRepository = imageRepository,
+            patientRepository = patientRepository,
             notificationRepository = notificationRepository,
             authRepository = authRepository,
             onSessionUpdated = onSessionUpdated,
@@ -210,5 +213,4 @@ private fun reviewActionGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors
 private fun messageActionGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors): List<Color> {
     return listOf(colors.warning.copy(alpha = 0.9f), colors.error.copy(alpha = 0.92f))
 }
-
 
