@@ -17,7 +17,7 @@ data class PatientEditUiState(
     val submitting: Boolean = false,
     val name: String = "",
     val gender: String = "male",
-    val birthDate: String = "1990-01-01",
+    val birthDate: String = "",
     val phonePrefix: String = "+86",
     val phoneLocalNumber: String = "",
     val email: String = "",
@@ -85,7 +85,7 @@ class PatientEditViewModel : BaseViewModel() {
             _state.update { it.copy(errorMessage = "患者姓名至少2个字符", successMessage = null) }
             return
         }
-        if (!DATE_PATTERN.matches(current.birthDate.trim())) {
+        if (current.birthDate.isNotBlank() && !DATE_PATTERN.matches(current.birthDate.trim())) {
             _state.update { it.copy(errorMessage = "请选择有效的出生日期", successMessage = null) }
             return
         }
@@ -150,7 +150,7 @@ class PatientEditViewModel : BaseViewModel() {
         return PatientEditUiState(
             name = detail.name,
             gender = normalizeGender(detail.gender),
-            birthDate = detail.birthDate,
+            birthDate = detail.birthDate.orEmpty(),
             phonePrefix = phonePrefix,
             phoneLocalNumber = phoneLocalNumber,
             email = detail.email.orEmpty(),
@@ -219,7 +219,7 @@ class PatientEditViewModel : BaseViewModel() {
         return PatientEditSnapshot(
             name = name.trim(),
             gender = gender.trim(),
-            birthDate = birthDate.trim(),
+            birthDate = birthDate.trim().ifBlank { null },
             phone = if (local.isBlank()) null else phonePrefix + local,
             email = email.trim().ifBlank { null },
             idCard = idCard.trim().ifBlank { null },
@@ -245,7 +245,7 @@ class PatientEditViewModel : BaseViewModel() {
     private data class PatientEditSnapshot(
         val name: String,
         val gender: String,
-        val birthDate: String,
+        val birthDate: String?,
         val phone: String?,
         val email: String?,
         val idCard: String?,

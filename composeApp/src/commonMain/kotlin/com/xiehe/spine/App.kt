@@ -423,7 +423,38 @@ fun App(
                                         HeaderTextAction(
                                             text = "删除",
                                             onClick = {
-                                                patientDetailNotice = "当前版本尚未接入删除患者接口"
+                                                patientDetailNotice = "正在删除患者..."
+                                                coroutineScope.launch {
+                                                    when (
+                                                        val result = appContainer.patientRepository.deletePatient(
+                                                            session = activeSession,
+                                                            patientId = current.patientId,
+                                                        )
+                                                    ) {
+                                                        is AppResult.Success -> {
+                                                            val updatedSession = result.data.first
+                                                            session = updatedSession
+                                                            selectedTab = 1
+                                                            route = null
+                                                            patientsVm.refresh(
+                                                                session = updatedSession,
+                                                                repository = appContainer.patientRepository,
+                                                                onSessionUpdated = { session = it },
+                                                            )
+                                                        }
+
+                                                        is AppResult.Failure -> {
+                                                            patientDetailNotice = result.message
+                                                            if (result.isUnauthorized) {
+                                                                appContainer.authRepository.logout()
+                                                                session = null
+                                                                route = null
+                                                                selectedTab = 0
+                                                                authRoute = AuthRoute.LOGIN
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             },
                                             fill = colors.error,
                                             borderColor = colors.error,

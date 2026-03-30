@@ -233,7 +233,7 @@ private fun PatientSummaryCard(
                     )
                 }
                 Text(
-                    text = "${patient.age}岁",
+                    text = patient.age?.let { "${it}岁" } ?: "年龄未填写",
                     style = SpineTheme.typography.subhead,
                     color = colors.textSecondary,
                 )

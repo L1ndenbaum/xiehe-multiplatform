@@ -23,11 +23,20 @@ data class PatientSummary(
     @SerialName("patient_id") val patientId: String,
     val name: String,
     val gender: String,
-    val age: Int,
+    @SerialName("birth_date") val birthDate: String? = null,
+    val age: Int? = null,
     val phone: String? = null,
+    val email: String? = null,
+    val address: String? = null,
+    @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
+    @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
+    @SerialName("id_card") val idCard: String? = null,
+    @SerialName("insurance_number") val insuranceNumber: String? = null,
     @SerialName("avatar_url") val avatarUrl: String? = null,
     @SerialName("avatar") val avatar: String? = null,
     val status: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
 )
 
 @Serializable
@@ -36,8 +45,8 @@ data class PatientDetail(
     @SerialName("patient_id") val patientId: String,
     val name: String,
     val gender: String,
-    @SerialName("birth_date") val birthDate: String,
-    val age: Int,
+    @SerialName("birth_date") val birthDate: String? = null,
+    val age: Int? = null,
     val phone: String? = null,
     val email: String? = null,
     @SerialName("avatar_url") val avatarUrl: String? = null,
@@ -49,6 +58,8 @@ data class PatientDetail(
     @SerialName("insurance_number") val insuranceNumber: String? = null,
     @SerialName("medical_history") val medicalHistory: String? = null,
     val status: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
 )
 
 @Serializable
@@ -56,14 +67,14 @@ data class CreatePatientRequest(
     @SerialName("patient_id") val patientId: String,
     val name: String,
     val gender: String,
-    @SerialName("birth_date") val birthDate: String,
-    val phone: String,
+    @SerialName("birth_date") val birthDate: String? = null,
+    val phone: String? = null,
     @SerialName("id_card") val idCard: String? = null,
     val email: String? = null,
     val address: String? = null,
     @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
     @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
-    @SerialName("medical_history") val medicalHistory: String? = null,
+    @SerialName("insurance_number") val insuranceNumber: String? = null,
 )
 
 @Serializable

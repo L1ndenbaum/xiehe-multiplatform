@@ -5,7 +5,6 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.ApiClient
 import com.xiehe.spine.data.auth.AuthRepository
 import io.ktor.http.encodeURLParameter
-import kotlinx.serialization.json.JsonObject
 
 class PatientRepository(
     private val apiClient: ApiClient,
@@ -49,6 +48,7 @@ class PatientRepository(
         gender: String? = null,
         ageMin: Int? = null,
         ageMax: Int? = null,
+        status: String? = null,
     ): AppResult<Pair<UserSession, PatientPageData>> {
         val path = buildString {
             append("/patients/?page=")
@@ -71,6 +71,10 @@ class PatientRepository(
                 append("&age_max=")
                 append(ageMax)
             }
+            if (!status.isNullOrBlank()) {
+                append("&status=")
+                append(status.encodeURLParameter())
+            }
         }
         return withRefresh(session) { activeSession ->
             apiClient.get(path = path, accessToken = activeSession.accessToken)
@@ -89,7 +93,7 @@ class PatientRepository(
     suspend fun createPatient(
         session: UserSession,
         request: CreatePatientRequest,
-    ): AppResult<Pair<UserSession, JsonObject>> {
+    ): AppResult<Pair<UserSession, PatientDetail>> {
         return withRefresh(session) { activeSession ->
             apiClient.post(path = "/patients/", body = request, accessToken = activeSession.accessToken)
         }
@@ -104,6 +108,18 @@ class PatientRepository(
             apiClient.put(
                 path = "/patients/$patientId",
                 body = request,
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
+    suspend fun deletePatient(
+        session: UserSession,
+        patientId: Int,
+    ): AppResult<Pair<UserSession, String>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.deleteForMessage(
+                path = "/patients/$patientId",
                 accessToken = activeSession.accessToken,
             )
         }

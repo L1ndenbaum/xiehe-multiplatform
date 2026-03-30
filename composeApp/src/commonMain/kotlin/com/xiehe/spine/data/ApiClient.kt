@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.delete
 import io.ktor.client.request.header
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -90,6 +91,22 @@ class ApiClient(
             requestUrl = requestUrl,
         ) {
             post {
+                url(requestUrl)
+                attachAuth(accessToken)
+            }
+        }
+    }
+
+    internal suspend fun deleteForMessage(
+        path: String,
+        accessToken: String? = null,
+    ): AppResult<String> {
+        val requestUrl = "$baseUrl$path"
+        return requestMessage(
+            requestName = "DELETE",
+            requestUrl = requestUrl,
+        ) {
+            delete {
                 url(requestUrl)
                 attachAuth(accessToken)
             }

@@ -15,7 +15,7 @@ data class PatientFormUiState(
     val patientId: String = generatedPatientId(),
     val name: String = "",
     val gender: String = "male",
-    val birthDate: String = "1990-01-01",
+    val birthDate: String = "",
     val phonePrefix: String = "+86",
     val phoneLocalNumber: String = "",
     val email: String = "",
@@ -23,7 +23,6 @@ data class PatientFormUiState(
     val address: String = "",
     val emergencyContactName: String = "",
     val emergencyContactPhone: String = "",
-    val medicalHistory: String = "",
     val loading: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -42,7 +41,6 @@ class PatientFormViewModel : BaseViewModel() {
     fun updateAddress(value: String) = _state.update { it.copy(address = value) }
     fun updateEmergencyContactName(value: String) = _state.update { it.copy(emergencyContactName = value) }
     fun updateEmergencyContactPhone(value: String) = _state.update { it.copy(emergencyContactPhone = sanitizeEmergencyPhone(value)) }
-    fun updateMedicalHistory(value: String) = _state.update { it.copy(medicalHistory = value) }
 
     fun submit(
         session: UserSession,
@@ -55,11 +53,11 @@ class PatientFormViewModel : BaseViewModel() {
             _state.update { it.copy(errorMessage = "患者姓名至少2个字符") }
             return
         }
-        if (!isValidBirthDate(form.birthDate)) {
+        if (form.birthDate.isNotBlank() && !isValidBirthDate(form.birthDate)) {
             _state.update { it.copy(errorMessage = "请选择有效的出生日期") }
             return
         }
-        if (!isValidPhone(form.phonePrefix, form.phoneLocalNumber)) {
+        if (form.phoneLocalNumber.isNotBlank() && !isValidPhone(form.phonePrefix, form.phoneLocalNumber)) {
             _state.update {
                 it.copy(
                     errorMessage = when (form.phonePrefix) {
@@ -70,23 +68,23 @@ class PatientFormViewModel : BaseViewModel() {
             }
             return
         }
-        if (form.idCard.isBlank() || !ID_CARD_PATTERN.matches(form.idCard.trim())) {
+        if (form.idCard.isNotBlank() && !ID_CARD_PATTERN.matches(form.idCard.trim())) {
             _state.update { it.copy(errorMessage = "身份证号必须为18位数字或字母") }
             return
         }
 
+        val phone = form.phoneLocalNumber.trim().takeIf { it.isNotBlank() }?.let { form.phonePrefix + it }
         val request = CreatePatientRequest(
             patientId = form.patientId,
             name = form.name.trim(),
             gender = form.gender,
-            birthDate = form.birthDate,
-            phone = form.phonePrefix + form.phoneLocalNumber,
-            idCard = form.idCard.trim(),
+            birthDate = form.birthDate.trim().ifBlank { null },
+            phone = phone,
+            idCard = form.idCard.trim().ifBlank { null },
             email = form.email.trim().ifBlank { null },
             address = form.address.trim().ifBlank { null },
             emergencyContactName = form.emergencyContactName.trim().ifBlank { null },
             emergencyContactPhone = form.emergencyContactPhone.trim().ifBlank { null },
-            medicalHistory = form.medicalHistory.trim().ifBlank { null },
         )
 
         scope.launch {

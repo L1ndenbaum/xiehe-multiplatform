@@ -96,7 +96,7 @@ fun PatientFormScreen(
             TextField(
                 value = state.idCard,
                 onValueChange = vm::updateIdCard,
-                placeholder = "请输入18位身份证号",
+                placeholder = "请输入18位身份证号(可选)",
                 leadingGlyph = IconToken.LOCK,
             )
 
@@ -129,18 +129,8 @@ fun PatientFormScreen(
             TextField(
                 value = state.address,
                 onValueChange = vm::updateAddress,
-                placeholder = "请输入家庭地址",
+                placeholder = "请输入家庭地址(可选)",
                 leadingGlyph = IconToken.SETTINGS,
-            )
-            TextField(
-                value = state.medicalHistory,
-                onValueChange = vm::updateMedicalHistory,
-                placeholder = "请输入病史备注",
-                singleLine = false,
-                leadingGlyph = IconToken.IMAGE,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
             )
 
             state.errorMessage?.let {

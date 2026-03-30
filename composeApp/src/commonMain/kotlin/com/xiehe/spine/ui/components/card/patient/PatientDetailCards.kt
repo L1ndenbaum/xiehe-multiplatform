@@ -73,7 +73,7 @@ fun PatientBasicInfoCard(detail: PatientDetail) {
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         InfoCapsule(text = detail.gender.ifBlank { "未填写" })
-                        InfoCapsule(text = "${detail.age}岁")
+                        InfoCapsule(text = detail.age?.let { "${it}岁" } ?: "年龄未填写")
                     }
                 }
             }
@@ -112,7 +112,7 @@ fun PatientBasicInfoCard(detail: PatientDetail) {
         )
         DetailGridRow(
             leftLabel = "年龄",
-            leftValue = "${detail.age}岁",
+            leftValue = detail.age?.let { "${it}岁" } ?: "-",
             rightLabel = "身份证号码",
             rightValue = detail.idCard.orDash(),
         )
@@ -593,13 +593,17 @@ private fun patientAvatarGradient(gender: String): List<Color> {
     }
 }
 
-private fun formatBirthDate(raw: String): String {
-    val datePart = raw.trim().take(10)
+private fun formatBirthDate(raw: String?): String {
+    val normalized = raw?.trim().orEmpty()
+    if (normalized.isBlank()) {
+        return "-"
+    }
+    val datePart = normalized.take(10)
     val parts = datePart.split("-")
     return if (parts.size == 3) {
         "${parts[0]}年${parts[1]}月${parts[2]}日"
     } else {
-        raw
+        normalized
     }
 }
 
