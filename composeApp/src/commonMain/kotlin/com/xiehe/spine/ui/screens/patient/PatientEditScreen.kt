@@ -52,6 +52,7 @@ fun PatientEditScreen(
     repository: PatientRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onSubmitSuccess: () -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val scroll = rememberScrollState()
@@ -69,6 +70,7 @@ fun PatientEditScreen(
             session = session,
             repository = repository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -173,6 +175,7 @@ fun PatientEditScreen(
                         repository = repository,
                         onSessionUpdated = onSessionUpdated,
                         onSuccess = onSubmitSuccess,
+                        onSessionExpired = onSessionExpired,
                     )
                 },
                 enabled = !state.loading && !state.submitting,

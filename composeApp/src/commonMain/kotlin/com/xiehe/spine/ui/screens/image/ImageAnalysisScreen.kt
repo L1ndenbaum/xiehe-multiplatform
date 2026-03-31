@@ -70,6 +70,7 @@ fun ImageAnalysisScreen(
     aiRepository: AiInferenceRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onBack: () -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val scope = rememberCoroutineScope()
@@ -93,6 +94,7 @@ fun ImageAnalysisScreen(
             imageRepository = imageRepository,
             measurementRepository = measurementRepository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -138,6 +140,7 @@ fun ImageAnalysisScreen(
                     examType = examType,
                     patientId = patientId,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                 )
             },
             onImportJson = { jsonPicker.launch() },
@@ -260,6 +263,7 @@ fun ImageAnalysisScreen(
                             session = session,
                             repository = measurementRepository,
                             onSessionUpdated = onSessionUpdated,
+                            onSessionExpired = onSessionExpired,
                         )
                     }
                     AnalysisBottomAction.TOOLKIT -> vm.openToolsPanel()
@@ -434,6 +438,7 @@ fun ImageAnalysisScreen(
                                     repository = measurementRepository,
                                     examType = examType,
                                     onSessionUpdated = onSessionUpdated,
+                                    onSessionExpired = onSessionExpired,
                                 )
                             }
                         },
@@ -489,5 +494,3 @@ fun ImageAnalysisScreen(
         }
     }
 }
-
-

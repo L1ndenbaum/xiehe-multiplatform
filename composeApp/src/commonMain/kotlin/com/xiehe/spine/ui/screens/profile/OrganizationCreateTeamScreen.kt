@@ -51,6 +51,7 @@ fun OrganizationCreateTeamScreen(
     repository: OrganizationRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onFinished: () -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
 
@@ -259,6 +260,7 @@ fun OrganizationCreateTeamScreen(
                                     maxMembers = maxMembersValue,
                                     onSessionUpdated = onSessionUpdated,
                                     onSuccess = onFinished,
+                                    onSessionExpired = onSessionExpired,
                                 )
                             },
                         )

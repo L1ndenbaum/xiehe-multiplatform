@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.patient
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
@@ -41,6 +42,7 @@ class PatientEditViewModel : BaseViewModel() {
         session: UserSession,
         repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(loading = true, errorMessage = null, successMessage = null) }
@@ -54,7 +56,11 @@ class PatientEditViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(loading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(loading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(loading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }
@@ -76,6 +82,7 @@ class PatientEditViewModel : BaseViewModel() {
         repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSuccess: () -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val patientId = activePatientId ?: return
         val current = _state.value
@@ -133,7 +140,11 @@ class PatientEditViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(submitting = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(submitting = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(submitting = false, errorMessage = result.message) }
+                    }
                 }
             }
         }

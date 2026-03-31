@@ -49,6 +49,7 @@ fun DashboardScreen(
     notificationRepository: NotificationRepository,
     authRepository: AuthRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
     preloadedPatients: List<PatientSummary> = emptyList(),
     preloadedImages: List<ImageFileSummary> = emptyList(),
     onOpenAnalysis: (Int, Int?, String) -> Unit = { _, _, _ -> },
@@ -68,6 +69,7 @@ fun DashboardScreen(
             notificationRepository = notificationRepository,
             authRepository = authRepository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
             preloadedPatients = preloadedPatients,
             preloadedImages = preloadedImages,
         )
@@ -213,4 +215,3 @@ private fun reviewActionGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors
 private fun messageActionGradient(colors: com.xiehe.spine.ui.theme.SpineAppColors): List<Color> {
     return listOf(colors.warning.copy(alpha = 0.9f), colors.error.copy(alpha = 0.92f))
 }
-

@@ -41,6 +41,7 @@ fun MessagesScreen(
     session: UserSession,
     repository: NotificationRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
 
@@ -50,6 +51,7 @@ fun MessagesScreen(
             repository = repository,
             onSessionUpdated = onSessionUpdated,
             silent = false,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -64,6 +66,7 @@ fun MessagesScreen(
             repository = repository,
             onSessionUpdated = onSessionUpdated,
             silent = true,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -147,6 +150,7 @@ fun MessagesScreen(
                             repository = repository,
                             messageId = it.id,
                             onSessionUpdated = onSessionUpdated,
+                            onSessionExpired = onSessionExpired,
                         )
                     },
                     onDelete = {
@@ -155,6 +159,7 @@ fun MessagesScreen(
                             repository = repository,
                             message = it,
                             onSessionUpdated = onSessionUpdated,
+                            onSessionExpired = onSessionExpired,
                         )
                     },
                 )

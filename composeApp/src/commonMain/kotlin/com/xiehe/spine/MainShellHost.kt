@@ -36,6 +36,7 @@ internal fun MainShellHost(
     onSessionUpdated: (UserSession) -> Unit,
     onLogoutRequested: suspend () -> Unit,
     onRouteChange: (OverlayRoute?) -> Unit,
+    onSessionExpired: (String) -> Unit,
 ) {
     val patientsState by scopedViewModels.patientsVm.state.collectAsState()
     val imagesState by scopedViewModels.imagesVm.state.collectAsState()
@@ -113,6 +114,7 @@ internal fun MainShellHost(
                     notificationRepository = container.notificationRepository,
                     authRepository = container.authRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                     preloadedPatients = dashboardBootstrap.patients,
                     preloadedImages = dashboardBootstrap.images,
                     onOpenAnalysis = { fileId, patientId, examType ->
@@ -135,6 +137,7 @@ internal fun MainShellHost(
                     session = session,
                     repository = container.patientRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                     onOpenPatient = { onRouteChange(OverlayRoute.PatientDetail(it)) },
                     onEditPatient = { onRouteChange(OverlayRoute.PatientEdit(it)) },
                     showInlineSearch = false,
@@ -145,6 +148,7 @@ internal fun MainShellHost(
                     session = session,
                     repository = container.imageFileRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                     showInlineSearch = false,
                     onOpenAnalysis = { fileId, patientId, examType ->
                         onRouteChange(

@@ -1,6 +1,7 @@
 package com.xiehe.spine.ui.viewmodel.patient
 
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.image.ImageFileRepository
@@ -33,6 +34,7 @@ class PatientDetailViewModel : BaseViewModel() {
         patientRepository: PatientRepository,
         imageRepository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update {
@@ -54,7 +56,11 @@ class PatientDetailViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(loading = false, relatedLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(loading = false, relatedLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(loading = false, relatedLoading = false, errorMessage = result.message) }
+                    }
                     return@launch
                 }
             }
@@ -89,7 +95,7 @@ class PatientDetailViewModel : BaseViewModel() {
         repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onDeleted: (UserSession) -> Unit,
-        onUnauthorized: () -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         if (_state.value.deleting) {
             return
@@ -117,15 +123,22 @@ class PatientDetailViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            deleting = false,
-                            noticeMessage = null,
-                            errorMessage = result.message,
-                        )
-                    }
-                    if (result.isUnauthorized) {
-                        onUnauthorized()
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update {
+                            it.copy(
+                                deleting = false,
+                                noticeMessage = null,
+                                errorMessage = null,
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                deleting = false,
+                                noticeMessage = null,
+                                errorMessage = result.message,
+                            )
+                        }
                     }
                 }
             }

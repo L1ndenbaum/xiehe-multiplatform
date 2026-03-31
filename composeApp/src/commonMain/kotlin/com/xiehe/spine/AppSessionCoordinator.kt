@@ -9,6 +9,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,9 +19,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
+import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.viewmodel.auth.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
 import com.xiehe.spine.ui.viewmodel.profile.AppearanceViewModel
@@ -41,11 +49,24 @@ internal fun AppSessionCoordinator(
     var route by remember { mutableStateOf<OverlayRoute?>(null) }
     var authRoute by remember { mutableStateOf(AuthRoute.LOGIN) }
     var dashboardBootstrap by remember(session?.userId) { mutableStateOf(DashboardBootstrapState()) }
+    var sessionExpiredMessage by remember { mutableStateOf<String?>(null) }
+    var handlingSessionExpiry by remember { mutableStateOf(false) }
 
     val onTabSelected: (Int) -> Unit = remember {
         { tab ->
             selectedTab = tab
             route = null
+        }
+    }
+
+    val onSessionEvent: (SessionEvent) -> Unit = { event ->
+        when (event) {
+            is SessionEvent.SessionExpired -> {
+                if (session != null && !handlingSessionExpiry) {
+                    sessionExpiredMessage = event.message
+                    handlingSessionExpiry = true
+                }
+            }
         }
     }
 
@@ -64,6 +85,8 @@ internal fun AppSessionCoordinator(
         selectedTab = 0
         authRoute = AuthRoute.LOGIN
         dashboardBootstrap = DashboardBootstrapState()
+        sessionExpiredMessage = null
+        handlingSessionExpiry = false
     }
 
     if (session == null) {
@@ -108,7 +131,7 @@ internal fun AppSessionCoordinator(
 
                 is AppResult.Failure -> {
                     if (result.isUnauthorized) {
-                        resetToLogin(clearRemoteSession = false, activeSession = latest)
+                        onSessionEvent(result.asSessionExpiredEvent())
                         break
                     }
                 }
@@ -128,7 +151,7 @@ internal fun AppSessionCoordinator(
 
             is AppResult.Failure -> {
                 if (result.isUnauthorized) {
-                    resetToLogin(clearRemoteSession = false, activeSession = current)
+                    onSessionEvent(result.asSessionExpiredEvent())
                 }
             }
         }
@@ -157,7 +180,7 @@ internal fun AppSessionCoordinator(
             result is AppResult.Failure && result.isUnauthorized
         }
         if (unauthorized) {
-            resetToLogin(clearRemoteSession = false, activeSession = latestSession)
+            onSessionEvent(SessionEvent.SessionExpired())
             return@LaunchedEffect
         }
 
@@ -168,47 +191,71 @@ internal fun AppSessionCoordinator(
         )
     }
 
-    AnimatedContent(
-        targetState = route,
-        transitionSpec = {
-            val noOverlayTransition = initialState == null && targetState == null
-            if (noOverlayTransition) {
-                EnterTransition.None togetherWith ExitTransition.None
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedContent(
+            targetState = route,
+            transitionSpec = {
+                val noOverlayTransition = initialState == null && targetState == null
+                if (noOverlayTransition) {
+                    EnterTransition.None togetherWith ExitTransition.None
+                } else {
+                    (fadeIn(animationSpec = tween(220)) + slideInHorizontally(animationSpec = tween(220)) { it / 6 })
+                        .togetherWith(
+                            fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(180)) { -it / 7 },
+                        )
+                }
+            },
+            label = "scene_transition",
+        ) { currentRoute ->
+            if (currentRoute == null) {
+                MainShellHost(
+                    session = activeSession,
+                    container = container,
+                    scopedViewModels = scopedViewModels,
+                    selectedTab = selectedTab,
+                    dashboardBootstrap = dashboardBootstrap,
+                    onTabSelected = onTabSelected,
+                    onSessionUpdated = { session = it },
+                    onLogoutRequested = { resetToLogin(clearRemoteSession = true, activeSession = activeSession) },
+                    onRouteChange = { route = it },
+                    onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
+                )
             } else {
-                (fadeIn(animationSpec = tween(220)) + slideInHorizontally(animationSpec = tween(220)) { it / 6 })
-                    .togetherWith(
-                        fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(180)) { -it / 7 },
-                    )
+                OverlayHost(
+                    route = currentRoute,
+                    session = activeSession,
+                    container = container,
+                    scopedViewModels = scopedViewModels,
+                    appearanceVm = appearanceVm,
+                    selectedTab = selectedTab,
+                    onTabSelected = onTabSelected,
+                    onRouteChange = { route = it },
+                    onSessionUpdated = { session = it },
+                    onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
+                )
             }
-        },
-        label = "scene_transition",
-    ) { currentRoute ->
-        if (currentRoute == null) {
-            MainShellHost(
-                session = activeSession,
-                container = container,
-                scopedViewModels = scopedViewModels,
-                selectedTab = selectedTab,
-                dashboardBootstrap = dashboardBootstrap,
-                onTabSelected = onTabSelected,
-                onSessionUpdated = { session = it },
-                onLogoutRequested = { resetToLogin(clearRemoteSession = true, activeSession = activeSession) },
-                onRouteChange = { route = it },
-            )
-        } else {
-            OverlayHost(
-                route = currentRoute,
-                session = activeSession,
-                container = container,
-                scopedViewModels = scopedViewModels,
-                appearanceVm = appearanceVm,
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                onRouteChange = { route = it },
-                onSessionUpdated = { session = it },
-                onUnauthorized = { resetToLogin(clearRemoteSession = false, activeSession = activeSession) },
+        }
+
+        sessionExpiredMessage?.let { message ->
+            FloatingToast(
+                message = message,
+                accentColor = com.xiehe.spine.ui.theme.SpineTheme.colors.warning,
+                icon = IconToken.MESSAGE,
+                durationMillis = 1800L,
+                onDismiss = { sessionExpiredMessage = null },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
             )
         }
+    }
+
+    LaunchedEffect(handlingSessionExpiry, sessionExpiredMessage) {
+        if (!handlingSessionExpiry || sessionExpiredMessage == null) {
+            return@LaunchedEffect
+        }
+        delay(1800L)
+        resetToLogin(clearRemoteSession = false, activeSession = session)
     }
 
     LaunchedEffect(session?.accessToken) {

@@ -34,6 +34,7 @@ fun PatientDetailScreen(
     patientRepository: PatientRepository,
     imageRepository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
     onOpenAnalysis: (Int, Int?, String) -> Unit,
     onOpenImageUpload: () -> Unit,
 ) {
@@ -50,6 +51,7 @@ fun PatientDetailScreen(
             patientRepository = patientRepository,
             imageRepository = imageRepository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 

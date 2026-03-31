@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.screens.image
 
+import com.xiehe.spine.notifySessionExpired
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -75,6 +76,7 @@ fun ImagesScreen(
     session: UserSession,
     repository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
     showInlineSearch: Boolean = true,
     onOpenAnalysis: (Int, Int?, String) -> Unit = { _, _, _ -> },
 ) {
@@ -92,7 +94,7 @@ fun ImagesScreen(
     val saver = rememberDownloadedFileSaver()
 
     LaunchedEffect(session.accessToken) {
-        vm.refreshIfNeeded(session, repository, onSessionUpdated)
+        vm.refreshIfNeeded(session, repository, onSessionUpdated, onSessionExpired = onSessionExpired)
     }
 
     Box(
@@ -227,7 +229,11 @@ fun ImagesScreen(
                                             }
 
                                             is AppResult.Failure -> {
-                                                actionError = result.message
+                                                if (result.notifySessionExpired(onSessionExpired)) {
+                                                    actionError = null
+                                                } else {
+                                                    actionError = result.message
+                                                }
                                             }
                                         }
                                         actionLoadingMessage = null
@@ -363,12 +369,17 @@ fun ImagesScreen(
                                                 session = activeSession,
                                                 repository = repository,
                                                 onSessionUpdated = onSessionUpdated,
+                                                onSessionExpired = onSessionExpired,
                                             )
                                             actionSuccess = result.data.second
                                         }
 
                                         is AppResult.Failure -> {
-                                            actionError = result.message
+                                            if (result.notifySessionExpired(onSessionExpired)) {
+                                                actionError = null
+                                            } else {
+                                                actionError = result.message
+                                            }
                                         }
                                     }
                                     actionLoadingMessage = null

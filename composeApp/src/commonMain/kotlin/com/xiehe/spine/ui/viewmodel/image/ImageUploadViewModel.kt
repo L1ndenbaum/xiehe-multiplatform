@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.image
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
@@ -39,6 +40,7 @@ class ImageUploadViewModel : BaseViewModel() {
         session: UserSession,
         repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         if (_state.value.loadingPatients) {
             return
@@ -68,11 +70,15 @@ class ImageUploadViewModel : BaseViewModel() {
                     }
 
                     is AppResult.Failure -> {
-                        _state.update {
-                            it.copy(
-                                loadingPatients = false,
-                                errorMessage = result.message,
-                            )
+                        if (result.notifySessionExpired(onSessionExpired)) {
+                            _state.update { it.copy(loadingPatients = false, errorMessage = null) }
+                        } else {
+                            _state.update {
+                                it.copy(
+                                    loadingPatients = false,
+                                    errorMessage = result.message,
+                                )
+                            }
                         }
                         return@launch
                     }
@@ -106,6 +112,7 @@ class ImageUploadViewModel : BaseViewModel() {
         repository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSuccess: () -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val current = _state.value
         val patientId = current.selectedPatientId
@@ -145,11 +152,15 @@ class ImageUploadViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            uploading = false,
-                            errorMessage = result.message,
-                        )
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(uploading = false, errorMessage = null) }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                uploading = false,
+                                errorMessage = result.message,
+                            )
+                        }
                     }
                 }
             }

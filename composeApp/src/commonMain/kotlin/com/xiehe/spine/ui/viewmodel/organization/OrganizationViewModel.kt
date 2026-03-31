@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.organization
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.organization.OrganizationInvitation
@@ -45,6 +46,7 @@ class OrganizationViewModel : BaseViewModel() {
         repository: OrganizationRepository,
         onSessionUpdated: (UserSession) -> Unit,
         silent: Boolean = false,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             reload(
@@ -53,6 +55,7 @@ class OrganizationViewModel : BaseViewModel() {
                 onSessionUpdated = onSessionUpdated,
                 preferredTeamId = _state.value.selectedTeamId,
                 silent = silent,
+                onSessionExpired = onSessionExpired,
             )
         }
     }
@@ -62,6 +65,7 @@ class OrganizationViewModel : BaseViewModel() {
         repository: OrganizationRepository,
         teamId: Int,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         if (_state.value.selectedTeamId == teamId) {
             return
@@ -74,6 +78,7 @@ class OrganizationViewModel : BaseViewModel() {
                 onSessionUpdated = onSessionUpdated,
                 preferredTeamId = teamId,
                 silent = true,
+                onSessionExpired = onSessionExpired,
             )
         }
     }
@@ -96,6 +101,7 @@ class OrganizationViewModel : BaseViewModel() {
         invitation: OrganizationInvitation,
         accept: Boolean,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val invitationId = invitation.stableId ?: return
         scope.launch {
@@ -111,11 +117,16 @@ class OrganizationViewModel : BaseViewModel() {
                         preferredTeamId = _state.value.selectedTeamId,
                         silent = true,
                         successMessage = result.data.second,
+                        onSessionExpired = onSessionExpired,
                     )
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(actionLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }
@@ -130,6 +141,7 @@ class OrganizationViewModel : BaseViewModel() {
         message: String,
         onSessionUpdated: (UserSession) -> Unit,
         onSuccess: () -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
@@ -152,12 +164,17 @@ class OrganizationViewModel : BaseViewModel() {
                         preferredTeamId = teamId,
                         silent = true,
                         successMessage = result.data.second,
+                        onSessionExpired = onSessionExpired,
                     )
                     onSuccess()
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(actionLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }
@@ -173,6 +190,7 @@ class OrganizationViewModel : BaseViewModel() {
         maxMembers: Int?,
         onSessionUpdated: (UserSession) -> Unit,
         onSuccess: () -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
@@ -196,12 +214,17 @@ class OrganizationViewModel : BaseViewModel() {
                         preferredTeamId = _state.value.selectedTeamId,
                         silent = true,
                         successMessage = result.data.second,
+                        onSessionExpired = onSessionExpired,
                     )
                     onSuccess()
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(actionLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }
@@ -214,6 +237,7 @@ class OrganizationViewModel : BaseViewModel() {
         member: OrganizationMember,
         role: OrganizationRole,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
@@ -235,11 +259,16 @@ class OrganizationViewModel : BaseViewModel() {
                         preferredTeamId = teamId,
                         silent = true,
                         successMessage = result.data.second,
+                        onSessionExpired = onSessionExpired,
                     )
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(actionLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }
@@ -251,6 +280,7 @@ class OrganizationViewModel : BaseViewModel() {
         teamId: Int,
         member: OrganizationMember,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
@@ -271,11 +301,16 @@ class OrganizationViewModel : BaseViewModel() {
                         preferredTeamId = teamId,
                         silent = true,
                         successMessage = result.data.second,
+                        onSessionExpired = onSessionExpired,
                     )
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(actionLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }
@@ -292,6 +327,7 @@ class OrganizationViewModel : BaseViewModel() {
         preferredTeamId: Int?,
         silent: Boolean,
         successMessage: String? = null,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         if (!silent) {
             _state.update { it.copy(loading = true, errorMessage = null) }
@@ -330,6 +366,21 @@ class OrganizationViewModel : BaseViewModel() {
             invitationsResult as? AppResult.Failure,
             membersResult as? AppResult.Failure,
         ).firstOrNull()
+        if (failure?.notifySessionExpired(onSessionExpired) == true) {
+            _state.update { current ->
+                current.copy(
+                    loading = false,
+                    actionLoading = false,
+                    teams = teams,
+                    selectedTeamId = selectedTeamId,
+                    members = members,
+                    invitations = invitations,
+                    noticeMessage = successMessage ?: current.noticeMessage,
+                    errorMessage = null,
+                ).withFilteredData()
+            }
+            return
+        }
 
         _state.update { current ->
             val currentRoleLabel = selectedTeamId?.let { teamId ->

@@ -57,6 +57,7 @@ fun PersonalInfoScreen(
     session: UserSession,
     authRepository: AuthRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val colors = SpineTheme.colors
@@ -75,6 +76,7 @@ fun PersonalInfoScreen(
             session = session,
             repository = authRepository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -262,6 +264,7 @@ fun PersonalInfoScreen(
                         session = session,
                         repository = authRepository,
                         onSessionUpdated = onSessionUpdated,
+                        onSessionExpired = onSessionExpired,
                     )
                 },
             )

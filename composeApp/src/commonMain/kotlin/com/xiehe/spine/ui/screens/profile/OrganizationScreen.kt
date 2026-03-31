@@ -80,6 +80,7 @@ fun OrganizationScreen(
     session: UserSession,
     repository: OrganizationRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -96,6 +97,7 @@ fun OrganizationScreen(
             session = session,
             repository = repository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -113,6 +115,7 @@ fun OrganizationScreen(
                     repository = repository,
                     teamId = teamId,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                 )
             },
             onChangeRole = { member ->
@@ -132,6 +135,7 @@ fun OrganizationScreen(
                     invitation = invitation,
                     accept = true,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                 )
             },
             onRejectInvitation = { invitation ->
@@ -141,6 +145,7 @@ fun OrganizationScreen(
                     invitation = invitation,
                     accept = false,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                 )
             },
             onDismissNotice = vm::clearMessages,
@@ -259,6 +264,7 @@ fun OrganizationScreen(
                                                     member = target,
                                                     role = selectedRole,
                                                     onSessionUpdated = onSessionUpdated,
+                                                    onSessionExpired = onSessionExpired,
                                                 )
                                             }
                                             pendingRoleChange = null
@@ -297,6 +303,7 @@ fun OrganizationScreen(
                                                     teamId = teamId,
                                                     member = target,
                                                     onSessionUpdated = onSessionUpdated,
+                                                    onSessionExpired = onSessionExpired,
                                                 )
                                             }
                                             pendingDeleteMember = null

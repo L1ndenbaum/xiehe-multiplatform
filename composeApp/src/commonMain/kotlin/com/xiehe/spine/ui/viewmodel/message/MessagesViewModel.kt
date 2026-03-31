@@ -1,4 +1,5 @@
 package com.xiehe.spine.ui.viewmodel.message
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
 import com.xiehe.spine.core.model.AppResult
@@ -33,6 +34,7 @@ class MessagesViewModel : BaseViewModel() {
         repository: NotificationRepository,
         onSessionUpdated: (UserSession) -> Unit,
         silent: Boolean = false,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             if (!silent) {
@@ -56,10 +58,21 @@ class MessagesViewModel : BaseViewModel() {
             val messages = (messagesResult as? AppResult.Success)?.data?.second?.items.orEmpty()
             val stats = (statsResult as? AppResult.Success)?.data?.second
             val settings = (settingsResult as? AppResult.Success)?.data?.second
-            val failureMessage = listOf(messagesResult, statsResult, settingsResult)
+            val failure = listOf(messagesResult, statsResult, settingsResult)
                 .filterIsInstance<AppResult.Failure>()
                 .firstOrNull()
-                ?.message
+            if (failure?.notifySessionExpired(onSessionExpired) == true) {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        items = messages,
+                        stats = stats ?: it.stats,
+                        settings = settings ?: it.settings,
+                        errorMessage = null,
+                    )
+                }
+                return@launch
+            }
 
             _state.update {
                 it.copy(
@@ -67,7 +80,7 @@ class MessagesViewModel : BaseViewModel() {
                     items = messages,
                     stats = stats ?: it.stats,
                     settings = settings ?: it.settings,
-                    errorMessage = failureMessage,
+                    errorMessage = failure?.message,
                 )
             }
         }
@@ -78,6 +91,7 @@ class MessagesViewModel : BaseViewModel() {
         repository: NotificationRepository,
         messageId: Int,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val target = _state.value.items.firstOrNull { it.id == messageId } ?: return
         if (target.isRead) {
@@ -103,7 +117,11 @@ class MessagesViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(actionLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }
@@ -114,6 +132,7 @@ class MessagesViewModel : BaseViewModel() {
         repository: NotificationRepository,
         message: NotificationMessage,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
@@ -139,7 +158,11 @@ class MessagesViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(actionLoading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }

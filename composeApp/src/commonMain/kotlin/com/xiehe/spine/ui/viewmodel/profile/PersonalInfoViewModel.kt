@@ -1,11 +1,12 @@
 package com.xiehe.spine.ui.viewmodel.profile
-import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.auth.CurrentUserProfile
 import com.xiehe.spine.data.auth.UpdateCurrentUserRequest
+import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,6 +59,7 @@ class PersonalInfoViewModel : BaseViewModel() {
         session: UserSession,
         repository: AuthRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         if (_state.value.loading) {
             return
@@ -73,11 +75,15 @@ class PersonalInfoViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            loading = false,
-                            errorMessage = result.message,
-                        )
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(loading = false, errorMessage = null) }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                loading = false,
+                                errorMessage = result.message,
+                            )
+                        }
                     }
                 }
             }
@@ -113,6 +119,7 @@ class PersonalInfoViewModel : BaseViewModel() {
         session: UserSession,
         repository: AuthRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         if (_state.value.saving) {
             return
@@ -149,7 +156,11 @@ class PersonalInfoViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(saving = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(saving = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(saving = false, errorMessage = result.message) }
+                    }
                 }
             }
         }

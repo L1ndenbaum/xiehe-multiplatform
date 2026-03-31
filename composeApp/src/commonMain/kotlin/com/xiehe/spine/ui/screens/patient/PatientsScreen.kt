@@ -48,6 +48,7 @@ fun PatientsScreen(
     session: UserSession,
     repository: PatientRepository,
     onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
     onOpenPatient: (Int) -> Unit,
     showInlineSearch: Boolean = true,
     onEditPatient: (Int) -> Unit,
@@ -58,12 +59,12 @@ fun PatientsScreen(
 
     LaunchedEffect(session.accessToken, state.search, state.genderFilter, state.ageFilter) {
         delay(260)
-        vm.refresh(session, repository, onSessionUpdated)
+        vm.refresh(session, repository, onSessionUpdated, onSessionExpired)
     }
 
     LaunchedEffect(listState.canScrollForward, state.page, state.totalPages, state.loadingMore) {
         if (!listState.canScrollForward && state.page < state.totalPages && !state.loadingMore) {
-            vm.loadMore(session, repository, onSessionUpdated)
+            vm.loadMore(session, repository, onSessionUpdated, onSessionExpired)
         }
     }
 

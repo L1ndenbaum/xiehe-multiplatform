@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.image
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
@@ -76,6 +77,7 @@ class ImagesViewModel : BaseViewModel() {
         repository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
         force: Boolean = false,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val snapshot = _state.value
         if (snapshot.loading) {
@@ -88,13 +90,14 @@ class ImagesViewModel : BaseViewModel() {
                 return
             }
         }
-        refresh(session, repository, onSessionUpdated)
+        refresh(session, repository, onSessionUpdated, onSessionExpired)
     }
 
     fun refresh(
         session: UserSession,
         repository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(loading = true, errorMessage = null) }
@@ -114,11 +117,15 @@ class ImagesViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            loading = false,
-                            errorMessage = result.message,
-                        )
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(loading = false, errorMessage = null) }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                loading = false,
+                                errorMessage = result.message,
+                            )
+                        }
                     }
                 }
             }

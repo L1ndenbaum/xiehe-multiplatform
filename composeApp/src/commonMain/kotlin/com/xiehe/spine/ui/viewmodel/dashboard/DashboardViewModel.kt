@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.dashboard
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.auth.AuthRepository
@@ -48,6 +49,7 @@ class DashboardViewModel : BaseViewModel() {
         notificationRepository: NotificationRepository,
         authRepository: AuthRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
         preloadedPatients: List<PatientSummary> = emptyList(),
         preloadedImages: List<ImageFileSummary> = emptyList(),
     ) {
@@ -92,6 +94,26 @@ class DashboardViewModel : BaseViewModel() {
                 (meResult as? AppResult.Success)?.data?.first,
             ).lastOrNull() ?: session
             onSessionUpdated(latestSession)
+            val failure = listOf(
+                overviewResult,
+                patientsResult,
+                imagesResult,
+                messagesResult,
+                meResult,
+            ).filterIsInstance<AppResult.Failure>().firstOrNull()
+            if (failure?.notifySessionExpired(onSessionExpired) == true) {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        data = it.data ?: initialOverview,
+                        pendingItems = initialTasks,
+                        recentMessages = emptyList(),
+                        doctorDisplayName = latestSession.fullName ?: latestSession.username,
+                        errorMessage = null,
+                    )
+                }
+                return@launch
+            }
 
             val latestPatients = when (patientsResult) {
                 is AppResult.Success -> patientsResult.data.second
@@ -136,15 +158,28 @@ class DashboardViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            loading = false,
-                            data = it.data ?: initialOverview,
-                            pendingItems = pendingItems,
-                            recentMessages = recentMessages,
-                            doctorDisplayName = doctorName,
-                            errorMessage = overviewResult.message,
-                        )
+                    if (overviewResult.notifySessionExpired(onSessionExpired)) {
+                        _state.update {
+                            it.copy(
+                                loading = false,
+                                data = it.data ?: initialOverview,
+                                pendingItems = pendingItems,
+                                recentMessages = recentMessages,
+                                doctorDisplayName = doctorName,
+                                errorMessage = null,
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                loading = false,
+                                data = it.data ?: initialOverview,
+                                pendingItems = pendingItems,
+                                recentMessages = recentMessages,
+                                doctorDisplayName = doctorName,
+                                errorMessage = overviewResult.message,
+                            )
+                        }
                     }
                 }
             }

@@ -59,6 +59,7 @@ fun OrganizationInviteScreen(
     repository: OrganizationRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onFinished: () -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val team = state.selectedTeam
@@ -84,6 +85,7 @@ fun OrganizationInviteScreen(
                 repository = repository,
                 onSessionUpdated = onSessionUpdated,
                 silent = true,
+                onSessionExpired = onSessionExpired,
             )
         }
     }
@@ -277,6 +279,7 @@ fun OrganizationInviteScreen(
                                     message = message.trim(),
                                     onSessionUpdated = onSessionUpdated,
                                     onSuccess = onFinished,
+                                    onSessionExpired = onSessionExpired,
                                 )
                             },
                         )

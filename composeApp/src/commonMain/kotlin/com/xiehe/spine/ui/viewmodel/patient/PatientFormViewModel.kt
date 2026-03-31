@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.patient
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
@@ -47,6 +48,7 @@ class PatientFormViewModel : BaseViewModel() {
         repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSuccess: () -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val form = _state.value
         if (form.name.trim().length < 2) {
@@ -97,7 +99,11 @@ class PatientFormViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update { it.copy(loading = false, errorMessage = result.message) }
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update { it.copy(loading = false, errorMessage = null) }
+                    } else {
+                        _state.update { it.copy(loading = false, errorMessage = result.message) }
+                    }
                 }
             }
         }

@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.auth.AuthRepository
@@ -64,6 +65,7 @@ fun ChangePasswordScreen(
     authRepository: AuthRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onFinished: () -> Unit = {},
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val colors = SpineTheme.colors
     val scope = rememberCoroutineScope()
@@ -165,7 +167,11 @@ fun ChangePasswordScreen(
 
                                             is AppResult.Failure -> {
                                                 submitting = false
-                                                errorMessage = result.message
+                                                if (result.notifySessionExpired(onSessionExpired)) {
+                                                    errorMessage = null
+                                                } else {
+                                                    errorMessage = result.message
+                                                }
                                             }
                                         }
                                     }

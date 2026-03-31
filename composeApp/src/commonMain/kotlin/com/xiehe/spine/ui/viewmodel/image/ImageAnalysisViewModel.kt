@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.image
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.currentEpochSeconds
@@ -270,6 +271,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
         imageRepository: ImageFileRepository,
         measurementRepository: MeasurementRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val current = _state.value
         if (current.fileId == fileId && (current.measurements.isNotEmpty() || current.imageBytes != null)) {
@@ -327,6 +329,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
+                    measurementsResult.notifySessionExpired(onSessionExpired)
                     errors += measurementsResult.message
                 }
             }
@@ -339,6 +342,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
+                    imageResult.notifySessionExpired(onSessionExpired)
                     errors += imageResult.message
                 }
             }
@@ -377,6 +381,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
         imageRepository: ImageFileRepository,
         measurementRepository: MeasurementRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val fileId = _state.value.fileId ?: return
         _state.update {
@@ -405,6 +410,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
             imageRepository = imageRepository,
             measurementRepository = measurementRepository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -480,6 +486,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
         session: UserSession,
         repository: MeasurementRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val fileId = _state.value.fileId ?: return
         _state.update {
@@ -510,14 +517,26 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            reportLoading = false,
-                            reportText = "",
-                            reportSavedAt = "",
-                            errorMessage = result.message,
-                            bannerMessage = result.message,
-                        )
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update {
+                            it.copy(
+                                reportLoading = false,
+                                reportText = "",
+                                reportSavedAt = "",
+                                errorMessage = null,
+                                bannerMessage = null,
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                reportLoading = false,
+                                reportText = "",
+                                reportSavedAt = "",
+                                errorMessage = result.message,
+                                bannerMessage = result.message,
+                            )
+                        }
                     }
                 }
             }
@@ -543,6 +562,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
         repository: MeasurementRepository,
         examType: String,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val snapshot = _state.value
         val fileId = snapshot.fileId ?: return
@@ -585,12 +605,22 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            reportGenerating = false,
-                            errorMessage = result.message,
-                            bannerMessage = result.message,
-                        )
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update {
+                            it.copy(
+                                reportGenerating = false,
+                                errorMessage = null,
+                                bannerMessage = null,
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                reportGenerating = false,
+                                errorMessage = result.message,
+                                bannerMessage = result.message,
+                            )
+                        }
                     }
                 }
             }
@@ -845,6 +875,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
         examType: String,
         patientId: Int?,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val snapshot = _state.value
         val fileId = snapshot.fileId ?: return
@@ -896,12 +927,22 @@ class ImageAnalysisViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            saving = false,
-                            errorMessage = result.message,
-                            bannerMessage = result.message,
-                        )
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update {
+                            it.copy(
+                                saving = false,
+                                errorMessage = null,
+                                bannerMessage = null,
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                saving = false,
+                                errorMessage = result.message,
+                                bannerMessage = result.message,
+                            )
+                        }
                     }
                 }
             }
@@ -1806,7 +1847,6 @@ class ImageAnalysisViewModel : BaseViewModel() {
         val auxiliary: Boolean? = null,
     )
 }
-
 
 
 

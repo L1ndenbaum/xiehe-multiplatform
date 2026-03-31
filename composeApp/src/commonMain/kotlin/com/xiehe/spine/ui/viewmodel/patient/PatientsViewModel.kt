@@ -1,5 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.patient
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
@@ -64,6 +65,7 @@ class PatientsViewModel : BaseViewModel() {
         session: UserSession,
         repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         loadInternal(
             session = session,
@@ -71,6 +73,7 @@ class PatientsViewModel : BaseViewModel() {
             page = 1,
             append = false,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -78,6 +81,7 @@ class PatientsViewModel : BaseViewModel() {
         session: UserSession,
         repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
     ) {
         val current = _state.value
         if (current.loadingMore || current.loading || current.page >= current.totalPages) {
@@ -89,6 +93,7 @@ class PatientsViewModel : BaseViewModel() {
             page = current.page + 1,
             append = true,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -98,6 +103,7 @@ class PatientsViewModel : BaseViewModel() {
         page: Int,
         append: Boolean,
         onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit,
     ) {
         scope.launch {
             _state.update {
@@ -137,12 +143,22 @@ class PatientsViewModel : BaseViewModel() {
                 }
 
                 is AppResult.Failure -> {
-                    _state.update {
-                        it.copy(
-                            loading = false,
-                            loadingMore = false,
-                            errorMessage = result.message,
-                        )
+                    if (result.notifySessionExpired(onSessionExpired)) {
+                        _state.update {
+                            it.copy(
+                                loading = false,
+                                loadingMore = false,
+                                errorMessage = null,
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                loading = false,
+                                loadingMore = false,
+                                errorMessage = result.message,
+                            )
+                        }
                     }
                 }
             }

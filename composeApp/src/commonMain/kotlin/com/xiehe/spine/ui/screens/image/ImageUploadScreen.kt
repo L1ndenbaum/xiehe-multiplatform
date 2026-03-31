@@ -50,6 +50,7 @@ fun ImageUploadScreen(
     imageRepository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onUploadSuccess: () -> Unit,
+    onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val scroll = rememberScrollState()
@@ -72,6 +73,7 @@ fun ImageUploadScreen(
             session = session,
             repository = patientRepository,
             onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
         )
     }
 
@@ -145,6 +147,7 @@ fun ImageUploadScreen(
                         repository = imageRepository,
                         onSessionUpdated = onSessionUpdated,
                         onSuccess = onUploadSuccess,
+                        onSessionExpired = onSessionExpired,
                     )
                 },
                 enabled = !state.uploading,

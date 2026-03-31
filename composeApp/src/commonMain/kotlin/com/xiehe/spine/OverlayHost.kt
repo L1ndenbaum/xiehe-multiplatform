@@ -65,11 +65,73 @@ internal fun OverlayHost(
     onTabSelected: (Int) -> Unit,
     onRouteChange: (OverlayRoute?) -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
-    onUnauthorized: suspend () -> Unit,
+    onSessionExpired: (String) -> Unit,
+) {
+    when (route) {
+        is OverlayRoute.PatientDetail,
+        OverlayRoute.PatientForm,
+        is OverlayRoute.PatientEdit,
+        -> PatientOverlayContent(
+            route = route,
+            session = session,
+            container = container,
+            scopedViewModels = scopedViewModels,
+            selectedTab = selectedTab,
+            onTabSelected = onTabSelected,
+            onRouteChange = onRouteChange,
+            onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
+        )
+
+        is OverlayRoute.ImageAnalysis,
+        OverlayRoute.ImageUpload,
+        -> ImageOverlayContent(
+            route = route,
+            session = session,
+            container = container,
+            scopedViewModels = scopedViewModels,
+            selectedTab = selectedTab,
+            onTabSelected = onTabSelected,
+            onRouteChange = onRouteChange,
+            onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
+        )
+
+        OverlayRoute.Appearance,
+        OverlayRoute.PersonalInfo,
+        OverlayRoute.Organization,
+        OverlayRoute.OrganizationCreateTeam,
+        OverlayRoute.OrganizationInvite,
+        OverlayRoute.ChangePassword,
+        OverlayRoute.Messages,
+        -> ProfileOverlayContent(
+            route = route,
+            session = session,
+            container = container,
+            scopedViewModels = scopedViewModels,
+            appearanceVm = appearanceVm,
+            selectedTab = selectedTab,
+            onTabSelected = onTabSelected,
+            onRouteChange = onRouteChange,
+            onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
+        )
+    }
+}
+
+@Composable
+private fun PatientOverlayContent(
+    route: OverlayRoute,
+    session: UserSession,
+    container: AppContainer,
+    scopedViewModels: SessionScopedViewModels,
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
+    onRouteChange: (OverlayRoute?) -> Unit,
+    onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val messagesState by scopedViewModels.messagesVm.state.collectAsState()
-    val organizationState by scopedViewModels.organizationVm.state.collectAsState()
 
     when (route) {
         is OverlayRoute.PatientDetail -> {
@@ -112,6 +174,7 @@ internal fun OverlayHost(
                     patientRepository = container.patientRepository,
                     imageRepository = container.imageFileRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                     onOpenAnalysis = { fileId, patientId, examType ->
                         onRouteChange(
                             OverlayRoute.ImageAnalysis(
@@ -203,11 +266,10 @@ internal fun OverlayHost(
                                                 session = updatedSession,
                                                 repository = container.patientRepository,
                                                 onSessionUpdated = onSessionUpdated,
+                                                onSessionExpired = onSessionExpired,
                                             )
                                         },
-                                        onUnauthorized = {
-                                            coroutineScope.launch { onUnauthorized() }
-                                        },
+                                        onSessionExpired = onSessionExpired,
                                     )
                                 },
                             )
@@ -215,21 +277,6 @@ internal fun OverlayHost(
                     }
                 }
             }
-        }
-
-        is OverlayRoute.ImageAnalysis -> {
-            ImageAnalysisScreen(
-                fileId = route.fileId,
-                patientId = route.patientId,
-                examType = route.examType,
-                vm = scopedViewModels.imageAnalysisVm,
-                session = session,
-                imageRepository = container.imageFileRepository,
-                measurementRepository = container.measurementRepository,
-                aiRepository = container.aiInferenceRepository,
-                onSessionUpdated = onSessionUpdated,
-                onBack = { onRouteChange(null) },
-            )
         }
 
         OverlayRoute.PatientForm -> {
@@ -249,6 +296,7 @@ internal fun OverlayHost(
                     session = session,
                     repository = container.patientRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                     onSubmitSuccess = {
                         onRouteChange(null)
                         onTabSelected(1)
@@ -275,6 +323,7 @@ internal fun OverlayHost(
                     session = session,
                     repository = container.patientRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                     onSubmitSuccess = {
                         onRouteChange(OverlayRoute.PatientDetail(route.patientId))
                     },
@@ -282,6 +331,93 @@ internal fun OverlayHost(
             }
         }
 
+        else -> Unit
+    }
+}
+
+@Composable
+private fun ImageOverlayContent(
+    route: OverlayRoute,
+    session: UserSession,
+    container: AppContainer,
+    scopedViewModels: SessionScopedViewModels,
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
+    onRouteChange: (OverlayRoute?) -> Unit,
+    onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit,
+) {
+    when (route) {
+        is OverlayRoute.ImageAnalysis -> {
+            ImageAnalysisScreen(
+                fileId = route.fileId,
+                patientId = route.patientId,
+                examType = route.examType,
+                vm = scopedViewModels.imageAnalysisVm,
+                session = session,
+                imageRepository = container.imageFileRepository,
+                measurementRepository = container.measurementRepository,
+                aiRepository = container.aiInferenceRepository,
+                onSessionUpdated = onSessionUpdated,
+                onBack = { onRouteChange(null) },
+                onSessionExpired = onSessionExpired,
+            )
+        }
+
+        OverlayRoute.ImageUpload -> {
+            MobileShell(
+                selectedTab = selectedTab,
+                onTabSelected = onTabSelected,
+                headerContent = {
+                    SimpleShellHeader(
+                        title = "上传影像",
+                        leadingGlyph = IconToken.BACK,
+                        onLeadingAction = { onRouteChange(null) },
+                    )
+                },
+            ) {
+                ImageUploadScreen(
+                    vm = scopedViewModels.imageUploadVm,
+                    session = session,
+                    patientRepository = container.patientRepository,
+                    imageRepository = container.imageFileRepository,
+                    onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
+                    onUploadSuccess = {
+                        onRouteChange(null)
+                        onTabSelected(2)
+                        scopedViewModels.imagesVm.refresh(
+                            session = session,
+                            repository = container.imageFileRepository,
+                            onSessionUpdated = onSessionUpdated,
+                            onSessionExpired = onSessionExpired,
+                        )
+                    },
+                )
+            }
+        }
+
+        else -> Unit
+    }
+}
+
+@Composable
+private fun ProfileOverlayContent(
+    route: OverlayRoute,
+    session: UserSession,
+    container: AppContainer,
+    scopedViewModels: SessionScopedViewModels,
+    appearanceVm: AppearanceViewModel,
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
+    onRouteChange: (OverlayRoute?) -> Unit,
+    onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit,
+) {
+    val messagesState by scopedViewModels.messagesVm.state.collectAsState()
+    val organizationState by scopedViewModels.organizationVm.state.collectAsState()
+
+    when (route) {
         OverlayRoute.Appearance -> {
             MobileShell(
                 selectedTab = selectedTab,
@@ -316,6 +452,7 @@ internal fun OverlayHost(
                     session = session,
                     authRepository = container.authRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                 )
             }
         }
@@ -368,6 +505,7 @@ internal fun OverlayHost(
                     session = session,
                     repository = container.organizationRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                 )
             }
         }
@@ -391,6 +529,7 @@ internal fun OverlayHost(
                     repository = container.organizationRepository,
                     onSessionUpdated = onSessionUpdated,
                     onFinished = { onRouteChange(OverlayRoute.Organization) },
+                    onSessionExpired = onSessionExpired,
                 )
             }
         }
@@ -414,6 +553,7 @@ internal fun OverlayHost(
                     repository = container.organizationRepository,
                     onSessionUpdated = onSessionUpdated,
                     onFinished = { onRouteChange(OverlayRoute.Organization) },
+                    onSessionExpired = onSessionExpired,
                 )
             }
         }
@@ -436,6 +576,7 @@ internal fun OverlayHost(
                     authRepository = container.authRepository,
                     onSessionUpdated = onSessionUpdated,
                     onFinished = { onRouteChange(null) },
+                    onSessionExpired = onSessionExpired,
                 )
             }
         }
@@ -458,39 +599,11 @@ internal fun OverlayHost(
                     session = session,
                     repository = container.notificationRepository,
                     onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                 )
             }
         }
 
-        OverlayRoute.ImageUpload -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
-                    SimpleShellHeader(
-                        title = "上传影像",
-                        leadingGlyph = IconToken.BACK,
-                        onLeadingAction = { onRouteChange(null) },
-                    )
-                },
-            ) {
-                ImageUploadScreen(
-                    vm = scopedViewModels.imageUploadVm,
-                    session = session,
-                    patientRepository = container.patientRepository,
-                    imageRepository = container.imageFileRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onUploadSuccess = {
-                        onRouteChange(null)
-                        onTabSelected(2)
-                        scopedViewModels.imagesVm.refresh(
-                            session = session,
-                            repository = container.imageFileRepository,
-                            onSessionUpdated = onSessionUpdated,
-                        )
-                    },
-                )
-            }
-        }
+        else -> Unit
     }
 }
