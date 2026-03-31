@@ -1,12 +1,16 @@
 package com.xiehe.spine
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -132,16 +136,17 @@ private fun PatientOverlayContent(
     onSessionExpired: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val detailRoute = route as? OverlayRoute.PatientDetail
+    var showDeletePatientConfirm by remember(detailRoute?.patientId) { mutableStateOf(false) }
+    var deletePatientConfirmVisible by remember(detailRoute?.patientId) { mutableStateOf(false) }
 
-    when (route) {
-        is OverlayRoute.PatientDetail -> {
-            var showDeletePatientConfirm by remember(route.patientId) { mutableStateOf(false) }
-            var deletePatientConfirmVisible by remember(route.patientId) { mutableStateOf(false) }
-
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+    MobileShell(
+        selectedTab = selectedTab,
+        onTabSelected = onTabSelected,
+        showBottomBar = false,
+        headerContent = {
+            when (route) {
+                is OverlayRoute.PatientDetail -> {
                     val colors = SpineTheme.colors
                     SimpleShellHeader(
                         title = "患者详情",
@@ -165,173 +170,180 @@ private fun PatientOverlayContent(
                             )
                         },
                     )
-                },
-            ) {
-                PatientDetailScreen(
-                    patientId = route.patientId,
-                    vm = scopedViewModels.patientDetailVm,
-                    session = session,
-                    patientRepository = container.patientRepository,
-                    imageRepository = container.imageFileRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onSessionExpired = onSessionExpired,
-                    onOpenAnalysis = { fileId, patientId, examType ->
-                        onRouteChange(
-                            OverlayRoute.ImageAnalysis(
-                                fileId = fileId,
-                                patientId = patientId,
-                                examType = examType,
-                            ),
-                        )
-                    },
-                    onOpenImageUpload = { onRouteChange(OverlayRoute.ImageUpload) },
-                )
-            }
-
-            if (showDeletePatientConfirm) {
-                LaunchedEffect(showDeletePatientConfirm) {
-                    if (showDeletePatientConfirm) {
-                        delay(16)
-                        deletePatientConfirmVisible = true
-                    }
                 }
-                val overlayAlpha by animateFloatAsState(
-                    targetValue = if (deletePatientConfirmVisible) 0.35f else 0f,
-                    animationSpec = tween(220),
-                    label = "patient_delete_confirm_overlay_alpha",
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = overlayAlpha))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {
-                                coroutineScope.launch {
-                                    deletePatientConfirmVisible = false
-                                    delay(220)
-                                    showDeletePatientConfirm = false
-                                }
-                            },
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    AnimatedVisibility(
-                        visible = deletePatientConfirmVisible,
-                        enter = fadeIn(animationSpec = tween(220)) +
-                            slideInVertically(animationSpec = tween(220)) { it / 4 },
-                        exit = fadeOut(animationSpec = tween(220)) +
-                            slideOutVertically(animationSpec = tween(220)) { it / 5 },
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = {},
-                                ),
-                        ) {
-                            OperationVerifyCard(
-                                title = "删除患者",
-                                message = "确认删除该患者吗？该操作会执行软删除，患者记录将不再显示在列表中。",
-                                confirmText = "删除",
-                                cancelText = "取消",
-                                confirmButtonColor = SpineTheme.colors.error,
-                                cancelButtonColor = SpineTheme.colors.textSecondary,
-                                onCancel = {
-                                    coroutineScope.launch {
-                                        deletePatientConfirmVisible = false
-                                        delay(220)
-                                        showDeletePatientConfirm = false
-                                    }
-                                },
-                                onConfirm = {
-                                    coroutineScope.launch {
-                                        deletePatientConfirmVisible = false
-                                        delay(220)
-                                        showDeletePatientConfirm = false
-                                    }
-                                    scopedViewModels.patientDetailVm.delete(
-                                        patientId = route.patientId,
-                                        session = session,
-                                        repository = container.patientRepository,
-                                        onSessionUpdated = onSessionUpdated,
-                                        onDeleted = { updatedSession ->
-                                            onSessionUpdated(updatedSession)
-                                            onTabSelected(1)
-                                            onRouteChange(null)
-                                            scopedViewModels.patientsVm.refresh(
-                                                session = updatedSession,
-                                                repository = container.patientRepository,
-                                                onSessionUpdated = onSessionUpdated,
-                                                onSessionExpired = onSessionExpired,
-                                            )
-                                        },
-                                        onSessionExpired = onSessionExpired,
-                                    )
-                                },
-                            )
-                        }
-                    }
-                }
-            }
-        }
 
-        OverlayRoute.PatientForm -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                OverlayRoute.PatientForm -> {
                     SimpleShellHeader(
                         title = "添加患者",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(null) },
                     )
-                },
-            ) {
-                PatientFormScreen(
-                    vm = scopedViewModels.patientFormVm,
-                    session = session,
-                    repository = container.patientRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onSessionExpired = onSessionExpired,
-                    onSubmitSuccess = {
-                        onRouteChange(null)
-                        onTabSelected(1)
-                    },
-                )
-            }
-        }
+                }
 
-        is OverlayRoute.PatientEdit -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                is OverlayRoute.PatientEdit -> {
                     SimpleShellHeader(
                         title = "编辑患者",
                         leadingGlyph = IconToken.BACK,
-                        onLeadingAction = { onRouteChange(null) },
+                        onLeadingAction = { onRouteChange(OverlayRoute.PatientDetail(route.patientId)) },
                     )
-                },
-            ) {
-                PatientEditScreen(
-                    patientId = route.patientId,
-                    vm = scopedViewModels.patientEditVm,
-                    session = session,
-                    repository = container.patientRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onSessionExpired = onSessionExpired,
-                    onSubmitSuccess = {
-                        onRouteChange(OverlayRoute.PatientDetail(route.patientId))
-                    },
+                }
+
+                else -> Unit
+            }
+        },
+    ) {
+        AnimatedContent(
+            targetState = route,
+            transitionSpec = {
+                overlayContentTransition(
+                    initialOrder = patientOverlayOrder(initialState),
+                    targetOrder = patientOverlayOrder(targetState),
                 )
+            },
+            label = "patient_overlay_content_transition",
+        ) { currentRoute ->
+            when (currentRoute) {
+                is OverlayRoute.PatientDetail -> {
+                    PatientDetailScreen(
+                        patientId = currentRoute.patientId,
+                        vm = scopedViewModels.patientDetailVm,
+                        session = session,
+                        patientRepository = container.patientRepository,
+                        imageRepository = container.imageFileRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onSessionExpired = onSessionExpired,
+                        onOpenAnalysis = { fileId, patientId, examType ->
+                            onRouteChange(
+                                OverlayRoute.ImageAnalysis(
+                                    fileId = fileId,
+                                    patientId = patientId,
+                                    examType = examType,
+                                ),
+                            )
+                        },
+                        onOpenImageUpload = { onRouteChange(OverlayRoute.ImageUpload) },
+                    )
+
+                    if (showDeletePatientConfirm) {
+                        LaunchedEffect(showDeletePatientConfirm) {
+                            delay(16)
+                            deletePatientConfirmVisible = true
+                        }
+                        val overlayAlpha by animateFloatAsState(
+                            targetValue = if (deletePatientConfirmVisible) 0.35f else 0f,
+                            animationSpec = tween(220),
+                            label = "patient_delete_confirm_overlay_alpha",
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = overlayAlpha))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            deletePatientConfirmVisible = false
+                                            delay(220)
+                                            showDeletePatientConfirm = false
+                                        }
+                                    },
+                                ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            AnimatedVisibility(
+                                visible = deletePatientConfirmVisible,
+                                enter = fadeIn(animationSpec = tween(220)) +
+                                    slideInVertically(animationSpec = tween(220)) { it / 4 },
+                                exit = fadeOut(animationSpec = tween(220)) +
+                                    slideOutVertically(animationSpec = tween(220)) { it / 5 },
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(horizontal = 20.dp)
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null,
+                                            onClick = {},
+                                        ),
+                                ) {
+                                    OperationVerifyCard(
+                                        title = "删除患者",
+                                        message = "确认删除该患者吗？该操作会执行软删除，患者记录将不再显示在列表中。",
+                                        confirmText = "删除",
+                                        cancelText = "取消",
+                                        confirmButtonColor = SpineTheme.colors.error,
+                                        cancelButtonColor = SpineTheme.colors.textSecondary,
+                                        onCancel = {
+                                            coroutineScope.launch {
+                                                deletePatientConfirmVisible = false
+                                                delay(220)
+                                                showDeletePatientConfirm = false
+                                            }
+                                        },
+                                        onConfirm = {
+                                            coroutineScope.launch {
+                                                deletePatientConfirmVisible = false
+                                                delay(220)
+                                                showDeletePatientConfirm = false
+                                            }
+                                            scopedViewModels.patientDetailVm.delete(
+                                                patientId = currentRoute.patientId,
+                                                session = session,
+                                                repository = container.patientRepository,
+                                                onSessionUpdated = onSessionUpdated,
+                                                onDeleted = { updatedSession ->
+                                                    onSessionUpdated(updatedSession)
+                                                    onTabSelected(1)
+                                                    onRouteChange(null)
+                                                    scopedViewModels.patientsVm.refresh(
+                                                        session = updatedSession,
+                                                        repository = container.patientRepository,
+                                                        onSessionUpdated = onSessionUpdated,
+                                                        onSessionExpired = onSessionExpired,
+                                                    )
+                                                },
+                                                onSessionExpired = onSessionExpired,
+                                            )
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                OverlayRoute.PatientForm -> {
+                    PatientFormScreen(
+                        vm = scopedViewModels.patientFormVm,
+                        session = session,
+                        repository = container.patientRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onSessionExpired = onSessionExpired,
+                        onSubmitSuccess = {
+                            onRouteChange(null)
+                            onTabSelected(1)
+                        },
+                    )
+                }
+
+                is OverlayRoute.PatientEdit -> {
+                    PatientEditScreen(
+                        patientId = currentRoute.patientId,
+                        vm = scopedViewModels.patientEditVm,
+                        session = session,
+                        repository = container.patientRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onSessionExpired = onSessionExpired,
+                        onSubmitSuccess = {
+                            onRouteChange(OverlayRoute.PatientDetail(currentRoute.patientId))
+                        },
+                    )
+                }
+
+                else -> Unit
             }
         }
-
-        else -> Unit
     }
 }
 
@@ -368,6 +380,7 @@ private fun ImageOverlayContent(
             MobileShell(
                 selectedTab = selectedTab,
                 onTabSelected = onTabSelected,
+                showBottomBar = false,
                 headerContent = {
                     SimpleShellHeader(
                         title = "上传影像",
@@ -416,57 +429,36 @@ private fun ProfileOverlayContent(
 ) {
     val messagesState by scopedViewModels.messagesVm.state.collectAsState()
     val organizationState by scopedViewModels.organizationVm.state.collectAsState()
+    val canInviteMembers = organizationState.canInviteMembers(session.userId)
+    val canCreateTeam =
+        session.isSuperuser ||
+            session.isSystemAdmin ||
+            (organizationState.currentMember(session.userId)?.isSystemAdmin == true)
 
-    when (route) {
-        OverlayRoute.Appearance -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+    MobileShell(
+        selectedTab = selectedTab,
+        onTabSelected = onTabSelected,
+        showBottomBar = false,
+        headerContent = {
+            when (route) {
+                OverlayRoute.Appearance -> {
                     SimpleShellHeader(
                         title = "系统设置",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(null) },
                     )
-                },
-            ) {
-                AppearanceScreen(vm = appearanceVm)
-            }
-        }
+                }
 
-        OverlayRoute.PersonalInfo -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                OverlayRoute.PersonalInfo -> {
                     SimpleShellHeader(
                         title = "个人信息",
                         subtitle = "查看和修改您的个人资料",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(null) },
                     )
-                },
-            ) {
-                PersonalInfoScreen(
-                    vm = scopedViewModels.personalInfoVm,
-                    session = session,
-                    authRepository = container.authRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onSessionExpired = onSessionExpired,
-                )
-            }
-        }
+                }
 
-        OverlayRoute.Organization -> {
-            val canInviteMembers = organizationState.canInviteMembers(session.userId)
-            val canCreateTeam =
-                session.isSuperuser ||
-                    session.isSystemAdmin ||
-                    (organizationState.currentMember(session.userId)?.isSystemAdmin == true)
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                OverlayRoute.Organization -> {
                     SimpleShellHeader(
                         title = "组织管理",
                         subtitle = "查看和管理组织成员",
@@ -498,112 +490,163 @@ private fun ProfileOverlayContent(
                             null
                         },
                     )
-                },
-            ) {
-                OrganizationScreen(
-                    vm = scopedViewModels.organizationVm,
-                    session = session,
-                    repository = container.organizationRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onSessionExpired = onSessionExpired,
-                )
-            }
-        }
+                }
 
-        OverlayRoute.OrganizationCreateTeam -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                OverlayRoute.OrganizationCreateTeam -> {
                     SimpleShellHeader(
                         title = "创建新团队",
                         subtitle = "创建新的协作团队",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(OverlayRoute.Organization) },
                     )
-                },
-            ) {
-                OrganizationCreateTeamScreen(
-                    vm = scopedViewModels.organizationVm,
-                    session = session,
-                    repository = container.organizationRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onFinished = { onRouteChange(OverlayRoute.Organization) },
-                    onSessionExpired = onSessionExpired,
-                )
-            }
-        }
+                }
 
-        OverlayRoute.OrganizationInvite -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                OverlayRoute.OrganizationInvite -> {
                     SimpleShellHeader(
                         title = "邀请新成员",
                         subtitle = organizationState.selectedTeam?.name ?: "发送组织邀请",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(OverlayRoute.Organization) },
                     )
-                },
-            ) {
-                OrganizationInviteScreen(
-                    vm = scopedViewModels.organizationVm,
-                    session = session,
-                    repository = container.organizationRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onFinished = { onRouteChange(OverlayRoute.Organization) },
-                    onSessionExpired = onSessionExpired,
-                )
-            }
-        }
+                }
 
-        OverlayRoute.ChangePassword -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                OverlayRoute.ChangePassword -> {
                     SimpleShellHeader(
                         title = "修改密码",
                         subtitle = "定期更换密码保障账号安全",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(null) },
                     )
-                },
-            ) {
-                ChangePasswordScreen(
-                    session = session,
-                    authRepository = container.authRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onFinished = { onRouteChange(null) },
-                    onSessionExpired = onSessionExpired,
-                )
-            }
-        }
+                }
 
-        OverlayRoute.Messages -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                headerContent = {
+                OverlayRoute.Messages -> {
                     SimpleShellHeader(
                         title = "消息中心",
                         subtitle = "${messagesState.items.size}条消息",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(null) },
                     )
-                },
-            ) {
-                MessagesScreen(
-                    vm = scopedViewModels.messagesVm,
-                    session = session,
-                    repository = container.notificationRepository,
-                    onSessionUpdated = onSessionUpdated,
-                    onSessionExpired = onSessionExpired,
+                }
+
+                else -> Unit
+            }
+        },
+    ) {
+        AnimatedContent(
+            targetState = route,
+            transitionSpec = {
+                overlayContentTransition(
+                    initialOrder = profileOverlayOrder(initialState),
+                    targetOrder = profileOverlayOrder(targetState),
                 )
+            },
+            label = "profile_overlay_content_transition",
+        ) { currentRoute ->
+            when (currentRoute) {
+                OverlayRoute.Appearance -> {
+                    AppearanceScreen(vm = appearanceVm)
+                }
+
+                OverlayRoute.PersonalInfo -> {
+                    PersonalInfoScreen(
+                        vm = scopedViewModels.personalInfoVm,
+                        session = session,
+                        authRepository = container.authRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onSessionExpired = onSessionExpired,
+                    )
+                }
+
+                OverlayRoute.Organization -> {
+                    OrganizationScreen(
+                        vm = scopedViewModels.organizationVm,
+                        session = session,
+                        repository = container.organizationRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onSessionExpired = onSessionExpired,
+                    )
+                }
+
+                OverlayRoute.OrganizationCreateTeam -> {
+                    OrganizationCreateTeamScreen(
+                        vm = scopedViewModels.organizationVm,
+                        session = session,
+                        repository = container.organizationRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onFinished = { onRouteChange(OverlayRoute.Organization) },
+                        onSessionExpired = onSessionExpired,
+                    )
+                }
+
+                OverlayRoute.OrganizationInvite -> {
+                    OrganizationInviteScreen(
+                        vm = scopedViewModels.organizationVm,
+                        session = session,
+                        repository = container.organizationRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onFinished = { onRouteChange(OverlayRoute.Organization) },
+                        onSessionExpired = onSessionExpired,
+                    )
+                }
+
+                OverlayRoute.ChangePassword -> {
+                    ChangePasswordScreen(
+                        session = session,
+                        authRepository = container.authRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onFinished = { onRouteChange(null) },
+                        onSessionExpired = onSessionExpired,
+                    )
+                }
+
+                OverlayRoute.Messages -> {
+                    MessagesScreen(
+                        vm = scopedViewModels.messagesVm,
+                        session = session,
+                        repository = container.notificationRepository,
+                        onSessionUpdated = onSessionUpdated,
+                        onSessionExpired = onSessionExpired,
+                    )
+                }
+
+                else -> Unit
             }
         }
-
-        else -> Unit
     }
 }
+
+private fun patientOverlayOrder(route: OverlayRoute): Int = when (route) {
+    is OverlayRoute.PatientEdit -> 1
+    is OverlayRoute.PatientDetail,
+    OverlayRoute.PatientForm,
+    -> 0
+    else -> 0
+}
+
+private fun profileOverlayOrder(route: OverlayRoute): Int = when (route) {
+    OverlayRoute.OrganizationInvite,
+    OverlayRoute.OrganizationCreateTeam,
+    OverlayRoute.ChangePassword,
+    -> 1
+    OverlayRoute.Appearance,
+    OverlayRoute.PersonalInfo,
+    OverlayRoute.Organization,
+    OverlayRoute.Messages,
+    -> 0
+    else -> 0
+}
+
+private fun overlayContentTransition(
+    initialOrder: Int,
+    targetOrder: Int,
+) = (
+    fadeIn(animationSpec = tween(240)) +
+        slideInHorizontally(animationSpec = tween(260)) { full ->
+            if (targetOrder >= initialOrder) full / 6 else -full / 6
+        }
+    ).togetherWith(
+        fadeOut(animationSpec = tween(180)) +
+            slideOutHorizontally(animationSpec = tween(200)) { full ->
+                if (targetOrder >= initialOrder) -full / 7 else full / 7
+            },
+    )

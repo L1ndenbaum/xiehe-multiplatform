@@ -1,14 +1,5 @@
 package com.xiehe.spine
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -192,48 +183,33 @@ internal fun AppSessionCoordinator(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedContent(
-            targetState = route,
-            transitionSpec = {
-                val noOverlayTransition = initialState == null && targetState == null
-                if (noOverlayTransition) {
-                    EnterTransition.None togetherWith ExitTransition.None
-                } else {
-                    (fadeIn(animationSpec = tween(220)) + slideInHorizontally(animationSpec = tween(220)) { it / 6 })
-                        .togetherWith(
-                            fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(180)) { -it / 7 },
-                        )
-                }
-            },
-            label = "scene_transition",
-        ) { currentRoute ->
-            if (currentRoute == null) {
-                MainShellHost(
-                    session = activeSession,
-                    container = container,
-                    scopedViewModels = scopedViewModels,
-                    selectedTab = selectedTab,
-                    dashboardBootstrap = dashboardBootstrap,
-                    onTabSelected = onTabSelected,
-                    onSessionUpdated = { session = it },
-                    onLogoutRequested = { resetToLogin(clearRemoteSession = true, activeSession = activeSession) },
-                    onRouteChange = { route = it },
-                    onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
-                )
-            } else {
-                OverlayHost(
-                    route = currentRoute,
-                    session = activeSession,
-                    container = container,
-                    scopedViewModels = scopedViewModels,
-                    appearanceVm = appearanceVm,
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                    onRouteChange = { route = it },
-                    onSessionUpdated = { session = it },
-                    onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
-                )
-            }
+        val currentRoute = route
+        if (currentRoute == null) {
+            MainShellHost(
+                session = activeSession,
+                container = container,
+                scopedViewModels = scopedViewModels,
+                selectedTab = selectedTab,
+                dashboardBootstrap = dashboardBootstrap,
+                onTabSelected = onTabSelected,
+                onSessionUpdated = { session = it },
+                onLogoutRequested = { resetToLogin(clearRemoteSession = true, activeSession = activeSession) },
+                onRouteChange = { route = it },
+                onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
+            )
+        } else {
+            OverlayHost(
+                route = currentRoute,
+                session = activeSession,
+                container = container,
+                scopedViewModels = scopedViewModels,
+                appearanceVm = appearanceVm,
+                selectedTab = selectedTab,
+                onTabSelected = onTabSelected,
+                onRouteChange = { route = it },
+                onSessionUpdated = { session = it },
+                onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
+            )
         }
 
         sessionExpiredMessage?.let { message ->

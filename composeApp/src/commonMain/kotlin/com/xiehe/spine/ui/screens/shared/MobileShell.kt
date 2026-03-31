@@ -27,6 +27,7 @@ private val defaultNavItems = listOf(
 fun MobileShell(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
+    showBottomBar: Boolean = true,
     headerContent: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -44,17 +45,19 @@ fun MobileShell(
         ) {
             content()
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .navigationBarsPadding(),
-        ) {
-            NavBar(
-                items = navItems,
-                selectedIndex = selectedTab,
-                onSelect = onTabSelected,
-            )
+        if (showBottomBar) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .navigationBarsPadding(),
+            ) {
+                NavBar(
+                    items = navItems,
+                    selectedIndex = selectedTab,
+                    onSelect = onTabSelected,
+                )
+            }
         }
     }
 }
