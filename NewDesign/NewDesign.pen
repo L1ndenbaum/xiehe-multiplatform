@@ -1,5 +1,5 @@
 {
-  "version": "2.8",
+  "version": "2.9",
   "children": [
     {
       "type": "frame",
@@ -496,7 +496,78 @@
           "reusable": true,
           "ref": "H1nE7",
           "x": 24,
-          "y": 841
+          "y": 841,
+          "descendants": {
+            "mIk71": {
+              "width": "fill_container",
+              "x": 16,
+              "y": 16
+            },
+            "IQtkh": {
+              "y": 9
+            },
+            "BRzxC": {
+              "x": 17,
+              "y": 17
+            },
+            "wWqi1": {
+              "width": "fill_container",
+              "x": 68
+            },
+            "XHXrm": {
+              "y": 23
+            },
+            "JZ5KK": {
+              "x": 9,
+              "y": 4
+            },
+            "Vud8S": {
+              "x": 46
+            },
+            "40Cfa": {
+              "x": 8,
+              "y": 4
+            },
+            "zoU5E": {
+              "y": 52
+            },
+            "32TJy": {
+              "y": 1
+            },
+            "S3FP3": {
+              "x": 18
+            },
+            "sgRE8": {
+              "width": "fill_container",
+              "x": 16,
+              "y": 104
+            },
+            "8agQS": {
+              "width": "fill_container"
+            },
+            "nIcYb": {
+              "x": 64.5,
+              "y": 14.5
+            },
+            "ADU2X": {
+              "x": 85.5,
+              "y": 12.5
+            },
+            "9knO4": {
+              "x": 213
+            },
+            "GipMq": {
+              "x": 14,
+              "y": 14
+            },
+            "An0jJ": {
+              "x": 267
+            },
+            "7803Z": {
+              "x": 14,
+              "y": 14
+            }
+          }
         },
         {
           "type": "frame",
@@ -4359,8 +4430,14 @@
               "flipX": false,
               "flipY": false,
               "descendants": {
+                "nRpXN": {
+                  "x": 14,
+                  "y": 12
+                },
                 "FlHHk": {
-                  "content": "性别: 全部"
+                  "content": "性别: 全部",
+                  "x": 38,
+                  "y": 10.5
                 }
               }
             },
@@ -4373,15 +4450,80 @@
               "y": 52,
               "height": 183,
               "descendants": {
+                "BjVnZ": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 16
+                },
+                "dYHyY": {
+                  "x": 15.5,
+                  "y": 12.5
+                },
+                "jNoEQ": {
+                  "width": "fill_container",
+                  "x": 60
+                },
+                "QDvel": {
+                  "width": "fill_container"
+                },
                 "5GOtN": {
-                  "content": "王**"
+                  "content": "王**",
+                  "y": -1.5
+                },
+                "P6mzR": {
+                  "x": 42,
+                  "y": 1
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#7C3AED"
+                  "fill": "#7C3AED",
+                  "x": 9,
+                  "y": 2
                 },
                 "1nIyU": {
-                  "content": "45岁"
+                  "content": "45岁",
+                  "y": 26
+                },
+                "LTwWM": {
+                  "width": "fill_container",
+                  "y": 51
+                },
+                "hORiU": {
+                  "x": 28,
+                  "y": 2
+                },
+                "5d5W5": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 114
+                },
+                "mOBtE": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 125
+                },
+                "2rn6J": {
+                  "width": "fill_container"
+                },
+                "lkYcX": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "Inr2j": {
+                  "x": 71.75,
+                  "y": 11.5
+                },
+                "yEnqh": {
+                  "width": "fill_container",
+                  "x": 160.5
+                },
+                "qUhge": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "MK7P1": {
+                  "x": 71.75,
+                  "y": 11.5
                 }
               }
             },
@@ -4394,6 +4536,11 @@
               "y": 247,
               "height": 183,
               "descendants": {
+                "BjVnZ": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 16
+                },
                 "uzMIG": {
                   "fill": {
                     "type": "gradient",
@@ -4416,20 +4563,76 @@
                   }
                 },
                 "dYHyY": {
-                  "content": "女"
+                  "content": "女",
+                  "x": 15.5,
+                  "y": 12.5
+                },
+                "jNoEQ": {
+                  "width": "fill_container",
+                  "x": 60
+                },
+                "QDvel": {
+                  "width": "fill_container"
                 },
                 "5GOtN": {
-                  "content": "李**"
+                  "content": "李**",
+                  "y": -1.5
                 },
                 "P6mzR": {
-                  "fill": "#FDF2F8"
+                  "fill": "#FDF2F8",
+                  "x": 42,
+                  "y": 1
                 },
                 "06zTO": {
                   "content": "女",
-                  "fill": "#DB2777"
+                  "fill": "#DB2777",
+                  "x": 9,
+                  "y": 2
                 },
                 "1nIyU": {
-                  "content": "32岁"
+                  "content": "32岁",
+                  "y": 26
+                },
+                "LTwWM": {
+                  "width": "fill_container",
+                  "y": 51
+                },
+                "hORiU": {
+                  "x": 28,
+                  "y": 2
+                },
+                "5d5W5": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 114
+                },
+                "mOBtE": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 125
+                },
+                "2rn6J": {
+                  "width": "fill_container"
+                },
+                "lkYcX": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "Inr2j": {
+                  "x": 71.75,
+                  "y": 11.5
+                },
+                "yEnqh": {
+                  "width": "fill_container",
+                  "x": 160.5
+                },
+                "qUhge": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "MK7P1": {
+                  "x": 71.75,
+                  "y": 11.5
                 }
               }
             },
@@ -4442,15 +4645,80 @@
               "y": 442,
               "height": 183,
               "descendants": {
+                "BjVnZ": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 16
+                },
+                "dYHyY": {
+                  "x": 15.5,
+                  "y": 12.5
+                },
+                "jNoEQ": {
+                  "width": "fill_container",
+                  "x": 60
+                },
+                "QDvel": {
+                  "width": "fill_container"
+                },
                 "5GOtN": {
-                  "content": "张**"
+                  "content": "张**",
+                  "y": -1.5
+                },
+                "P6mzR": {
+                  "x": 42,
+                  "y": 1
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#7C3AED"
+                  "fill": "#7C3AED",
+                  "x": 9,
+                  "y": 2
                 },
                 "1nIyU": {
-                  "content": "58岁"
+                  "content": "58岁",
+                  "y": 26
+                },
+                "LTwWM": {
+                  "width": "fill_container",
+                  "y": 51
+                },
+                "hORiU": {
+                  "x": 28,
+                  "y": 2
+                },
+                "5d5W5": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 114
+                },
+                "mOBtE": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 125
+                },
+                "2rn6J": {
+                  "width": "fill_container"
+                },
+                "lkYcX": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "Inr2j": {
+                  "x": 71.75,
+                  "y": 11.5
+                },
+                "yEnqh": {
+                  "width": "fill_container",
+                  "x": 160.5
+                },
+                "qUhge": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "MK7P1": {
+                  "x": 71.75,
+                  "y": 11.5
                 }
               }
             },
@@ -4463,6 +4731,11 @@
               "y": 637,
               "height": 183,
               "descendants": {
+                "BjVnZ": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 16
+                },
                 "uzMIG": {
                   "fill": {
                     "type": "gradient",
@@ -4485,20 +4758,76 @@
                   }
                 },
                 "dYHyY": {
-                  "content": "女"
+                  "content": "女",
+                  "x": 15.5,
+                  "y": 12.5
+                },
+                "jNoEQ": {
+                  "width": "fill_container",
+                  "x": 60
+                },
+                "QDvel": {
+                  "width": "fill_container"
                 },
                 "5GOtN": {
-                  "content": "刘**"
+                  "content": "刘**",
+                  "y": -1.5
                 },
                 "P6mzR": {
-                  "fill": "#FDF2F8"
+                  "fill": "#FDF2F8",
+                  "x": 42,
+                  "y": 1
                 },
                 "06zTO": {
                   "content": "女",
-                  "fill": "#DB2777"
+                  "fill": "#DB2777",
+                  "x": 9,
+                  "y": 2
                 },
                 "1nIyU": {
-                  "content": "28岁"
+                  "content": "28岁",
+                  "y": 26
+                },
+                "LTwWM": {
+                  "width": "fill_container",
+                  "y": 51
+                },
+                "hORiU": {
+                  "x": 28,
+                  "y": 2
+                },
+                "5d5W5": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 114
+                },
+                "mOBtE": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 125
+                },
+                "2rn6J": {
+                  "width": "fill_container"
+                },
+                "lkYcX": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "Inr2j": {
+                  "x": 71.75,
+                  "y": 11.5
+                },
+                "yEnqh": {
+                  "width": "fill_container",
+                  "x": 160.5
+                },
+                "qUhge": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "MK7P1": {
+                  "x": 71.75,
+                  "y": 11.5
                 }
               }
             },
@@ -4511,15 +4840,80 @@
               "y": 832,
               "height": 183,
               "descendants": {
+                "BjVnZ": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 16
+                },
+                "dYHyY": {
+                  "x": 15.5,
+                  "y": 12.5
+                },
+                "jNoEQ": {
+                  "width": "fill_container",
+                  "x": 60
+                },
+                "QDvel": {
+                  "width": "fill_container"
+                },
                 "5GOtN": {
-                  "content": "陈**"
+                  "content": "陈**",
+                  "y": -1.5
+                },
+                "P6mzR": {
+                  "x": 42,
+                  "y": 1
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#7C3AED"
+                  "fill": "#7C3AED",
+                  "x": 9,
+                  "y": 2
                 },
                 "1nIyU": {
-                  "content": "51岁"
+                  "content": "51岁",
+                  "y": 26
+                },
+                "LTwWM": {
+                  "width": "fill_container",
+                  "y": 51
+                },
+                "hORiU": {
+                  "x": 28,
+                  "y": 2
+                },
+                "5d5W5": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 114
+                },
+                "mOBtE": {
+                  "width": "fill_container",
+                  "x": 16,
+                  "y": 125
+                },
+                "2rn6J": {
+                  "width": "fill_container"
+                },
+                "lkYcX": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "Inr2j": {
+                  "x": 71.75,
+                  "y": 11.5
+                },
+                "yEnqh": {
+                  "width": "fill_container",
+                  "x": 160.5
+                },
+                "qUhge": {
+                  "x": 51.75,
+                  "y": 14
+                },
+                "MK7P1": {
+                  "x": 71.75,
+                  "y": 11.5
                 }
               }
             }
@@ -12865,20 +13259,39 @@
                         "position": 1
                       }
                     ]
-                  }
+                  },
+                  "x": 16,
+                  "y": 24
                 },
                 "y3Sgq": {
-                  "content": "张"
+                  "content": "张",
+                  "x": 13,
+                  "y": 9
+                },
+                "GZW9s": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "x": 72,
+                  "y": 12.5
+                },
+                "SPJEB": {
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5jMH0": {
                   "content": "张伟"
                 },
                 "l32Ph": {
-                  "fill": "#F5F3FF"
+                  "fill": "#F5F3FF",
+                  "width": "fit_content",
+                  "x": 41,
+                  "y": 1.5
                 },
                 "F2DxH": {
                   "content": "我",
-                  "fill": "#7C3AED"
+                  "fill": "#7C3AED",
+                  "x": 8,
+                  "y": 2
                 },
                 "5FYBj": {
                   "width": 46,
@@ -12886,24 +13299,34 @@
                   "height": 20,
                   "layout": "vertical",
                   "justifyContent": "center",
-                  "alignItems": "center"
+                  "alignItems": "center",
+                  "x": 76,
+                  "y": 1.5
                 },
                 "zYP2e": {
                   "content": "管理员",
-                  "fill": "#D97706"
+                  "fill": "#D97706",
+                  "x": 6.5,
+                  "y": 2
                 },
                 "ECzZY": {
-                  "content": "主任医师 · 影像科"
+                  "content": "主任医师 · 影像科",
+                  "y": 27
                 },
                 "gY78H": {
-                  "content": "zhangwei@pumch.cn"
+                  "content": "zhangwei@pumch.cn",
+                  "y": 51
                 },
                 "sXzPV": {
                   "width": 0,
-                  "fill": "#00000000"
+                  "fill": "#00000000",
+                  "x": 327,
+                  "y": 30
                 },
                 "qSahC": {
-                  "fill": "#00000000"
+                  "fill": "#00000000",
+                  "x": -8,
+                  "y": 8
                 }
               }
             },
@@ -12913,6 +13336,7 @@
               "ref": "uHOnm",
               "width": "fill_container",
               "name": "member2",
+              "y": 106,
               "descendants": {
                 "Qg8dy": {
                   "fill": {
@@ -12933,34 +13357,65 @@
                         "position": 1
                       }
                     ]
-                  }
+                  },
+                  "x": 16,
+                  "y": 24
                 },
                 "y3Sgq": {
-                  "content": "李"
+                  "content": "李",
+                  "x": 13,
+                  "y": 9
+                },
+                "GZW9s": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "x": 72,
+                  "y": 12.5
+                },
+                "SPJEB": {
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5jMH0": {
                   "content": "李晓梅"
                 },
                 "l32Ph": {
-                  "fill": "#EEF2FF"
+                  "fill": "#EEF2FF",
+                  "width": "fit_content",
+                  "x": 57,
+                  "y": 1.5
                 },
                 "F2DxH": {
                   "content": "成员",
-                  "fill": "#6366F1"
+                  "fill": "#6366F1",
+                  "x": 8,
+                  "y": 2
                 },
                 "5FYBj": {
                   "width": 0,
-                  "fill": "#00000000"
+                  "fill": "#00000000",
+                  "x": 103,
+                  "y": 1.5
                 },
                 "zYP2e": {
                   "content": "",
                   "fill": "#00000000"
                 },
                 "ECzZY": {
-                  "content": "副主任医师 · 影像科"
+                  "content": "副主任医师 · 影像科",
+                  "y": 27
                 },
                 "gY78H": {
-                  "content": "lixiaomei@pumch.cn"
+                  "content": "lixiaomei@pumch.cn",
+                  "y": 51
+                },
+                "sXzPV": {
+                  "x": 295,
+                  "y": 30
+                },
+                "qSahC": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             },
@@ -12970,6 +13425,7 @@
               "ref": "uHOnm",
               "width": "fill_container",
               "name": "member3",
+              "y": 212,
               "descendants": {
                 "Qg8dy": {
                   "fill": {
@@ -12990,34 +13446,65 @@
                         "position": 1
                       }
                     ]
-                  }
+                  },
+                  "x": 16,
+                  "y": 24
                 },
                 "y3Sgq": {
-                  "content": "王"
+                  "content": "王",
+                  "x": 13,
+                  "y": 9
+                },
+                "GZW9s": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "x": 72,
+                  "y": 12.5
+                },
+                "SPJEB": {
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5jMH0": {
                   "content": "王建国"
                 },
                 "l32Ph": {
-                  "fill": "#EEF2FF"
+                  "fill": "#EEF2FF",
+                  "width": "fit_content",
+                  "x": 57,
+                  "y": 1.5
                 },
                 "F2DxH": {
                   "content": "成员",
-                  "fill": "#6366F1"
+                  "fill": "#6366F1",
+                  "x": 8,
+                  "y": 2
                 },
                 "5FYBj": {
                   "width": 0,
-                  "fill": "#00000000"
+                  "fill": "#00000000",
+                  "x": 103,
+                  "y": 1.5
                 },
                 "zYP2e": {
                   "content": "",
                   "fill": "#00000000"
                 },
                 "ECzZY": {
-                  "content": "主治医师 · 影像科"
+                  "content": "主治医师 · 影像科",
+                  "y": 27
                 },
                 "gY78H": {
-                  "content": "wangjianguo@pumch.cn"
+                  "content": "wangjianguo@pumch.cn",
+                  "y": 51
+                },
+                "sXzPV": {
+                  "x": 295,
+                  "y": 30
+                },
+                "qSahC": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             },
@@ -13027,6 +13514,7 @@
               "ref": "uHOnm",
               "width": "fill_container",
               "name": "member4",
+              "y": 318,
               "descendants": {
                 "Qg8dy": {
                   "fill": {
@@ -13047,34 +13535,65 @@
                         "position": 1
                       }
                     ]
-                  }
+                  },
+                  "x": 16,
+                  "y": 24
                 },
                 "y3Sgq": {
-                  "content": "陈"
+                  "content": "陈",
+                  "x": 13,
+                  "y": 9
+                },
+                "GZW9s": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "x": 72,
+                  "y": 12.5
+                },
+                "SPJEB": {
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5jMH0": {
                   "content": "陈思雨"
                 },
                 "l32Ph": {
-                  "fill": "#EEF2FF"
+                  "fill": "#EEF2FF",
+                  "width": "fit_content",
+                  "x": 57,
+                  "y": 1.5
                 },
                 "F2DxH": {
                   "content": "成员",
-                  "fill": "#6366F1"
+                  "fill": "#6366F1",
+                  "x": 8,
+                  "y": 2
                 },
                 "5FYBj": {
                   "width": 0,
-                  "fill": "#00000000"
+                  "fill": "#00000000",
+                  "x": 103,
+                  "y": 1.5
                 },
                 "zYP2e": {
                   "content": "",
                   "fill": "#00000000"
                 },
                 "ECzZY": {
-                  "content": "住院医师 · 影像科"
+                  "content": "住院医师 · 影像科",
+                  "y": 27
                 },
                 "gY78H": {
-                  "content": "chensiyu@pumch.cn"
+                  "content": "chensiyu@pumch.cn",
+                  "y": 51
+                },
+                "sXzPV": {
+                  "x": 295,
+                  "y": 30
+                },
+                "qSahC": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             }
@@ -13085,8 +13604,8 @@
     {
       "type": "frame",
       "id": "RLfaf",
-      "x": 1817,
-      "y": 2285,
+      "x": 1807,
+      "y": 2303,
       "name": "Variant/Organization/Invites",
       "clip": true,
       "width": 375,
@@ -13615,17 +14134,22 @@
                   }
                 },
                 "AFwLE": {
-                  "content": "胡"
+                  "content": "胡",
+                  "x": 13,
+                  "y": 9
                 },
                 "3aVTC": {
                   "content": "胡文博"
                 },
                 "WTEiU": {
-                  "fill": "#FEF3C7"
+                  "fill": "#FEF3C7",
+                  "width": "fit_content"
                 },
                 "Lbr2H": {
                   "content": "待接受",
-                  "fill": "#D97706"
+                  "fill": "#D97706",
+                  "x": 8,
+                  "y": 2
                 },
                 "RZ1mV": {
                   "content": "huwenbo@pumch.cn"
@@ -13641,7 +14165,9 @@
                 },
                 "20cJU": {
                   "content": "撤销",
-                  "fill": "#EF4444"
+                  "fill": "#EF4444",
+                  "x": 9.5,
+                  "y": 4.5
                 }
               }
             },
@@ -13651,6 +14177,7 @@
               "ref": "9bDYk",
               "width": "fill_container",
               "name": "inviteRow2",
+              "y": 102,
               "descendants": {
                 "PDcrG": {
                   "fill": {
@@ -13674,17 +14201,22 @@
                   }
                 },
                 "AFwLE": {
-                  "content": "杨"
+                  "content": "杨",
+                  "x": 13,
+                  "y": 9
                 },
                 "3aVTC": {
                   "content": "杨芳"
                 },
                 "WTEiU": {
-                  "fill": "#FEF3C7"
+                  "fill": "#FEF3C7",
+                  "width": "fit_content"
                 },
                 "Lbr2H": {
                   "content": "待接受",
-                  "fill": "#D97706"
+                  "fill": "#D97706",
+                  "x": 8,
+                  "y": 2
                 },
                 "RZ1mV": {
                   "content": "yangfang@pumch.cn"
@@ -13700,7 +14232,9 @@
                 },
                 "20cJU": {
                   "content": "撤销",
-                  "fill": "#EF4444"
+                  "fill": "#EF4444",
+                  "x": 9.5,
+                  "y": 4.5
                 }
               }
             }
