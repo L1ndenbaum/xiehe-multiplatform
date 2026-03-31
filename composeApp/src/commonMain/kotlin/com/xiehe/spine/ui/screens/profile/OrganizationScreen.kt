@@ -844,15 +844,15 @@ private fun OrganizationInvitationCard(
                     style = SpineTheme.typography.subhead,
                     color = colors.textSecondary,
                 )
-                Text(
-                    text = "邀请你以",
-                    style = SpineTheme.typography.subhead,
-                    color = colors.textSecondary,
-                )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Text(
+                        text = "邀请你以",
+                        style = SpineTheme.typography.subhead,
+                        color = colors.textSecondary,
+                    )
                     MetaBadge(
                         text = invitation.inviteRoleLabel(),
                         background = colors.primaryMuted,
