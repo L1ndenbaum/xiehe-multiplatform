@@ -37,9 +37,9 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.Text
-import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.theme.ThemeMode
@@ -200,10 +200,10 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
         } else {
             listOf("北京时间 (UTC+8)", "东京时间 (UTC+9)", "新加坡时间 (UTC+8)")
         }
-        SettingsPickerDialog(
+        OptionPickerOverlay(
             title = title,
             options = options,
-            currentValue = if (picker == SettingsPickerType.LANGUAGE) language else timezone,
+            selected = if (picker == SettingsPickerType.LANGUAGE) language else timezone,
             onDismiss = { pickerType = null },
             onSelect = {
                 if (picker == SettingsPickerType.LANGUAGE) {
@@ -432,56 +432,4 @@ private fun SettingsDivider() {
             .height(1.dp)
             .background(colors.borderSubtle),
     )
-}
-
-@Composable
-private fun SettingsPickerDialog(
-    title: String,
-    options: List<String>,
-    currentValue: String,
-    onDismiss: () -> Unit,
-    onSelect: (String) -> Unit,
-) {
-    val colors = SpineTheme.colors
-    PickerDialog(
-        title = title,
-        onDismissRequest = onDismiss,
-        showActionRow = false,
-    ) { dismiss ->
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            options.forEach { option ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (option == currentValue) colors.primaryMuted else colors.surfaceMuted)
-                        .border(
-                            1.dp,
-                            if (option == currentValue) colors.primary.copy(alpha = 0.22f) else colors.borderSubtle,
-                            RoundedCornerShape(14.dp),
-                        )
-                        .clickable {
-                            onSelect(option)
-                            dismiss()
-                        }
-                        .padding(horizontal = 14.dp, vertical = 14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = option,
-                        style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Medium),
-                        color = colors.textPrimary,
-                    )
-                    if (option == currentValue) {
-                        Text(
-                            text = "✓",
-                            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
-                            color = colors.primary,
-                        )
-                    }
-                }
-            }
-        }
-    }
 }

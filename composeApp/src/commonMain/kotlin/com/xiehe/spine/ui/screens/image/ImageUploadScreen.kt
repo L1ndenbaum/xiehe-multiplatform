@@ -30,10 +30,10 @@ import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.file.rememberImageFilePickerLauncher
 import com.xiehe.spine.ui.components.form.input.TextField
+import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.image.ImageUploadViewModel
 import com.xiehe.spine.ui.viewmodel.image.UploadFilePayload
@@ -174,73 +174,29 @@ fun ImageUploadScreen(
 
     when (picker) {
         ImageUploadPicker.PATIENT -> {
-            PickerDialog(
-                title = "",
-                onDismissRequest = { picker = null },
-                showActionRow = false,
-                edgeToEdge = true,
-            ) { dismiss ->
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "选择患者", style = SpineTheme.typography.title)
-                    state.patients.forEach { patient ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color = if (patient.id == state.selectedPatientId) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
-                                    shape = RoundedCornerShape(SpineTheme.radius.md),
-                                )
-                                .clickable {
-                                    vm.updatePatient(patient.id)
-                                    dismiss()
-                                }
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(patient.name, color = if (patient.id == state.selectedPatientId) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
-                            if (patient.id == state.selectedPatientId) {
-                                Text("✓", color = SpineTheme.colors.onPrimary)
-                            }
-                        }
+            OptionPickerOverlay(
+                title = "选择患者",
+                options = state.patients.map { it.name },
+                selected = selectedPatientName,
+                onDismiss = { picker = null },
+                onSelect = { selectedName ->
+                    state.patients.firstOrNull { it.name == selectedName }?.let { patient ->
+                        vm.updatePatient(patient.id)
                     }
-                }
-            }
+                },
+            )
         }
 
         ImageUploadPicker.EXAM_TYPE -> {
-            PickerDialog(
-                title = "",
-                onDismissRequest = { picker = null },
-                showActionRow = false,
-                edgeToEdge = true,
-            ) { dismiss ->
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "选择影像类别", style = SpineTheme.typography.title)
-                    state.examTypes.forEach { examType ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color = if (examType == state.selectedExamType) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
-                                    shape = RoundedCornerShape(SpineTheme.radius.md),
-                                )
-                                .clickable {
-                                    vm.updateExamType(examType)
-                                    dismiss()
-                                }
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(examType.label, color = if (examType == state.selectedExamType) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
-                            if (examType == state.selectedExamType) {
-                                Text("✓", color = SpineTheme.colors.onPrimary)
-                            }
-                        }
-                    }
-                }
-            }
+            OptionPickerOverlay(
+                title = "选择影像类别",
+                options = state.examTypes.map { it.label },
+                selected = state.selectedExamType.label,
+                onDismiss = { picker = null },
+                onSelect = { selectedLabel ->
+                    state.examTypes.firstOrNull { it.label == selectedLabel }?.let(vm::updateExamType)
+                },
+            )
         }
 
         null -> Unit
