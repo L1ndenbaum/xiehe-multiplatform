@@ -186,10 +186,10 @@ fun PatientImageRecordsCard(
                 color = colors.textPrimary,
             )
             Button(
-                text = "上传图片",
+                text = "上传影像",
                 onClick = onUploadImage,
                 leadingGlyph = IconToken.UPLOAD,
-                modifier = Modifier.height(40.dp),
+                modifier = Modifier.padding(8.dp, 4.dp).height(30.dp)
             )
         }
 
