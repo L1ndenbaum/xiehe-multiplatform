@@ -104,6 +104,11 @@ class PersonalInfoViewModel : BaseViewModel() {
         _state.update { it.copy(errorMessage = null, successMessage = null) }
     }
 
+    fun reset() {
+        baseline = null
+        _state.value = PersonalInfoUiState()
+    }
+
     fun save(
         session: UserSession,
         repository: AuthRepository,

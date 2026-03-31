@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,9 +36,12 @@ fun PatientDetailScreen(
     onSessionUpdated: (UserSession) -> Unit,
     onOpenAnalysis: (Int, Int?, String) -> Unit,
     onOpenImageUpload: () -> Unit,
-    noticeMessage: String? = null,
 ) {
     val state by vm.state.collectAsState()
+
+    DisposableEffect(patientId) {
+        onDispose { vm.clear() }
+    }
 
     LaunchedEffect(patientId, session.accessToken) {
         vm.load(
@@ -60,7 +64,7 @@ fun PatientDetailScreen(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            noticeMessage?.let {
+            state.noticeMessage?.let {
                 item {
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Text(
@@ -113,6 +117,8 @@ fun PatientDetailScreen(
 
         if (state.loading) {
             LoadingOverlay(message = "...正在加载中")
+        } else if (state.deleting) {
+            LoadingOverlay(message = "...正在删除患者")
         }
     }
 }

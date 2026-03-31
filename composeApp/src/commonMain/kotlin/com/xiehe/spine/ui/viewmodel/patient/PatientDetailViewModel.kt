@@ -15,9 +15,11 @@ import kotlinx.coroutines.launch
 
 data class PatientDetailUiState(
     val loading: Boolean = false,
+    val deleting: Boolean = false,
     val detail: PatientDetail? = null,
     val relatedImages: List<ImageFileSummary> = emptyList(),
     val relatedLoading: Boolean = false,
+    val noticeMessage: String? = null,
     val errorMessage: String? = null,
 )
 
@@ -33,7 +35,15 @@ class PatientDetailViewModel : BaseViewModel() {
         onSessionUpdated: (UserSession) -> Unit,
     ) {
         scope.launch {
-            _state.update { it.copy(loading = true, relatedLoading = true, errorMessage = null) }
+            _state.update {
+                it.copy(
+                    loading = true,
+                    deleting = false,
+                    relatedLoading = true,
+                    noticeMessage = null,
+                    errorMessage = null,
+                )
+            }
             var activeSession = session
 
             val detail = when (val result = patientRepository.loadPatientDetail(activeSession, patientId)) {
@@ -62,11 +72,62 @@ class PatientDetailViewModel : BaseViewModel() {
             _state.update {
                 it.copy(
                     loading = false,
+                    deleting = false,
                     relatedLoading = false,
                     detail = detail,
                     relatedImages = relatedImages,
+                    noticeMessage = null,
                     errorMessage = null,
                 )
+            }
+        }
+    }
+
+    fun delete(
+        patientId: Int,
+        session: UserSession,
+        repository: PatientRepository,
+        onSessionUpdated: (UserSession) -> Unit,
+        onDeleted: (UserSession) -> Unit,
+        onUnauthorized: () -> Unit,
+    ) {
+        if (_state.value.deleting) {
+            return
+        }
+        scope.launch {
+            _state.update {
+                it.copy(
+                    deleting = true,
+                    noticeMessage = "正在删除患者...",
+                    errorMessage = null,
+                )
+            }
+            when (val result = repository.deletePatient(session = session, patientId = patientId)) {
+                is AppResult.Success -> {
+                    val updatedSession = result.data.first
+                    onSessionUpdated(updatedSession)
+                    _state.update {
+                        it.copy(
+                            deleting = false,
+                            noticeMessage = result.data.second,
+                            errorMessage = null,
+                        )
+                    }
+                    onDeleted(updatedSession)
+                }
+
+                is AppResult.Failure -> {
+                    _state.update {
+                        it.copy(
+                            deleting = false,
+                            noticeMessage = null,
+                            errorMessage = result.message,
+                        )
+                    }
+                    if (result.isUnauthorized) {
+                        onUnauthorized()
+                    }
+                }
             }
         }
     }
