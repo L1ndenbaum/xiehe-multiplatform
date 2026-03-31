@@ -162,8 +162,8 @@ fun OrganizationScreen(
                 icon = if (state.errorMessage != null) IconToken.MESSAGE else IconToken.CHECK,
                 onDismiss = vm::clearMessages,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 12.dp),
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
             )
         }
 

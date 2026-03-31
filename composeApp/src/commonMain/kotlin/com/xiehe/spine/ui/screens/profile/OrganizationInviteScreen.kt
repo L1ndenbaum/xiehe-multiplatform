@@ -206,8 +206,8 @@ fun OrganizationInviteScreen(
                 icon = IconToken.MESSAGE,
                 onDismiss = vm::clearMessages,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 12.dp),
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
             )
         }
 

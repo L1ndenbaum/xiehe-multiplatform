@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.button.shared.Button
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
@@ -70,113 +71,126 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
         darkModeEnabled = preference.mode == ThemeMode.DARK
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.background)
-            .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        SettingsBrandCard(
-            selectedBrand = selectedBrand,
-            onBrandSelected = {
-                selectedBrand = it
-                successMessage = null
-            },
-            shadowColor = shadowColor,
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            SettingsBrandCard(
+                selectedBrand = selectedBrand,
+                onBrandSelected = {
+                    selectedBrand = it
+                    successMessage = null
+                },
+                shadowColor = shadowColor,
+            )
 
-        SettingsSectionCard(title = "界面设置", shadowColor = shadowColor) {
-            SettingsToggleRow(
-                iconGlyph = IconToken.EYE,
-                iconTint = colors.primary,
-                iconBackground = colors.primaryMuted,
-                title = "启用暗色主题",
-                subtitle = "切换深色界面风格",
-                checked = darkModeEnabled,
-                onCheckedChange = {
-                    darkModeEnabled = it
-                    successMessage = null
-                },
-            )
-            SettingsDivider()
-            SettingsToggleRow(
-                iconGlyph = IconToken.BELL,
-                iconTint = colors.info,
-                iconBackground = colors.info.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
-                title = "显示系统通知",
-                subtitle = "接收消息和提醒推送",
-                checked = notificationsEnabled,
-                onCheckedChange = {
-                    notificationsEnabled = it
-                    successMessage = null
-                },
-            )
-            SettingsDivider()
-            SettingsToggleRow(
-                iconGlyph = IconToken.SAVE,
-                iconTint = colors.warning,
-                iconBackground = colors.warning.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
-                title = "自动保存草稿",
-                subtitle = "编辑内容自动暂存",
-                checked = autoSaveEnabled,
-                onCheckedChange = {
-                    autoSaveEnabled = it
-                    successMessage = null
-                },
-            )
-        }
+            SettingsSectionCard(title = "界面设置", shadowColor = shadowColor) {
+                SettingsToggleRow(
+                    iconGlyph = IconToken.EYE,
+                    iconTint = colors.primary,
+                    iconBackground = colors.primaryMuted,
+                    title = "启用暗色主题",
+                    subtitle = "切换深色界面风格",
+                    checked = darkModeEnabled,
+                    onCheckedChange = {
+                        darkModeEnabled = it
+                        successMessage = null
+                    },
+                )
+                SettingsDivider()
+                SettingsToggleRow(
+                    iconGlyph = IconToken.BELL,
+                    iconTint = colors.info,
+                    iconBackground = colors.info.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+                    title = "显示系统通知",
+                    subtitle = "接收消息和提醒推送",
+                    checked = notificationsEnabled,
+                    onCheckedChange = {
+                        notificationsEnabled = it
+                        successMessage = null
+                    },
+                )
+                SettingsDivider()
+                SettingsToggleRow(
+                    iconGlyph = IconToken.SAVE,
+                    iconTint = colors.warning,
+                    iconBackground = colors.warning.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+                    title = "自动保存草稿",
+                    subtitle = "编辑内容自动暂存",
+                    checked = autoSaveEnabled,
+                    onCheckedChange = {
+                        autoSaveEnabled = it
+                        successMessage = null
+                    },
+                )
+            }
 
-        SettingsSectionCard(title = "语言和地区", shadowColor = shadowColor) {
-            SettingsFieldLabel(
-                text = "语言",
-                iconGlyph = IconToken.MESSAGE,
-                iconTint = colors.info,
-                iconBackground = colors.info.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
-            )
-            SettingsDropdownField(
-                text = language,
+            SettingsSectionCard(title = "语言和地区", shadowColor = shadowColor) {
+                SettingsFieldLabel(
+                    text = "语言",
+                    iconGlyph = IconToken.MESSAGE,
+                    iconTint = colors.info,
+                    iconBackground = colors.info.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+                )
+                SettingsDropdownField(
+                    text = language,
+                    onClick = {
+                        pickerType = SettingsPickerType.LANGUAGE
+                        successMessage = null
+                    },
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                SettingsFieldLabel(
+                    text = "时区",
+                    iconGlyph = IconToken.CLOCK,
+                    iconTint = colors.success,
+                    iconBackground = colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
+                )
+                SettingsDropdownField(
+                    text = timezone,
+                    onClick = {
+                        pickerType = SettingsPickerType.TIMEZONE
+                        successMessage = null
+                    },
+                )
+            }
+
+            Button(
+                text = "保存设置",
                 onClick = {
-                    pickerType = SettingsPickerType.LANGUAGE
-                    successMessage = null
+                    vm.updateBrand(selectedBrand)
+                    vm.updateMode(if (darkModeEnabled) ThemeMode.DARK else ThemeMode.LIGHT)
+                    successMessage = buildString {
+                        append("设置已保存")
+                        if (!notificationsEnabled) append("，通知已关闭")
+                        if (autoSaveEnabled) append("，已启用自动保存")
+                    }
                 },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            SettingsFieldLabel(
-                text = "时区",
-                iconGlyph = IconToken.CLOCK,
-                iconTint = colors.success,
-                iconBackground = colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
-            )
-            SettingsDropdownField(
-                text = timezone,
-                onClick = {
-                    pickerType = SettingsPickerType.TIMEZONE
-                    successMessage = null
-                },
-            )
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        successMessage?.let {
-            SettingsInlineMessage(it)
+        successMessage?.let { message ->
+            FloatingToast(
+                message = message,
+                accentColor = colors.success,
+                icon = IconToken.CHECK,
+                onDismiss = { successMessage = null },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
+            )
         }
-
-        Button(
-            text = "保存设置",
-            onClick = {
-                vm.updateBrand(selectedBrand)
-                vm.updateMode(if (darkModeEnabled) ThemeMode.DARK else ThemeMode.LIGHT)
-                successMessage = buildString {
-                    append("设置已保存")
-                    if (!notificationsEnabled) append("，通知已关闭")
-                    if (autoSaveEnabled) append("，已启用自动保存")
-                }
-            },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 
     pickerType?.let { picker ->
@@ -418,26 +432,6 @@ private fun SettingsDivider() {
             .height(1.dp)
             .background(colors.borderSubtle),
     )
-}
-
-@Composable
-private fun SettingsInlineMessage(message: String) {
-    val colors = SpineTheme.colors
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = 620.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f))
-            .border(1.dp, colors.success.copy(alpha = 0.22f), RoundedCornerShape(18.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-    ) {
-        Text(
-            text = message,
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
-            color = colors.success,
-        )
-    }
 }
 
 @Composable

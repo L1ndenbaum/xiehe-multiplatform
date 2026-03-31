@@ -38,6 +38,7 @@ import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.ui.components.button.shared.Button
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
@@ -98,7 +99,6 @@ fun ChangePasswordScreen(
                     PasswordVerifyCard(
                         currentPassword = currentPassword,
                         showCurrent = showCurrent,
-                        errorMessage = errorMessage,
                         onPasswordChange = {
                             currentPassword = it
                             errorMessage = null
@@ -124,7 +124,6 @@ fun ChangePasswordScreen(
                         showConfirm = showConfirm,
                         strength = strength,
                         matchesConfirm = matchesConfirm,
-                        errorMessage = errorMessage,
                         onNewPasswordChange = {
                             newPassword = it
                             errorMessage = null
@@ -200,6 +199,18 @@ fun ChangePasswordScreen(
 
         if (submitting) {
             LoadingOverlay(message = "...正在提交中")
+        }
+
+        errorMessage?.let { message ->
+            FloatingToast(
+                message = message,
+                accentColor = colors.error,
+                icon = IconToken.MESSAGE,
+                onDismiss = { errorMessage = null },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
+            )
         }
     }
 }
@@ -318,7 +329,6 @@ private fun PasswordStepConnector(completed: Boolean) {
 private fun PasswordVerifyCard(
     currentPassword: String,
     showCurrent: Boolean,
-    errorMessage: String?,
     onPasswordChange: (String) -> Unit,
     onToggleVisibility: () -> Unit,
     onNext: () -> Unit,
@@ -334,9 +344,6 @@ private fun PasswordVerifyCard(
             onValueChange = onPasswordChange,
             onToggleVisibility = onToggleVisibility,
         )
-        errorMessage?.let {
-            PasswordInlineMessage(message = it, color = colors.error, background = colors.error.copy(alpha = if (colors.isDark) 0.18f else 0.1f))
-        }
         Button(
             text = "下一步",
             onClick = onNext,
@@ -353,7 +360,6 @@ private fun PasswordResetCard(
     showConfirm: Boolean,
     strength: PasswordStrength,
     matchesConfirm: Boolean,
-    errorMessage: String?,
     onNewPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
     onToggleNewVisibility: () -> Unit,
@@ -408,9 +414,6 @@ private fun PasswordResetCard(
             }
         }
         PasswordRequirementCard(password = newPassword)
-        errorMessage?.let {
-            PasswordInlineMessage(message = it, color = colors.error, background = colors.error.copy(alpha = if (colors.isDark) 0.18f else 0.1f))
-        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -705,27 +708,6 @@ private fun PasswordSecondaryButton(
             text = text,
             style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
             color = colors.textSecondary,
-        )
-    }
-}
-
-@Composable
-private fun PasswordInlineMessage(
-    message: String,
-    color: Color,
-    background: Color,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(background)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-    ) {
-        Text(
-            text = message,
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
-            color = color,
         )
     }
 }

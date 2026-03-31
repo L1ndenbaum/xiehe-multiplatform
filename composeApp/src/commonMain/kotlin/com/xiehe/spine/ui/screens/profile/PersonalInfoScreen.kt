@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.ui.components.card.profile.ProfileTag
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
@@ -224,28 +225,6 @@ fun PersonalInfoScreen(
                 )
             }
 
-            localNotice?.let {
-                InlineMessageCard(
-                    message = it,
-                    color = colors.primary,
-                    background = colors.primaryMuted,
-                )
-            }
-            state.errorMessage?.let {
-                InlineMessageCard(
-                    message = it,
-                    color = colors.error,
-                    background = colors.error.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
-                )
-            }
-            state.successMessage?.let {
-                InlineMessageCard(
-                    message = it,
-                    color = colors.success,
-                    background = colors.success.copy(alpha = if (colors.isDark) 0.18f else 0.1f),
-                )
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
 
@@ -290,6 +269,33 @@ fun PersonalInfoScreen(
 
         if (state.loading || state.saving) {
             LoadingOverlay(message = "...正在加载中")
+        }
+
+        val toastMessage = localNotice ?: state.errorMessage ?: state.successMessage
+        if (toastMessage != null) {
+            FloatingToast(
+                message = toastMessage,
+                accentColor = when {
+                    localNotice != null -> colors.primary
+                    state.errorMessage != null -> colors.error
+                    else -> colors.success
+                },
+                icon = when {
+                    localNotice != null -> IconToken.BELL
+                    state.errorMessage != null -> IconToken.MESSAGE
+                    else -> IconToken.CHECK
+                },
+                onDismiss = {
+                    if (localNotice != null) {
+                        localNotice = null
+                    } else {
+                        vm.clearMessages()
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
+            )
         }
     }
 }
@@ -390,29 +396,6 @@ private fun ProfileFieldEditorDialog(
             placeholder = placeholder,
             modifier = Modifier.fillMaxWidth(),
             leadingGlyph = IconToken.EDIT,
-        )
-    }
-}
-
-@Composable
-private fun InlineMessageCard(
-    message: String,
-    color: Color,
-    background: Color,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = 620.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(background)
-            .border(1.dp, color.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-    ) {
-        Text(
-            text = message,
-            style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.Medium),
-            color = color,
         )
     }
 }

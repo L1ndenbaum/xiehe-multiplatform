@@ -100,6 +100,10 @@ class PersonalInfoViewModel : BaseViewModel() {
         _state.update { it.copy(title = value, errorMessage = null, successMessage = null) }
     }
 
+    fun clearMessages() {
+        _state.update { it.copy(errorMessage = null, successMessage = null) }
+    }
+
     fun save(
         session: UserSession,
         repository: AuthRepository,
