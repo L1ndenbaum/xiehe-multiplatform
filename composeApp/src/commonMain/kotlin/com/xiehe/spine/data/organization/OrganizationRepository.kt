@@ -54,6 +54,54 @@ class OrganizationRepository(
         }
     }
 
+    suspend fun inviteMember(
+        session: UserSession,
+        teamId: Int,
+        email: String,
+        role: String,
+        message: String?,
+    ): AppResult<Pair<UserSession, String>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.postForMessage(
+                path = "/permissions/teams/$teamId/invite",
+                body = OrganizationInviteRequest(
+                    email = email,
+                    role = role,
+                    message = message,
+                ),
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
+    suspend fun updateMemberRole(
+        session: UserSession,
+        teamId: Int,
+        userId: Int,
+        role: String,
+    ): AppResult<Pair<UserSession, String>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.patchForMessage(
+                path = "/permissions/teams/$teamId/members/$userId/role",
+                body = OrganizationMemberRoleUpdateRequest(role = role),
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
+    suspend fun removeMember(
+        session: UserSession,
+        teamId: Int,
+        userId: Int,
+    ): AppResult<Pair<UserSession, String>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.deleteForMessage(
+                path = "/permissions/teams/$teamId/members/$userId",
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
     private suspend inline fun <reified T> withRefresh(
         session: UserSession,
         crossinline action: suspend (UserSession) -> AppResult<T>,

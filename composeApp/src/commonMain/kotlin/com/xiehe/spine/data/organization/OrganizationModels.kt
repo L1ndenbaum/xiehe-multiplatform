@@ -92,3 +92,24 @@ data class OrganizationInvitationUser(
 data class OrganizationInvitationRespondRequest(
     val accept: Boolean,
 )
+
+@Serializable
+data class OrganizationInviteRequest(
+    val email: String,
+    val role: String = OrganizationRole.MEMBER.apiValue,
+    val message: String? = null,
+)
+
+@Serializable
+data class OrganizationMemberRoleUpdateRequest(
+    val role: String,
+)
+
+enum class OrganizationRole(
+    val apiValue: String,
+    val label: String,
+) {
+    ADMIN(apiValue = "ADMIN", label = "管理员"),
+    MEMBER(apiValue = "MEMBER", label = "成员"),
+    GUEST(apiValue = "GUEST", label = "访客"),
+}

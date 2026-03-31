@@ -5,6 +5,7 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.organization.OrganizationInvitation
 import com.xiehe.spine.data.organization.OrganizationMember
 import com.xiehe.spine.data.organization.OrganizationRepository
+import com.xiehe.spine.data.organization.OrganizationRole
 import com.xiehe.spine.data.organization.OrganizationTeamSummary
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import kotlinx.coroutines.async
@@ -25,6 +26,7 @@ data class OrganizationUiState(
     val activeTab: OrganizationTab = OrganizationTab.MEMBERS,
     val search: String = "",
     val teams: List<OrganizationTeamSummary> = emptyList(),
+    val teamRoleLabels: Map<Int, String> = emptyMap(),
     val selectedTeamId: Int? = null,
     val members: List<OrganizationMember> = emptyList(),
     val filteredMembers: List<OrganizationMember> = emptyList(),
@@ -45,55 +47,34 @@ class OrganizationViewModel : BaseViewModel() {
         silent: Boolean = false,
     ) {
         scope.launch {
-            if (!silent) {
-                _state.update { it.copy(loading = true, errorMessage = null) }
-            }
-
-            val teamsResultDeferred = async { repository.loadMyTeams(session) }
-            val invitationsResultDeferred = async { repository.loadMyInvitations(session) }
-
-            val teamsResult = teamsResultDeferred.await()
-            val invitationsResult = invitationsResultDeferred.await()
-
-            val teams = (teamsResult as? AppResult.Success)?.data?.second?.items.orEmpty()
-            val selectedTeamId = resolveSelectedTeamId(
-                current = _state.value.selectedTeamId,
-                teams = teams,
+            reload(
+                session = session,
+                repository = repository,
+                onSessionUpdated = onSessionUpdated,
+                preferredTeamId = _state.value.selectedTeamId,
+                silent = silent,
             )
-            val membersResult = if (selectedTeamId != null) {
-                repository.loadTeamMembers(
-                    session = (teamsResult as? AppResult.Success)?.data?.first ?: session,
-                    teamId = selectedTeamId,
-                )
-            } else {
-                null
-            }
+        }
+    }
 
-            listOfNotNull(
-                (teamsResult as? AppResult.Success)?.data?.first,
-                (invitationsResult as? AppResult.Success)?.data?.first,
-                (membersResult as? AppResult.Success)?.data?.first,
-            ).lastOrNull()?.let(onSessionUpdated)
-
-            val members = (membersResult as? AppResult.Success)?.data?.second?.members.orEmpty()
-            val invitations = (invitationsResult as? AppResult.Success)?.data?.second?.items.orEmpty()
-            val failure = listOfNotNull(
-                teamsResult as? AppResult.Failure,
-                invitationsResult as? AppResult.Failure,
-                membersResult as? AppResult.Failure,
-            ).firstOrNull()
-
-            _state.update { current ->
-                val next = current.copy(
-                    loading = false,
-                    teams = teams,
-                    selectedTeamId = selectedTeamId,
-                    members = members,
-                    invitations = invitations,
-                    errorMessage = failure?.message,
-                )
-                next.withFilteredData()
-            }
+    fun selectTeam(
+        session: UserSession,
+        repository: OrganizationRepository,
+        teamId: Int,
+        onSessionUpdated: (UserSession) -> Unit,
+    ) {
+        if (_state.value.selectedTeamId == teamId) {
+            return
+        }
+        scope.launch {
+            _state.update { it.copy(selectedTeamId = teamId, loading = true, errorMessage = null) }
+            reload(
+                session = session,
+                repository = repository,
+                onSessionUpdated = onSessionUpdated,
+                preferredTeamId = teamId,
+                silent = true,
+            )
         }
     }
 
@@ -121,22 +102,208 @@ class OrganizationViewModel : BaseViewModel() {
             _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
             when (val result = repository.respondInvitation(session, invitationId, accept)) {
                 is AppResult.Success -> {
-                    onSessionUpdated(result.data.first)
-                    _state.update { current ->
-                        val next = current.copy(
-                            actionLoading = false,
-                            invitations = current.invitations.filterNot { it.stableId == invitationId },
-                            noticeMessage = result.data.second,
-                            errorMessage = null,
-                        )
-                        next.withFilteredData()
-                    }
+                    val updatedSession = result.data.first
+                    onSessionUpdated(updatedSession)
+                    reload(
+                        session = updatedSession,
+                        repository = repository,
+                        onSessionUpdated = onSessionUpdated,
+                        preferredTeamId = _state.value.selectedTeamId,
+                        silent = true,
+                        successMessage = result.data.second,
+                    )
                 }
 
                 is AppResult.Failure -> {
                     _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
                 }
             }
+        }
+    }
+
+    fun inviteMember(
+        session: UserSession,
+        repository: OrganizationRepository,
+        teamId: Int,
+        email: String,
+        role: OrganizationRole,
+        message: String,
+        onSessionUpdated: (UserSession) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        scope.launch {
+            _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
+            when (
+                val result = repository.inviteMember(
+                    session = session,
+                    teamId = teamId,
+                    email = email,
+                    role = role.apiValue,
+                    message = message.ifBlank { null },
+                )
+            ) {
+                is AppResult.Success -> {
+                    val updatedSession = result.data.first
+                    onSessionUpdated(updatedSession)
+                    reload(
+                        session = updatedSession,
+                        repository = repository,
+                        onSessionUpdated = onSessionUpdated,
+                        preferredTeamId = teamId,
+                        silent = true,
+                        successMessage = result.data.second,
+                    )
+                    onSuccess()
+                }
+
+                is AppResult.Failure -> {
+                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                }
+            }
+        }
+    }
+
+    fun updateMemberRole(
+        session: UserSession,
+        repository: OrganizationRepository,
+        teamId: Int,
+        member: OrganizationMember,
+        role: OrganizationRole,
+        onSessionUpdated: (UserSession) -> Unit,
+    ) {
+        scope.launch {
+            _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
+            when (
+                val result = repository.updateMemberRole(
+                    session = session,
+                    teamId = teamId,
+                    userId = member.userId,
+                    role = role.apiValue,
+                )
+            ) {
+                is AppResult.Success -> {
+                    val updatedSession = result.data.first
+                    onSessionUpdated(updatedSession)
+                    reload(
+                        session = updatedSession,
+                        repository = repository,
+                        onSessionUpdated = onSessionUpdated,
+                        preferredTeamId = teamId,
+                        silent = true,
+                        successMessage = result.data.second,
+                    )
+                }
+
+                is AppResult.Failure -> {
+                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                }
+            }
+        }
+    }
+
+    fun removeMember(
+        session: UserSession,
+        repository: OrganizationRepository,
+        teamId: Int,
+        member: OrganizationMember,
+        onSessionUpdated: (UserSession) -> Unit,
+    ) {
+        scope.launch {
+            _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
+            when (
+                val result = repository.removeMember(
+                    session = session,
+                    teamId = teamId,
+                    userId = member.userId,
+                )
+            ) {
+                is AppResult.Success -> {
+                    val updatedSession = result.data.first
+                    onSessionUpdated(updatedSession)
+                    reload(
+                        session = updatedSession,
+                        repository = repository,
+                        onSessionUpdated = onSessionUpdated,
+                        preferredTeamId = teamId,
+                        silent = true,
+                        successMessage = result.data.second,
+                    )
+                }
+
+                is AppResult.Failure -> {
+                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                }
+            }
+        }
+    }
+
+    fun clearMessages() {
+        _state.update { it.copy(noticeMessage = null, errorMessage = null) }
+    }
+
+    private suspend fun reload(
+        session: UserSession,
+        repository: OrganizationRepository,
+        onSessionUpdated: (UserSession) -> Unit,
+        preferredTeamId: Int?,
+        silent: Boolean,
+        successMessage: String? = null,
+    ) {
+        if (!silent) {
+            _state.update { it.copy(loading = true, errorMessage = null) }
+        }
+
+        val teamsResultDeferred = scope.async { repository.loadMyTeams(session) }
+        val invitationsResultDeferred = scope.async { repository.loadMyInvitations(session) }
+
+        val teamsResult = teamsResultDeferred.await()
+        val invitationsResult = invitationsResultDeferred.await()
+
+        val teams = (teamsResult as? AppResult.Success)?.data?.second?.items.orEmpty()
+        val selectedTeamId = resolveSelectedTeamId(
+            current = preferredTeamId,
+            teams = teams,
+        )
+        val membersResult = if (selectedTeamId != null) {
+            repository.loadTeamMembers(
+                session = (teamsResult as? AppResult.Success)?.data?.first ?: session,
+                teamId = selectedTeamId,
+            )
+        } else {
+            null
+        }
+
+        listOfNotNull(
+            (teamsResult as? AppResult.Success)?.data?.first,
+            (invitationsResult as? AppResult.Success)?.data?.first,
+            (membersResult as? AppResult.Success)?.data?.first,
+        ).lastOrNull()?.let(onSessionUpdated)
+
+        val members = (membersResult as? AppResult.Success)?.data?.second?.members.orEmpty()
+        val invitations = (invitationsResult as? AppResult.Success)?.data?.second?.items.orEmpty()
+        val failure = listOfNotNull(
+            teamsResult as? AppResult.Failure,
+            invitationsResult as? AppResult.Failure,
+            membersResult as? AppResult.Failure,
+        ).firstOrNull()
+
+        _state.update { current ->
+            val currentRoleLabel = selectedTeamId?.let { teamId ->
+                members.firstOrNull { it.userId == session.userId }?.cachedRoleLabel()?.let { label ->
+                    teamId to label
+                }
+            }
+            current.copy(
+                loading = false,
+                actionLoading = false,
+                teams = teams,
+                teamRoleLabels = current.teamRoleLabels + listOfNotNull(currentRoleLabel),
+                selectedTeamId = selectedTeamId,
+                members = members,
+                invitations = invitations,
+                noticeMessage = successMessage ?: current.noticeMessage,
+                errorMessage = failure?.message,
+            ).withFilteredData()
         }
     }
 
@@ -204,6 +371,30 @@ val OrganizationUiState.selectedTeam: OrganizationTeamSummary?
 
 fun OrganizationUiState.currentMember(userId: Int): OrganizationMember? {
     return members.firstOrNull { it.userId == userId }
+}
+
+fun OrganizationUiState.canInviteMembers(currentUserId: Int): Boolean {
+    return selectedTeamId != null && currentMember(currentUserId)?.isTeamManager() == true
+}
+
+fun OrganizationUiState.canManageTarget(
+    member: OrganizationMember,
+    currentUserId: Int,
+): Boolean {
+    return canInviteMembers(currentUserId) && !member.isCreator && member.userId != currentUserId
+}
+
+fun OrganizationMember.isTeamManager(): Boolean {
+    return isCreator || role.equals("ADMIN", ignoreCase = true)
+}
+
+private fun OrganizationMember.cachedRoleLabel(): String {
+    return when {
+        isCreator -> "创建者"
+        role.equals("ADMIN", ignoreCase = true) -> "管理员"
+        role.equals("GUEST", ignoreCase = true) -> "访客"
+        else -> "成员"
+    }
 }
 
 val OrganizationInvitation.stableId: Int?

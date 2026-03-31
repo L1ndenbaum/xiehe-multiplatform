@@ -114,6 +114,25 @@ class ApiClient(
         }
     }
 
+    internal suspend inline fun <reified B : Any> patchForMessage(
+        path: String,
+        body: B,
+        accessToken: String? = null,
+    ): AppResult<String> {
+        val requestUrl = "$baseUrl$path"
+        return requestMessage(
+            requestName = "PATCH",
+            requestUrl = requestUrl,
+        ) {
+            patch {
+                url(requestUrl)
+                attachAuth(accessToken)
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
     internal suspend inline fun <reified T, reified B : Any> put(
         path: String,
         body: B,

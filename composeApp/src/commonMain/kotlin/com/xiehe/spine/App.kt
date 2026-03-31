@@ -58,6 +58,7 @@ import com.xiehe.spine.ui.screens.patient.PatientDetailScreen
 import com.xiehe.spine.ui.screens.patient.PatientEditScreen
 import com.xiehe.spine.ui.screens.patient.PatientFormScreen
 import com.xiehe.spine.ui.screens.patient.PatientsScreen
+import com.xiehe.spine.ui.screens.profile.OrganizationInviteScreen
 import com.xiehe.spine.ui.screens.profile.OrganizationScreen
 import com.xiehe.spine.ui.screens.profile.PersonalInfoScreen
 import com.xiehe.spine.ui.screens.profile.ProfileScreen
@@ -76,6 +77,8 @@ import com.xiehe.spine.ui.viewmodel.patient.PatientFormViewModel
 import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationTab
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
+import com.xiehe.spine.ui.viewmodel.organization.canInviteMembers
+import com.xiehe.spine.ui.viewmodel.organization.selectedTeam
 import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
 import kotlinx.coroutines.async
@@ -100,6 +103,7 @@ private sealed interface OverlayRoute {
     data object Appearance : OverlayRoute
     data object PersonalInfo : OverlayRoute
     data object Organization : OverlayRoute
+    data object OrganizationInvite : OverlayRoute
     data object ChangePassword : OverlayRoute
     data object Messages : OverlayRoute
     data object ImageUpload : OverlayRoute
@@ -151,6 +155,7 @@ fun App(
     val patientsState by patientsVm.state.collectAsState()
     val imagesState by imagesVm.state.collectAsState()
     val messagesState by messagesVm.state.collectAsState()
+    val organizationState by organizationVm.state.collectAsState()
 
     SpineTheme(preference = themePreference) {
         if (session == null) {
@@ -691,11 +696,16 @@ fun App(
                                     subtitle = "查看和管理组织成员",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
-                                    actionsContent = {
-                                        HeaderTextAction(
-                                            text = "邀请成员",
-                                            onClick = { organizationVm.selectTab(OrganizationTab.INVITES) },
-                                        )
+                                    actionsContent = if (organizationState.canInviteMembers(activeSession.userId)) {
+                                        {
+                                            HeaderTextAction(
+                                                text = "邀请成员",
+                                                leadingGlyph = IconToken.ADD,
+                                                onClick = { route = OverlayRoute.OrganizationInvite },
+                                            )
+                                        }
+                                    } else {
+                                        null
                                     },
                                 )
                             },
@@ -705,6 +715,29 @@ fun App(
                                 session = activeSession,
                                 repository = appContainer.organizationRepository,
                                 onSessionUpdated = { session = it },
+                            )
+                        }
+                    }
+
+                    OverlayRoute.OrganizationInvite -> {
+                        MobileShell(
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "邀请新成员",
+                                    subtitle = organizationState.selectedTeam?.name ?: "发送组织邀请",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = OverlayRoute.Organization },
+                                )
+                            },
+                        ) {
+                            OrganizationInviteScreen(
+                                vm = organizationVm,
+                                session = activeSession,
+                                repository = appContainer.organizationRepository,
+                                onSessionUpdated = { session = it },
+                                onFinished = { route = OverlayRoute.Organization },
                             )
                         }
                     }

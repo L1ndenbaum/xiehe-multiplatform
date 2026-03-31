@@ -230,19 +230,28 @@ fun HeaderTextAction(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    leadingGlyph: IconToken? = null,
     fill: Color = Color.White.copy(alpha = 0.14f),
     borderColor: Color = Color.White.copy(alpha = 0.12f),
     textColor: Color = Color.White,
 ) {
-    Box(
+    Row(
         modifier = modifier
             .clip(RoundedCornerShape(18.dp))
             .background(fill)
             .border(1.dp, borderColor, RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 10.dp),
-        contentAlignment = Alignment.Center,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (leadingGlyph != null) {
+            AppIcon(
+                glyph = leadingGlyph,
+                tint = textColor,
+                modifier = Modifier.size(16.dp),
+            )
+        }
         Text(
             text = text,
             style = SpineTheme.typography.subhead.copy(fontWeight = FontWeight.SemiBold),

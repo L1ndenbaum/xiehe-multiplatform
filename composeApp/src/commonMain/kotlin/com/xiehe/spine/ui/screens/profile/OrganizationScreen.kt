@@ -1,51 +1,77 @@
 package com.xiehe.spine.ui.screens.profile
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.organization.OrganizationInvitation
 import com.xiehe.spine.data.organization.OrganizationMember
 import com.xiehe.spine.data.organization.OrganizationRepository
+import com.xiehe.spine.data.organization.OrganizationRole
 import com.xiehe.spine.data.organization.OrganizationTeamSummary
 import com.xiehe.spine.ui.components.card.shared.Card
+import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
+import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationTab
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
+import com.xiehe.spine.ui.viewmodel.organization.canManageTarget
 import com.xiehe.spine.ui.viewmodel.organization.currentMember
 import com.xiehe.spine.ui.viewmodel.organization.selectedTeam
 import com.xiehe.spine.ui.viewmodel.organization.stableId
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+private enum class MemberManagementAction {
+    CHANGE_ROLE,
+    REMOVE_MEMBER,
+}
 
 @Composable
 fun OrganizationScreen(
@@ -55,8 +81,14 @@ fun OrganizationScreen(
     onSessionUpdated: (UserSession) -> Unit,
 ) {
     val state by vm.state.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     val team = state.selectedTeam
-    val currentMember = state.currentMember(session.userId)
+
+    var rolePickerMember by remember { mutableStateOf<OrganizationMember?>(null) }
+    var pendingRoleChange by remember { mutableStateOf<Pair<OrganizationMember, OrganizationRole>?>(null) }
+    var pendingDeleteMember by remember { mutableStateOf<OrganizationMember?>(null) }
+    var confirmVisible by remember { mutableStateOf(false) }
+    var confirmAction by remember { mutableStateOf<MemberManagementAction?>(null) }
 
     LaunchedEffect(session.accessToken) {
         vm.load(
@@ -71,151 +103,442 @@ fun OrganizationScreen(
             .fillMaxSize()
             .background(SpineTheme.colors.backgroundElevated),
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            state.noticeMessage?.let {
-                item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = it,
-                            style = SpineTheme.typography.subhead,
-                            color = SpineTheme.colors.success,
-                        )
-                    }
-                }
-            }
-
-            state.errorMessage?.let {
-                item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = it,
-                            style = SpineTheme.typography.subhead,
-                            color = SpineTheme.colors.error,
-                        )
-                    }
-                }
-            }
-
-            item {
-                OrganizationSummaryCard(
-                    team = team,
-                    currentMember = currentMember,
-                    invitationCount = state.invitations.size,
+        LazyOrganizationContent(
+            state = state,
+            session = session,
+            repository = repository,
+            onSessionUpdated = onSessionUpdated,
+            onSelectTeam = { teamId ->
+                vm.selectTeam(
+                    session = session,
+                    repository = repository,
+                    teamId = teamId,
+                    onSessionUpdated = onSessionUpdated,
                 )
-            }
-
-            item {
-                OrganizationTabBar(
-                    activeTab = state.activeTab,
-                    memberCount = state.members.size,
-                    invitationCount = state.invitations.size,
-                    onSelect = vm::selectTab,
+            },
+            onChangeRole = { member ->
+                rolePickerMember = member
+            },
+            onDeleteMember = { member ->
+                pendingDeleteMember = member
+                confirmAction = MemberManagementAction.REMOVE_MEMBER
+                confirmVisible = true
+            },
+            onSelectTab = vm::selectTab,
+            onUpdateSearch = vm::updateSearch,
+            onAcceptInvitation = { invitation ->
+                vm.respondInvitation(
+                    session = session,
+                    repository = repository,
+                    invitation = invitation,
+                    accept = true,
+                    onSessionUpdated = onSessionUpdated,
                 )
-            }
-
-            item {
-                TextField(
-                    value = state.search,
-                    onValueChange = vm::updateSearch,
-                    placeholder = if (state.activeTab == OrganizationTab.MEMBERS) {
-                        "搜索姓名、职位或邮箱"
-                    } else {
-                        "搜索团队、邀请人或邮箱"
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingGlyph = IconToken.SEARCH,
+            },
+            onRejectInvitation = { invitation ->
+                vm.respondInvitation(
+                    session = session,
+                    repository = repository,
+                    invitation = invitation,
+                    accept = false,
+                    onSessionUpdated = onSessionUpdated,
                 )
-            }
-
-            when {
-                team == null && state.activeTab == OrganizationTab.MEMBERS -> {
-                    item {
-                        OrganizationEmptyCard(
-                            title = "暂无加入的组织",
-                            body = "当前账号还没有可展示的组织信息，待加入团队后这里会显示组织详情与成员列表。",
-                            glyph = IconToken.USERS,
-                        )
-                    }
-                }
-
-                state.activeTab == OrganizationTab.MEMBERS && state.filteredMembers.isEmpty() -> {
-                    item {
-                        OrganizationEmptyCard(
-                            title = if (state.search.isBlank()) "暂无成员数据" else "没有匹配的成员",
-                            body = if (state.search.isBlank()) {
-                                "当前组织暂时没有可展示的成员记录。"
-                            } else {
-                                "请尝试调整搜索关键词。"
-                            },
-                            glyph = IconToken.USER_ROUND,
-                        )
-                    }
-                }
-
-                state.activeTab == OrganizationTab.INVITES && state.filteredInvitations.isEmpty() -> {
-                    item {
-                        OrganizationEmptyCard(
-                            title = if (state.search.isBlank()) "暂无邀请" else "没有匹配的邀请",
-                            body = if (state.search.isBlank()) {
-                                "当前账号还没有待处理的组织邀请。"
-                            } else {
-                                "请尝试调整搜索关键词。"
-                            },
-                            glyph = IconToken.MESSAGE,
-                        )
-                    }
-                }
-
-                state.activeTab == OrganizationTab.MEMBERS -> {
-                    items(state.filteredMembers, key = { it.userId }) { member ->
-                        OrganizationMemberCard(
-                            member = member,
-                            isCurrentUser = member.userId == session.userId,
-                        )
-                    }
-                }
-
-                else -> {
-                    items(
-                        items = state.filteredInvitations,
-                        key = { invitation -> invitation.stableId ?: invitation.hashCode() },
-                    ) { invitation ->
-                        OrganizationInvitationCard(
-                            invitation = invitation,
-                            onAccept = {
-                                vm.respondInvitation(
-                                    session = session,
-                                    repository = repository,
-                                    invitation = invitation,
-                                    accept = true,
-                                    onSessionUpdated = onSessionUpdated,
-                                )
-                            },
-                            onReject = {
-                                vm.respondInvitation(
-                                    session = session,
-                                    repository = repository,
-                                    invitation = invitation,
-                                    accept = false,
-                                    onSessionUpdated = onSessionUpdated,
-                                )
-                            },
-                        )
-                    }
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(56.dp))
-            }
-        }
+            },
+            onDismissNotice = vm::clearMessages,
+        )
 
         if (state.loading || state.actionLoading) {
             LoadingOverlay(message = if (state.actionLoading) "...正在提交中" else "...正在加载中")
+        }
+
+        rolePickerMember?.let { member ->
+            OptionPickerOverlay(
+                title = "变更 ${member.displayName()} 的团队身份为:",
+                options = OrganizationRole.entries.map { it.label },
+                selected = member.roleLabel(),
+                onDismiss = { rolePickerMember = null },
+                onSelect = { selected ->
+                    rolePickerMember = null
+                    OrganizationRole.entries.firstOrNull { it.label == selected }?.let { role ->
+                        if (role.apiValue != member.normalizedRoleValue()) {
+                            pendingRoleChange = member to role
+                            confirmAction = MemberManagementAction.CHANGE_ROLE
+                            confirmVisible = true
+                        }
+                    }
+                },
+            )
+        }
+
+        if (confirmAction != null) {
+            val overlayAlpha by animateFloatAsState(
+                targetValue = if (confirmVisible) 0.35f else 0f,
+                animationSpec = tween(220),
+                label = "organization_confirm_overlay",
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = overlayAlpha))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {
+                            coroutineScope.launch {
+                                confirmVisible = false
+                                delay(220)
+                                confirmAction = null
+                                pendingDeleteMember = null
+                                pendingRoleChange = null
+                            }
+                        },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                AnimatedVisibility(
+                    visible = confirmVisible,
+                    enter = fadeIn(animationSpec = tween(220)) +
+                        slideInVertically(animationSpec = tween(220)) { it / 4 },
+                    exit = fadeOut(animationSpec = tween(220)) +
+                        slideOutVertically(animationSpec = tween(220)) { it / 5 },
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                            ),
+                    ) {
+                        when (confirmAction) {
+                            MemberManagementAction.CHANGE_ROLE -> {
+                                val (member, role) = pendingRoleChange ?: return@Box
+                                OperationVerifyCard(
+                                    title = "变更身份",
+                                    message = "确认将 ${member.displayName()} 的团队身份变更为${role.label}吗？",
+                                    confirmText = "确认变更",
+                                    cancelText = "取消",
+                                    confirmButtonColor = SpineTheme.colors.primary,
+                                    cancelButtonColor = SpineTheme.colors.textSecondary,
+                                    onCancel = {
+                                        coroutineScope.launch {
+                                            confirmVisible = false
+                                            delay(220)
+                                            confirmAction = null
+                                            pendingRoleChange = null
+                                        }
+                                    },
+                                    onConfirm = {
+                                        coroutineScope.launch {
+                                            confirmVisible = false
+                                            delay(220)
+                                            confirmAction = null
+                                            pendingRoleChange?.let { (target, selectedRole) ->
+                                                val teamId = team?.id ?: return@let
+                                                vm.updateMemberRole(
+                                                    session = session,
+                                                    repository = repository,
+                                                    teamId = teamId,
+                                                    member = target,
+                                                    role = selectedRole,
+                                                    onSessionUpdated = onSessionUpdated,
+                                                )
+                                            }
+                                            pendingRoleChange = null
+                                        }
+                                    },
+                                )
+                            }
+
+                            MemberManagementAction.REMOVE_MEMBER -> {
+                                val member = pendingDeleteMember ?: return@Box
+                                OperationVerifyCard(
+                                    title = "删除成员",
+                                    message = "确认将 ${member.displayName()} 从当前组织中移除吗？该操作不可撤销。",
+                                    confirmText = "删除成员",
+                                    cancelText = "取消",
+                                    confirmButtonColor = SpineTheme.colors.error,
+                                    cancelButtonColor = SpineTheme.colors.textSecondary,
+                                    onCancel = {
+                                        coroutineScope.launch {
+                                            confirmVisible = false
+                                            delay(220)
+                                            confirmAction = null
+                                            pendingDeleteMember = null
+                                        }
+                                    },
+                                    onConfirm = {
+                                        coroutineScope.launch {
+                                            confirmVisible = false
+                                            delay(220)
+                                            confirmAction = null
+                                            pendingDeleteMember?.let { target ->
+                                                val teamId = team?.id ?: return@let
+                                                vm.removeMember(
+                                                    session = session,
+                                                    repository = repository,
+                                                    teamId = teamId,
+                                                    member = target,
+                                                    onSessionUpdated = onSessionUpdated,
+                                                )
+                                            }
+                                            pendingDeleteMember = null
+                                        }
+                                    },
+                                )
+                            }
+
+                            null -> Unit
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LazyOrganizationContent(
+    state: com.xiehe.spine.ui.viewmodel.organization.OrganizationUiState,
+    session: UserSession,
+    repository: OrganizationRepository,
+    onSessionUpdated: (UserSession) -> Unit,
+    onSelectTeam: (Int) -> Unit,
+    onChangeRole: (OrganizationMember) -> Unit,
+    onDeleteMember: (OrganizationMember) -> Unit,
+    onSelectTab: (OrganizationTab) -> Unit,
+    onUpdateSearch: (String) -> Unit,
+    onAcceptInvitation: (OrganizationInvitation) -> Unit,
+    onRejectInvitation: (OrganizationInvitation) -> Unit,
+    onDismissNotice: () -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        state.noticeMessage?.let { message ->
+            item {
+                DismissableNoticeCard(
+                    text = message,
+                    color = SpineTheme.colors.success,
+                    onDismiss = onDismissNotice,
+                )
+            }
+        }
+
+        state.errorMessage?.let { message ->
+            item {
+                DismissableNoticeCard(
+                    text = message,
+                    color = SpineTheme.colors.error,
+                    onDismiss = onDismissNotice,
+                )
+            }
+        }
+
+        item {
+            OrganizationSummaryCarousel(
+                teams = state.teams,
+                selectedTeamId = state.selectedTeamId,
+                roleLabels = state.teamRoleLabels,
+                onSelectTeam = onSelectTeam,
+            )
+        }
+
+        item {
+            OrganizationTabBar(
+                activeTab = state.activeTab,
+                memberCount = state.members.size,
+                invitationCount = state.invitations.size,
+                onSelect = {
+                    onDismissNotice()
+                    onSelectTab(it)
+                },
+            )
+        }
+
+        item {
+            TextField(
+                value = state.search,
+                onValueChange = onUpdateSearch,
+                placeholder = if (state.activeTab == OrganizationTab.MEMBERS) {
+                    "搜索姓名、职位或邮箱"
+                } else {
+                    "搜索团队、邀请人或邮箱"
+                },
+                modifier = Modifier.fillMaxWidth(),
+                leadingGlyph = IconToken.SEARCH,
+            )
+        }
+
+        when {
+            state.selectedTeam == null && state.activeTab == OrganizationTab.MEMBERS -> {
+                item {
+                    OrganizationEmptyCard(
+                        title = "暂无加入的组织",
+                        body = "当前账号还没有可展示的组织信息，待加入团队后这里会显示组织详情与成员列表。",
+                        glyph = IconToken.USERS,
+                    )
+                }
+            }
+
+            state.activeTab == OrganizationTab.MEMBERS && state.filteredMembers.isEmpty() -> {
+                item {
+                    OrganizationEmptyCard(
+                        title = if (state.search.isBlank()) "暂无成员数据" else "没有匹配的成员",
+                        body = if (state.search.isBlank()) {
+                            "当前组织暂时没有可展示的成员记录。"
+                        } else {
+                            "请尝试调整搜索关键词。"
+                        },
+                        glyph = IconToken.USER_ROUND,
+                    )
+                }
+            }
+
+            state.activeTab == OrganizationTab.INVITES && state.filteredInvitations.isEmpty() -> {
+                item {
+                    OrganizationEmptyCard(
+                        title = if (state.search.isBlank()) "暂无邀请" else "没有匹配的邀请",
+                        body = if (state.search.isBlank()) {
+                            "当前账号还没有待处理的组织邀请。"
+                        } else {
+                            "请尝试调整搜索关键词。"
+                        },
+                        glyph = IconToken.MESSAGE,
+                    )
+                }
+            }
+
+            state.activeTab == OrganizationTab.MEMBERS -> {
+                items(state.filteredMembers, key = { it.userId }) { member ->
+                    OrganizationMemberCard(
+                        member = member,
+                        isCurrentUser = member.userId == session.userId,
+                        canManage = state.canManageTarget(member, session.userId),
+                        onChangeRole = { onChangeRole(member) },
+                        onDelete = { onDeleteMember(member) },
+                    )
+                }
+            }
+
+            else -> {
+                items(
+                    items = state.filteredInvitations,
+                    key = { invitation -> invitation.stableId ?: invitation.hashCode() },
+                ) { invitation ->
+                    OrganizationInvitationCard(
+                        invitation = invitation,
+                        onAccept = { onAcceptInvitation(invitation) },
+                        onReject = { onRejectInvitation(invitation) },
+                    )
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(56.dp))
+        }
+    }
+}
+
+@Composable
+private fun DismissableNoticeCard(
+    text: String,
+    color: Color,
+    onDismiss: () -> Unit,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = text,
+                style = SpineTheme.typography.subhead,
+                color = color,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = "关闭",
+                style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+                color = SpineTheme.colors.textSecondary,
+                modifier = Modifier.clickable(onClick = onDismiss),
+            )
+        }
+    }
+}
+
+@Composable
+private fun OrganizationSummaryCarousel(
+    teams: List<OrganizationTeamSummary>,
+    selectedTeamId: Int?,
+    roleLabels: Map<Int, String>,
+    onSelectTeam: (Int) -> Unit,
+) {
+    if (teams.isEmpty()) {
+        OrganizationSummaryCard(team = null, currentRoleLabel = null)
+        return
+    }
+
+    val selectedIndex = teams.indexOfFirst { it.id == selectedTeamId }.let { if (it >= 0) it else 0 }
+    val pagerState = rememberPagerState(
+        initialPage = selectedIndex,
+        pageCount = { teams.size },
+    )
+
+    LaunchedEffect(selectedIndex, teams.size) {
+        if (teams.isNotEmpty() && pagerState.currentPage != selectedIndex) {
+            pagerState.scrollToPage(selectedIndex)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage, teams) {
+        teams.getOrNull(pagerState.currentPage)?.id?.let { teamId ->
+            if (teamId != selectedTeamId) {
+                onSelectTeam(teamId)
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth(),
+            pageSpacing = 12.dp,
+        ) { page ->
+            val team = teams[page]
+            OrganizationSummaryCard(
+                team = team,
+                currentRoleLabel = roleLabels[team.id] ?: "成员",
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            teams.forEachIndexed { index, _ ->
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(
+                            if (index == selectedIndex) {
+                                SpineTheme.colors.primary
+                            } else {
+                                SpineTheme.colors.borderSubtle
+                            },
+                        )
+                        .size(width = if (index == selectedIndex) 18.dp else 8.dp, height = 8.dp),
+                )
+            }
         }
     }
 }
@@ -223,11 +546,11 @@ fun OrganizationScreen(
 @Composable
 private fun OrganizationSummaryCard(
     team: OrganizationTeamSummary?,
-    currentMember: OrganizationMember?,
-    invitationCount: Int,
+    currentRoleLabel: String?,
+    modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(modifier = modifier.fillMaxWidth()) {
         if (team == null) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -294,7 +617,7 @@ private fun OrganizationSummaryCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     MetaBadge(
-                        text = currentMember?.roleLabel() ?: "成员",
+                        text = currentRoleLabel ?: "成员",
                         background = colors.primaryMuted,
                         foreground = colors.primary,
                     )
@@ -332,14 +655,14 @@ private fun OrganizationSummaryCard(
             )
             SummaryDivider()
             SummaryStat(
-                title = "待接受邀请",
-                value = invitationCount.toString(),
+                title = "我的角色",
+                value = currentRoleLabel ?: "成员",
                 modifier = Modifier.weight(1f),
             )
             SummaryDivider()
             SummaryStat(
-                title = "创建年份",
-                value = team.createdYearLabel(),
+                title = "成员上限",
+                value = team.maxMembers?.toString() ?: "--",
                 modifier = Modifier.weight(1f),
             )
         }
@@ -429,6 +752,9 @@ private fun OrganizationTabButton(
 private fun OrganizationMemberCard(
     member: OrganizationMember,
     isCurrentUser: Boolean,
+    canManage: Boolean,
+    onChangeRole: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     val colors = SpineTheme.colors
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -481,6 +807,25 @@ private fun OrganizationMemberCard(
                         text = it,
                         style = SpineTheme.typography.caption,
                         color = colors.textTertiary,
+                    )
+                }
+            }
+            if (canManage) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    MemberActionChip(
+                        text = "变更身份",
+                        background = colors.primaryMuted,
+                        foreground = colors.primary,
+                        onClick = onChangeRole,
+                    )
+                    MemberActionChip(
+                        text = "删除成员",
+                        background = colors.error.copy(alpha = if (colors.isDark) 0.22f else 0.12f),
+                        foreground = colors.error,
+                        onClick = onDelete,
                     )
                 }
             }
@@ -629,8 +974,8 @@ private fun AvatarBadge(
 @Composable
 private fun MetaBadge(
     text: String,
-    background: androidx.compose.ui.graphics.Color,
-    foreground: androidx.compose.ui.graphics.Color,
+    background: Color,
+    foreground: Color,
 ) {
     Text(
         text = text,
@@ -673,15 +1018,15 @@ private fun SummaryDivider() {
     Box(
         modifier = Modifier
             .size(width = 1.dp, height = 32.dp)
-            .background(SpineTheme.colors.borderSubtle)
+            .background(SpineTheme.colors.borderSubtle),
     )
 }
 
 @Composable
 private fun ActionChip(
     text: String,
-    background: androidx.compose.ui.graphics.Color,
-    foreground: androidx.compose.ui.graphics.Color,
+    background: Color,
+    foreground: Color,
     onClick: () -> Unit,
 ) {
     Text(
@@ -696,8 +1041,23 @@ private fun ActionChip(
     )
 }
 
-private fun OrganizationTeamSummary.createdYearLabel(): String {
-    return createdAt?.take(4)?.takeIf { it.all(Char::isDigit) } ?: "--"
+@Composable
+private fun MemberActionChip(
+    text: String,
+    background: Color,
+    foreground: Color,
+    onClick: () -> Unit,
+) {
+    Text(
+        text = text,
+        style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+        color = foreground,
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(background)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+    )
 }
 
 private fun OrganizationMember.displayName(): String {
@@ -719,6 +1079,15 @@ private fun OrganizationMember.roleLabel(): String {
         role.equals("ADMIN", ignoreCase = true) -> "管理员"
         role.equals("GUEST", ignoreCase = true) -> "访客"
         else -> "成员"
+    }
+}
+
+private fun OrganizationMember.normalizedRoleValue(): String {
+    return when {
+        isCreator -> OrganizationRole.ADMIN.apiValue
+        role.equals("ADMIN", ignoreCase = true) -> OrganizationRole.ADMIN.apiValue
+        role.equals("GUEST", ignoreCase = true) -> OrganizationRole.GUEST.apiValue
+        else -> OrganizationRole.MEMBER.apiValue
     }
 }
 
