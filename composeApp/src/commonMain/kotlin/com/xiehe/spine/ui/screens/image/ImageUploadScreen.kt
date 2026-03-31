@@ -27,6 +27,7 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.ui.components.button.shared.Button
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.form.picker.PickerDialog
@@ -132,13 +133,6 @@ fun ImageUploadScreen(
                 )
             }
 
-            state.errorMessage?.let {
-                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.error))
-            }
-            state.successMessage?.let {
-                Text(text = it, style = SpineTheme.typography.subhead.copy(color = SpineTheme.colors.success))
-            }
-
             Button(
                 text = if (state.uploading) "上传中..." else "上传影像",
                 onClick = {
@@ -158,6 +152,23 @@ fun ImageUploadScreen(
 
         if (state.uploading || state.loadingPatients) {
             LoadingOverlay(message = "...正在加载中")
+        }
+
+        val toastMessage = state.errorMessage ?: state.successMessage
+        if (toastMessage != null) {
+            FloatingToast(
+                message = toastMessage,
+                accentColor = if (state.errorMessage != null) {
+                    SpineTheme.colors.error
+                } else {
+                    SpineTheme.colors.success
+                },
+                icon = if (state.errorMessage != null) IconToken.MESSAGE else IconToken.CHECK,
+                onDismiss = vm::clearMessages,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
+            )
         }
     }
 

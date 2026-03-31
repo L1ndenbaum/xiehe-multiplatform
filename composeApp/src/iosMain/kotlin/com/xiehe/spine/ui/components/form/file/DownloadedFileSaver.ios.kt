@@ -10,8 +10,7 @@ actual fun rememberDownloadedFileSaver(): DownloadedFileSaver {
             mimeType: String,
             bytes: ByteArray,
         ): FileSaveResult {
-            return FileSaveResult.Failure("当前平台暂不支持下载保存")
+            return shareFileOnIos(fileName = fileName, bytes = bytes)
         }
     }
 }
-

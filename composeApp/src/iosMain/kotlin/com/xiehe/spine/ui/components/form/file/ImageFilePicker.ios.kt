@@ -8,8 +8,7 @@ actual fun rememberImageFilePickerLauncher(
 ): ImageFilePickerLauncher {
     return object : ImageFilePickerLauncher {
         override fun launch() {
-            onFilePicked(null)
+            launchIosImagePicker(onFilePicked)
         }
     }
 }
-

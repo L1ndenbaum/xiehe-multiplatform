@@ -36,6 +36,10 @@ class ImageUploadViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(ImageUploadUiState())
     val state: StateFlow<ImageUploadUiState> = _state.asStateFlow()
 
+    fun clearMessages() {
+        _state.update { it.copy(errorMessage = null, successMessage = null) }
+    }
+
     fun loadPatients(
         session: UserSession,
         repository: PatientRepository,
@@ -96,15 +100,15 @@ class ImageUploadViewModel : BaseViewModel() {
     }
 
     fun updatePatient(patientId: Int?) {
-        _state.update { it.copy(selectedPatientId = patientId, errorMessage = null) }
+        _state.update { it.copy(selectedPatientId = patientId, errorMessage = null, successMessage = null) }
     }
 
     fun updateExamType(examType: ImageCategory) {
-        _state.update { it.copy(selectedExamType = examType, errorMessage = null) }
+        _state.update { it.copy(selectedExamType = examType, errorMessage = null, successMessage = null) }
     }
 
     fun setSelectedFile(file: UploadFilePayload?) {
-        _state.update { it.copy(selectedFile = file, errorMessage = null) }
+        _state.update { it.copy(selectedFile = file, errorMessage = null, successMessage = null) }
     }
 
     fun submit(

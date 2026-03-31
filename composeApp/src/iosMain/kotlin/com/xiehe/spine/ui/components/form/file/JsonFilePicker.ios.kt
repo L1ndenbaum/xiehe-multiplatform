@@ -8,8 +8,7 @@ actual fun rememberJsonFilePickerLauncher(
 ): JsonFilePickerLauncher {
     return object : JsonFilePickerLauncher {
         override fun launch() {
-            onFilePicked(null)
+            launchIosJsonPicker(onFilePicked)
         }
     }
 }
-
