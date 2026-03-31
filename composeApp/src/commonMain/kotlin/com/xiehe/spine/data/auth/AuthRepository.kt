@@ -59,6 +59,8 @@ class AuthRepository(
                     fullName = payload.user.fullName,
                     avatarUrl = payload.user.avatarUrl,
                     avatar = payload.user.avatar,
+                    isSuperuser = payload.user.isSuperuser,
+                    isSystemAdmin = payload.user.isSystemAdmin,
                     accessTokenExpiresAtEpochSeconds = resolveAccessTokenExpiry(
                         accessToken = payload.accessToken,
                         expiresIn = payload.expiresIn,
@@ -272,6 +274,8 @@ class AuthRepository(
             username = profile.username,
             email = profile.email ?: base.email,
             fullName = profile.fullName ?: profile.realName ?: base.fullName,
+            isSuperuser = profile.isSuperuser,
+            isSystemAdmin = profile.isSystemAdmin,
         )
     }
 

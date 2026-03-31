@@ -79,6 +79,8 @@ data class UserDto(
     @SerialName("full_name") val fullName: String? = null,
     @SerialName("avatar_url") val avatarUrl: String? = null,
     @SerialName("avatar") val avatar: String? = null,
+    @SerialName("is_superuser") val isSuperuser: Boolean = false,
+    @SerialName("is_system_admin") val isSystemAdmin: Boolean = false,
 )
 
 @Serializable
@@ -96,6 +98,8 @@ data class CurrentUserProfile(
     val title: String? = null,
     @SerialName("is_active") val isActive: Boolean? = null,
     val role: String? = null,
+    @SerialName("is_superuser") val isSuperuser: Boolean = false,
+    @SerialName("is_system_admin") val isSystemAdmin: Boolean = false,
 )
 
 @Serializable

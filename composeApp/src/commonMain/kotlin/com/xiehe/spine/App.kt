@@ -16,7 +16,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -58,6 +60,7 @@ import com.xiehe.spine.ui.screens.patient.PatientDetailScreen
 import com.xiehe.spine.ui.screens.patient.PatientEditScreen
 import com.xiehe.spine.ui.screens.patient.PatientFormScreen
 import com.xiehe.spine.ui.screens.patient.PatientsScreen
+import com.xiehe.spine.ui.screens.profile.OrganizationCreateTeamScreen
 import com.xiehe.spine.ui.screens.profile.OrganizationInviteScreen
 import com.xiehe.spine.ui.screens.profile.OrganizationScreen
 import com.xiehe.spine.ui.screens.profile.PersonalInfoScreen
@@ -78,6 +81,7 @@ import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationTab
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
 import com.xiehe.spine.ui.viewmodel.organization.canInviteMembers
+import com.xiehe.spine.ui.viewmodel.organization.currentMember
 import com.xiehe.spine.ui.viewmodel.organization.selectedTeam
 import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
@@ -104,6 +108,7 @@ private sealed interface OverlayRoute {
     data object PersonalInfo : OverlayRoute
     data object Organization : OverlayRoute
     data object OrganizationInvite : OverlayRoute
+    data object OrganizationCreateTeam : OverlayRoute
     data object ChangePassword : OverlayRoute
     data object Messages : OverlayRoute
     data object ImageUpload : OverlayRoute
@@ -687,6 +692,11 @@ fun App(
                     }
 
                     OverlayRoute.Organization -> {
+                        val canInviteMembers = organizationState.canInviteMembers(activeSession.userId)
+                        val canCreateTeam =
+                            activeSession.isSuperuser ||
+                                activeSession.isSystemAdmin ||
+                                (organizationState.currentMember(activeSession.userId)?.isSystemAdmin == true)
                         MobileShell(
                             selectedTab = selectedTab,
                             onTabSelected = onTabSelected,
@@ -696,13 +706,27 @@ fun App(
                                     subtitle = "查看和管理组织成员",
                                     leadingGlyph = IconToken.BACK,
                                     onLeadingAction = { route = null },
-                                    actionsContent = if (organizationState.canInviteMembers(activeSession.userId)) {
+                                    actionsContent = if (canCreateTeam || canInviteMembers) {
                                         {
-                                            HeaderTextAction(
-                                                text = "邀请成员",
-                                                leadingGlyph = IconToken.ADD,
-                                                onClick = { route = OverlayRoute.OrganizationInvite },
-                                            )
+                                            Column(
+                                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                                horizontalAlignment = Alignment.End,
+                                            ) {
+                                                if (canCreateTeam) {
+                                                    HeaderTextAction(
+                                                        text = "创建团队",
+                                                        leadingGlyph = IconToken.ADD,
+                                                        onClick = { route = OverlayRoute.OrganizationCreateTeam },
+                                                    )
+                                                }
+                                                if (canInviteMembers) {
+                                                    HeaderTextAction(
+                                                        text = "邀请成员",
+                                                        leadingGlyph = IconToken.ADD,
+                                                        onClick = { route = OverlayRoute.OrganizationInvite },
+                                                    )
+                                                }
+                                            }
                                         }
                                     } else {
                                         null
@@ -715,6 +739,29 @@ fun App(
                                 session = activeSession,
                                 repository = appContainer.organizationRepository,
                                 onSessionUpdated = { session = it },
+                            )
+                        }
+                    }
+
+                    OverlayRoute.OrganizationCreateTeam -> {
+                        MobileShell(
+                            selectedTab = selectedTab,
+                            onTabSelected = onTabSelected,
+                            headerContent = {
+                                SimpleShellHeader(
+                                    title = "创建新团队",
+                                    subtitle = "创建新的协作团队",
+                                    leadingGlyph = IconToken.BACK,
+                                    onLeadingAction = { route = OverlayRoute.Organization },
+                                )
+                            },
+                        ) {
+                            OrganizationCreateTeamScreen(
+                                vm = organizationVm,
+                                session = activeSession,
+                                repository = appContainer.organizationRepository,
+                                onSessionUpdated = { session = it },
+                                onFinished = { route = OverlayRoute.Organization },
                             )
                         }
                     }

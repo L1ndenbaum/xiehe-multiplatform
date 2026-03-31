@@ -74,6 +74,29 @@ class OrganizationRepository(
         }
     }
 
+    suspend fun createTeam(
+        session: UserSession,
+        name: String,
+        description: String?,
+        hospital: String?,
+        department: String?,
+        maxMembers: Int?,
+    ): AppResult<Pair<UserSession, String>> {
+        return withRefresh(session) { activeSession ->
+            apiClient.postForMessage(
+                path = "/permissions/teams",
+                body = OrganizationCreateTeamRequest(
+                    name = name,
+                    description = description,
+                    hospital = hospital,
+                    department = department,
+                    maxMembers = maxMembers,
+                ),
+                accessToken = activeSession.accessToken,
+            )
+        }
+    }
+
     suspend fun updateMemberRole(
         session: UserSession,
         teamId: Int,

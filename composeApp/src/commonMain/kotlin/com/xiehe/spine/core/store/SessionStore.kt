@@ -13,6 +13,8 @@ data class UserSession(
     val fullName: String? = null,
     val avatarUrl: String? = null,
     val avatar: String? = null,
+    val isSuperuser: Boolean = false,
+    val isSystemAdmin: Boolean = false,
     val accessTokenExpiresAtEpochSeconds: Long? = null,
 )
 

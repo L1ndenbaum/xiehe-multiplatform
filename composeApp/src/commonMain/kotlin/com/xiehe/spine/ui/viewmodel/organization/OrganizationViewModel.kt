@@ -163,6 +163,50 @@ class OrganizationViewModel : BaseViewModel() {
         }
     }
 
+    fun createTeam(
+        session: UserSession,
+        repository: OrganizationRepository,
+        name: String,
+        description: String,
+        hospital: String,
+        department: String,
+        maxMembers: Int?,
+        onSessionUpdated: (UserSession) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        scope.launch {
+            _state.update { it.copy(actionLoading = true, errorMessage = null, noticeMessage = null) }
+            when (
+                val result = repository.createTeam(
+                    session = session,
+                    name = name.trim(),
+                    description = description.trim().ifBlank { null },
+                    hospital = hospital.trim().ifBlank { null },
+                    department = department.trim().ifBlank { null },
+                    maxMembers = maxMembers,
+                )
+            ) {
+                is AppResult.Success -> {
+                    val updatedSession = result.data.first
+                    onSessionUpdated(updatedSession)
+                    reload(
+                        session = updatedSession,
+                        repository = repository,
+                        onSessionUpdated = onSessionUpdated,
+                        preferredTeamId = _state.value.selectedTeamId,
+                        silent = true,
+                        successMessage = result.data.second,
+                    )
+                    onSuccess()
+                }
+
+                is AppResult.Failure -> {
+                    _state.update { it.copy(actionLoading = false, errorMessage = result.message) }
+                }
+            }
+        }
+    }
+
     fun updateMemberRole(
         session: UserSession,
         repository: OrganizationRepository,

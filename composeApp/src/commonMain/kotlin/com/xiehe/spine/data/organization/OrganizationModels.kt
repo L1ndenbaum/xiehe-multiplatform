@@ -101,6 +101,15 @@ data class OrganizationInviteRequest(
 )
 
 @Serializable
+data class OrganizationCreateTeamRequest(
+    val name: String,
+    val description: String? = null,
+    val hospital: String? = null,
+    val department: String? = null,
+    @SerialName("max_members") val maxMembers: Int? = null,
+)
+
+@Serializable
 data class OrganizationMemberRoleUpdateRequest(
     val role: String,
 )
