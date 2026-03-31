@@ -42,6 +42,7 @@ import com.xiehe.spine.data.organization.OrganizationRepository
 import com.xiehe.spine.data.organization.OrganizationRole
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
@@ -97,18 +98,6 @@ fun OrganizationInviteScreen(
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            state.errorMessage?.let { error ->
-                item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = error,
-                            style = SpineTheme.typography.subhead,
-                            color = SpineTheme.colors.error,
-                        )
-                    }
-                }
-            }
-
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -208,6 +197,18 @@ fun OrganizationInviteScreen(
 
         if (state.actionLoading) {
             LoadingOverlay(message = "...正在发送邀请")
+        }
+
+        state.errorMessage?.let { error ->
+            FloatingToast(
+                message = error,
+                accentColor = SpineTheme.colors.error,
+                icon = IconToken.MESSAGE,
+                onDismiss = vm::clearMessages,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 12.dp),
+            )
         }
 
         if (showRolePicker) {

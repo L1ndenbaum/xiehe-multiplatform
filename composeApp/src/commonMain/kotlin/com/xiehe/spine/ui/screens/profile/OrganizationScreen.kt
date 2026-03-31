@@ -52,6 +52,7 @@ import com.xiehe.spine.data.organization.OrganizationRole
 import com.xiehe.spine.data.organization.OrganizationTeamSummary
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
@@ -106,8 +107,6 @@ fun OrganizationScreen(
         LazyOrganizationContent(
             state = state,
             session = session,
-            repository = repository,
-            onSessionUpdated = onSessionUpdated,
             onSelectTeam = { teamId ->
                 vm.selectTeam(
                     session = session,
@@ -149,6 +148,23 @@ fun OrganizationScreen(
 
         if (state.loading || state.actionLoading) {
             LoadingOverlay(message = if (state.actionLoading) "...正在提交中" else "...正在加载中")
+        }
+
+        val toastMessage = state.errorMessage ?: state.noticeMessage
+        if (toastMessage != null) {
+            FloatingToast(
+                message = toastMessage,
+                accentColor = if (state.errorMessage != null) {
+                    SpineTheme.colors.error
+                } else {
+                    SpineTheme.colors.success
+                },
+                icon = if (state.errorMessage != null) IconToken.MESSAGE else IconToken.CHECK,
+                onDismiss = vm::clearMessages,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 12.dp),
+            )
         }
 
         rolePickerMember?.let { member ->
@@ -302,8 +318,6 @@ fun OrganizationScreen(
 private fun LazyOrganizationContent(
     state: com.xiehe.spine.ui.viewmodel.organization.OrganizationUiState,
     session: UserSession,
-    repository: OrganizationRepository,
-    onSessionUpdated: (UserSession) -> Unit,
     onSelectTeam: (Int) -> Unit,
     onChangeRole: (OrganizationMember) -> Unit,
     onDeleteMember: (OrganizationMember) -> Unit,
@@ -318,26 +332,6 @@ private fun LazyOrganizationContent(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        state.noticeMessage?.let { message ->
-            item {
-                DismissableNoticeCard(
-                    text = message,
-                    color = SpineTheme.colors.success,
-                    onDismiss = onDismissNotice,
-                )
-            }
-        }
-
-        state.errorMessage?.let { message ->
-            item {
-                DismissableNoticeCard(
-                    text = message,
-                    color = SpineTheme.colors.error,
-                    onDismiss = onDismissNotice,
-                )
-            }
-        }
-
         item {
             OrganizationSummaryCarousel(
                 teams = state.teams,
@@ -440,34 +434,6 @@ private fun LazyOrganizationContent(
 
         item {
             Spacer(modifier = Modifier.height(56.dp))
-        }
-    }
-}
-
-@Composable
-private fun DismissableNoticeCard(
-    text: String,
-    color: Color,
-    onDismiss: () -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = text,
-                style = SpineTheme.typography.subhead,
-                color = color,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = "关闭",
-                style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-                color = SpineTheme.colors.textSecondary,
-                modifier = Modifier.clickable(onClick = onDismiss),
-            )
         }
     }
 }
@@ -879,10 +845,25 @@ private fun OrganizationInvitationCard(
                     color = colors.textSecondary,
                 )
                 Text(
-                    text = invitation.roleLabel(),
+                    text = "邀请你以",
                     style = SpineTheme.typography.subhead,
-                    color = colors.textTertiary,
+                    color = colors.textSecondary,
                 )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    MetaBadge(
+                        text = invitation.inviteRoleLabel(),
+                        background = colors.primaryMuted,
+                        foreground = colors.primary,
+                    )
+                    Text(
+                        text = "的身份加入",
+                        style = SpineTheme.typography.subhead,
+                        color = colors.textSecondary,
+                    )
+                }
                 invitation.createdAt?.takeIf { it.isNotBlank() }?.let {
                     Text(
                         text = "邀请时间 ${it.take(10)}",
@@ -892,21 +873,24 @@ private fun OrganizationInvitationCard(
                 }
                 if (invitation.stableId != null && invitation.status.isPendingInvitation()) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
                     ) {
-                        ActionChip(
-                            text = "接受",
-                            background = colors.primaryMuted,
-                            foreground = colors.primary,
-                            onClick = onAccept,
-                        )
-                        ActionChip(
-                            text = "拒绝",
-                            background = colors.error.copy(alpha = if (colors.isDark) 0.22f else 0.12f),
-                            foreground = colors.error,
-                            onClick = onReject,
-                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            ActionChip(
+                                text = "接受",
+                                background = colors.primaryMuted,
+                                foreground = colors.primary,
+                                onClick = onAccept,
+                            )
+                            ActionChip(
+                                text = "拒绝",
+                                background = colors.error.copy(alpha = if (colors.isDark) 0.22f else 0.12f),
+                                foreground = colors.error,
+                                onClick = onReject,
+                            )
+                        }
                     }
                 }
             }
@@ -1131,4 +1115,13 @@ private fun String?.isPendingInvitation(): Boolean {
 
 private fun OrganizationInvitation.initialLabel(): String {
     return teamTitle().trim().firstOrNull()?.toString() ?: "邀"
+}
+
+private fun OrganizationInvitation.inviteRoleLabel(): String {
+    return when {
+        role.equals("ADMIN", ignoreCase = true) -> "管理员"
+        role.equals("GUEST", ignoreCase = true) -> "访客"
+        role.equals("MEMBER", ignoreCase = true) -> "成员"
+        else -> "成员"
+    }
 }
