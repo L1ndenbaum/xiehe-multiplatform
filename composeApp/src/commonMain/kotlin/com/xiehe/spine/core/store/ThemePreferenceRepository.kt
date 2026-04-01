@@ -51,8 +51,8 @@ class ThemePreferenceRepository(
             "PURPLE" -> AppThemeBrandColor.PURPLE
             "BLUE" -> AppThemeBrandColor.BLUE
             "GREEN_V2" -> AppThemeBrandColor.GREEN
-            "GREEN" -> AppThemeBrandColor.PURPLE
-            else -> ThemePreference().brand
+            "GREEN" -> AppThemeBrandColor.GREEN
+            else -> AppThemeBrandColor.GREEN
         }
     }
 }
