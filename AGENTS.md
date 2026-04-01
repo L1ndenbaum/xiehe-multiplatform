@@ -7,3 +7,4 @@
 - When adding a new icon token or drawable, update every platform/resource mapping at the same time. At minimum, check `IconPainterContract.kt`, Android actual mappings such as `IconPainter.android.kt`, and any other exhaustive `when` mappings for icons.
 - If a required icon is missing, add it as an SVG under `composeApp/src/commonMain/composeResources/drawable/` and wire it into the shared icon token/mapping flow instead of reusing an unrelated icon.
 - 使用颜色时，应该使用 `theme/ThemePalettes.kt` 颜色体系里的语义颜色，不要在界面代码中硬编码颜色值。
+- Run "./gradlew :composeApp:compileKotlinMetadata", "./gradlew :composeApp:compileKotlinJvm", "./gradlew :composeApp:compileKotlinIosSimulatorArm64" after code change to check errors
