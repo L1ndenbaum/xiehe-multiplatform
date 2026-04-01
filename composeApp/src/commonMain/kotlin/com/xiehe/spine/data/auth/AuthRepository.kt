@@ -130,6 +130,25 @@ class AuthRepository(
         }
     }
 
+    suspend fun verifyCurrentPassword(
+        username: String,
+        password: String,
+    ): AppResult<Unit> {
+        return when (
+            val result = apiClient.post<LoginData, LoginRequest>(
+                path = "/auth/login",
+                body = LoginRequest(
+                    username = username,
+                    password = password,
+                    rememberMe = false,
+                ),
+            )
+        ) {
+            is AppResult.Success -> AppResult.Success(Unit)
+            is AppResult.Failure -> result
+        }
+    }
+
     suspend fun getCurrentUser(
         session: UserSession,
     ): AppResult<Pair<UserSession, CurrentUserProfile>> {

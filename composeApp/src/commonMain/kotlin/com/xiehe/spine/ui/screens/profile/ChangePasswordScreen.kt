@@ -101,6 +101,7 @@ fun ChangePasswordScreen(
                     PasswordVerifyCard(
                         currentPassword = currentPassword,
                         showCurrent = showCurrent,
+                        submitting = submitting,
                         onPasswordChange = {
                             currentPassword = it
                             errorMessage = null
@@ -111,7 +112,25 @@ fun ChangePasswordScreen(
                                 errorMessage = "请输入正确的当前密码"
                             } else {
                                 errorMessage = null
-                                step = PasswordStep.RESET
+                                scope.launch {
+                                    submitting = true
+                                    when (
+                                        val result = authRepository.verifyCurrentPassword(
+                                            username = session.username,
+                                            password = currentPassword,
+                                        )
+                                    ) {
+                                        is AppResult.Success -> {
+                                            submitting = false
+                                            step = PasswordStep.RESET
+                                        }
+
+                                        is AppResult.Failure -> {
+                                            submitting = false
+                                            errorMessage = result.message
+                                        }
+                                    }
+                                }
                             }
                         },
                     )
@@ -335,6 +354,7 @@ private fun PasswordStepConnector(completed: Boolean) {
 private fun PasswordVerifyCard(
     currentPassword: String,
     showCurrent: Boolean,
+    submitting: Boolean,
     onPasswordChange: (String) -> Unit,
     onToggleVisibility: () -> Unit,
     onNext: () -> Unit,
@@ -351,8 +371,9 @@ private fun PasswordVerifyCard(
             onToggleVisibility = onToggleVisibility,
         )
         Button(
-            text = "下一步",
+            text = if (submitting) "验证中..." else "下一步",
             onClick = onNext,
+            enabled = !submitting,
             modifier = Modifier.fillMaxWidth().height(52.dp),
         )
     }
