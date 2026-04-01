@@ -30,10 +30,21 @@ import com.xiehe.spine.ui.theme.SpineAppColors
 import com.xiehe.spine.ui.theme.SpineTheme
 
 private data class MessageNoticeStyle(
+    val type: NotificationType,
     val icon: IconToken,
     val gradient: List<Color>,
     val chipText: String,
+    val chipTextColor: Color,
+    val chipBackgroundColor: Color,
 )
+
+private sealed interface NotificationType {
+    data object Info : NotificationType
+    data object Warning : NotificationType
+    data object Error : NotificationType
+    data object Success : NotificationType
+    data object Unknown : NotificationType
+}
 
 @Composable
 fun MessageNoticeCard(
@@ -87,18 +98,18 @@ fun MessageNoticeCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
-                            .background(colors.surfaceMuted)
+                            .background(style.chipBackgroundColor)
                             .padding(horizontal = 10.dp, vertical = 3.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = style.chipText,
                             style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-                            color = colors.textSecondary,
+                            color = style.chipTextColor,
                         )
                     }
                     Text(
-                        text = messageTimeLabel(item.createdAt),
+                        text = item.senderName+"于 "+messageTimeLabel(item.createdAt)+" 发送",
                         style = SpineTheme.typography.caption,
                         color = colors.textTertiary,
                     )
@@ -184,18 +195,56 @@ private fun messageNoticeStyle(
     item: NotificationMessage,
     colors: SpineAppColors,
 ): MessageNoticeStyle {
-    val type = item.messageType.orEmpty()
-    return when {
-        type.contains("系统") -> MessageNoticeStyle(
+    return when (notificationTypeOf(item.messageType)) {
+        NotificationType.Info -> MessageNoticeStyle(
+            type = NotificationType.Info,
             icon = IconToken.BELL,
-            gradient = listOf(colors.primary.copy(alpha = 0.78f), colors.primary),
-            chipText = "系统通知",
+            gradient = listOf(colors.primary.copy(alpha = 0.78f), colors.info),
+            chipText = "通知",
+            chipTextColor = colors.info,
+            chipBackgroundColor = colors.info.copy(alpha = if (colors.isDark) 0.22f else 0.12f),
         )
+        NotificationType.Warning -> MessageNoticeStyle(
+            type = NotificationType.Warning,
+            icon = IconToken.BELL_RING,
+            gradient = listOf(colors.primary.copy(alpha = 0.78f), colors.warning),
+            chipText = "警告",
+            chipTextColor = colors.warning,
+            chipBackgroundColor = colors.warning.copy(alpha = if (colors.isDark) 0.22f else 0.14f),
+        )
+        NotificationType.Error -> MessageNoticeStyle(
+            type = NotificationType.Error,
+            icon = IconToken.LOCK,
+            gradient = listOf(colors.primary.copy(alpha = 0.78f), colors.error),
+            chipText = "错误",
+            chipTextColor = colors.error,
+            chipBackgroundColor = colors.error.copy(alpha = if (colors.isDark) 0.22f else 0.12f),
+        )
+        NotificationType.Success -> MessageNoticeStyle(
+            type = NotificationType.Success,
+            icon = IconToken.CHECK,
+            gradient = listOf(colors.primary.copy(alpha = 0.78f), colors.success),
+            chipText = "成功",
+            chipTextColor = colors.success,
+            chipBackgroundColor = colors.success.copy(alpha = if (colors.isDark) 0.22f else 0.12f),
+        )
+        NotificationType.Unknown -> MessageNoticeStyle(
+            type = NotificationType.Unknown,
+            icon = IconToken.BELL,
+            gradient = listOf(colors.primary.copy(alpha = 0.78f), colors.info),
+            chipText = "通知",
+            chipTextColor = colors.info,
+            chipBackgroundColor = colors.info.copy(alpha = if (colors.isDark) 0.22f else 0.12f),
+        )
+    }
+}
 
-        else -> MessageNoticeStyle(
-            icon = IconToken.IMAGE,
-            gradient = listOf(colors.warning.copy(alpha = 0.88f), colors.warning),
-            chipText = "审核提醒",
-        )
+private fun notificationTypeOf(rawType: String?): NotificationType {
+    return when (rawType?.trim()?.lowercase()) {
+        "info" -> NotificationType.Info
+        "warning" -> NotificationType.Warning
+        "error" -> NotificationType.Error
+        "success" -> NotificationType.Success
+        else -> NotificationType.Unknown
     }
 }
