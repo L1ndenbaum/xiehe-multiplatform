@@ -27,11 +27,29 @@ data class ThemePreference(
 )
 
 @Immutable
+data class SpineExamCategoryStyle(
+    val background: Color,
+    val content: Color,
+    val accentStart: Color,
+    val accentEnd: Color,
+)
+
+@Immutable
+data class SpineExamCategoryColors(
+    val front: SpineExamCategoryStyle,
+    val side: SpineExamCategoryStyle,
+    val leftBending: SpineExamCategoryStyle,
+    val rightBending: SpineExamCategoryStyle,
+    val posturePhoto: SpineExamCategoryStyle,
+)
+
+@Immutable
 data class SpineAppColors(
     val isDark: Boolean,
     val primary: Color,
     val onPrimary: Color,
     val primaryMuted: Color,
+    val headerHighlight: Color,
     val background: Color,
     val backgroundElevated: Color,
     val surface: Color,
@@ -46,7 +64,17 @@ data class SpineAppColors(
     val error: Color,
     val info: Color,
     val tabInactive: Color,
+    val examCategories: SpineExamCategoryColors,
 )
+
+fun SpineExamCategoryColors.resolve(examType: String): SpineExamCategoryStyle = when (examType.trim()) {
+    "正位X光片" -> front
+    "侧位X光片" -> side
+    "左侧曲位" -> leftBending
+    "右侧曲位" -> rightBending
+    "体态照片" -> posturePhoto
+    else -> front
+}
 
 @Immutable
 data class SpineAppTypography(

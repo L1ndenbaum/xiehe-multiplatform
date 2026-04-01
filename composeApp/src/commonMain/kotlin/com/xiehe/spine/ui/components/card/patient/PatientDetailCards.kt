@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -189,7 +190,10 @@ fun PatientImageRecordsCard(
                 text = "上传影像",
                 onClick = onUploadImage,
                 leadingGlyph = IconToken.UPLOAD,
-                modifier = Modifier.padding(8.dp, 4.dp).height(30.dp)
+                modifier = Modifier
+                    .padding(8.dp, 4.dp)
+                    .widthIn(min = 116.dp)
+                    .height(34.dp),
             )
         }
 

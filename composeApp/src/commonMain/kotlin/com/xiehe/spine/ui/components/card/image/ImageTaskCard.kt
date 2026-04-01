@@ -43,6 +43,7 @@ import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
+import com.xiehe.spine.ui.theme.resolve
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.decodeToImageBitmap
@@ -436,12 +437,8 @@ private fun compactCardExamType(item: ImageFileSummary): String {
     return inferExamType(item)
 }
 
+@Composable
 private fun examTypeBrush(item: ImageFileSummary): Brush {
-    return when (compactCardExamType(item)) {
-        "侧位X光片" -> Brush.horizontalGradient(listOf(Color(0xFFFB923C), Color(0xFFF59E0B)))
-        "左侧曲位" -> Brush.horizontalGradient(listOf(Color(0xFF34D399), Color(0xFF22C55E)))
-        "右侧曲位" -> Brush.horizontalGradient(listOf(Color(0xFF60A5FA), Color(0xFF38BDF8)))
-        "体态照片" -> Brush.horizontalGradient(listOf(Color(0xFFF87171), Color(0xFFEF4444)))
-        else -> Brush.horizontalGradient(listOf(Color(0xFF22D3EE), Color(0xFF14B8A6)))
-    }
+    val style = SpineTheme.colors.examCategories.resolve(compactCardExamType(item))
+    return Brush.horizontalGradient(listOf(style.accentStart, style.accentEnd))
 }

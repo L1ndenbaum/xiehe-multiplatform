@@ -31,6 +31,7 @@ import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
+import com.xiehe.spine.ui.theme.resolve
 import com.xiehe.spine.ui.viewmodel.dashboard.DashboardPendingTask
 
 @Composable
@@ -215,12 +216,13 @@ private fun PendingTaskRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(priority.dotColor),
-        )
+        // Dashboard 待处理任务部分 列表项的 状态圆点
+//        Box(
+//            modifier = Modifier
+//                .size(8.dp)
+//                .clip(CircleShape)
+//                .background(priority.dotColor),
+//        )
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -275,11 +277,12 @@ private fun PendingTaskRow(
                     color = colors.textTertiary,
                     maxLines = 1,
                 )
-                Text(
-                    text = priority.label,
-                    style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
-                    color = priority.textColor,
-                )
+                // Dashboard 待处理任务的状态标签
+//                Text(
+//                    text = priority.label,
+//                    style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
+//                    color = priority.textColor,
+//                )
             }
         }
         Box(
@@ -318,15 +321,11 @@ private data class PendingTaskPriority(
 
 @Composable
 private fun pendingTaskExamStyle(examType: String): PendingTaskExamStyle {
-    val colors = SpineTheme.colors
-    return when {
-        examType.contains("体态") -> PendingTaskExamStyle(colors.error.copy(alpha = 0.14f), colors.error)
-        examType.contains("侧") -> PendingTaskExamStyle(colors.warning.copy(alpha = 0.14f), colors.warning)
-        examType.contains("曲") -> PendingTaskExamStyle(colors.success.copy(alpha = 0.14f), colors.success)
-        examType.contains("CT") -> PendingTaskExamStyle(colors.info.copy(alpha = 0.14f), colors.info)
-        examType.contains("MRI") -> PendingTaskExamStyle(colors.primary.copy(alpha = 0.14f), colors.primary)
-        else -> PendingTaskExamStyle(colors.success.copy(alpha = 0.12f), colors.success)
-    }
+    val style = SpineTheme.colors.examCategories.resolve(examType)
+    return PendingTaskExamStyle(
+        background = style.background,
+        textColor = style.content,
+    )
 }
 
 @Composable

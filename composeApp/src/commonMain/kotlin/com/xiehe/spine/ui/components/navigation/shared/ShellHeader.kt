@@ -335,12 +335,12 @@ private fun HeaderActionBubble(
 @Composable
 private fun shellHeaderBrush(): Brush {
     val colors = SpineTheme.colors
-    return remember(colors.primary, colors.info, colors.isDark) {
+    return remember(colors.primary, colors.headerHighlight, colors.isDark) {
         Brush.linearGradient(
             colors = listOf(
                 colors.primary,
                 colors.primary.copy(alpha = if (colors.isDark) 0.88f else 0.94f),
-                colors.info.copy(alpha = if (colors.isDark) 0.76f else 0.9f),
+                colors.headerHighlight.copy(alpha = if (colors.isDark) 0.8f else 0.92f),
             ),
         )
     }
