@@ -11,9 +11,15 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import kotlinx.coroutines.delay
 
 fun appRouteContentTransition(
     initialOrder: Int,
@@ -51,14 +57,35 @@ fun overlayEntryExitTransition(): ExitTransition =
 
 @Composable
 fun AppOverlayEntryHost(
+    visible: Boolean = true,
     modifier: Modifier = Modifier,
+    onExited: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
+    var localVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (visible) {
+            localVisible = true
+        }
+    }
+
+    LaunchedEffect(visible) {
+        if (visible) {
+            localVisible = true
+        } else {
+            localVisible = false
+            delay(maxOf(AppMotion.routeFadeOutMillis, AppMotion.routeSlideOutMillis).toLong())
+            onExited?.invoke()
+        }
+    }
+
     AnimatedVisibility(
-        visible = true,
+        visible = localVisible,
         modifier = modifier,
         enter = overlayEntryEnterTransition(),
-        exit = overlayEntryExitTransition(),
+        exit = fadeOut(animationSpec = AppMotion.routeFadeOutSpec()) +
+            slideOutHorizontally(animationSpec = AppMotion.routeSlideOutSpec()) { full -> full / 6 },
         label = "app_overlay_entry_host",
     ) {
         Box(modifier = Modifier.fillMaxSize()) {

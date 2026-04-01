@@ -40,6 +40,7 @@ import com.xiehe.spine.ui.viewmodel.profile.AppearanceViewModel
 @Composable
 internal fun OverlayHost(
     route: OverlayRoute,
+    visible: Boolean,
     session: UserSession,
     container: AppContainer,
     scopedViewModels: SessionScopedViewModels,
@@ -50,6 +51,7 @@ internal fun OverlayHost(
     onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
+    onExited: (() -> Unit)? = null,
 ) {
     when (route) {
         is OverlayRoute.PatientDetail,
@@ -66,6 +68,8 @@ internal fun OverlayHost(
             onLogoutRequested = onLogoutRequested,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
+            visible = visible,
+            onExited = onExited,
         )
 
         is OverlayRoute.ImageAnalysis,
@@ -81,6 +85,8 @@ internal fun OverlayHost(
             onLogoutRequested = onLogoutRequested,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
+            visible = visible,
+            onExited = onExited,
         )
 
         OverlayRoute.Appearance,
@@ -102,6 +108,8 @@ internal fun OverlayHost(
             onLogoutRequested = onLogoutRequested,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
+            visible = visible,
+            onExited = onExited,
         )
     }
 }
@@ -118,6 +126,8 @@ private fun PatientOverlayContent(
     onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
+    visible: Boolean,
+    onExited: (() -> Unit)?,
 ) {
     val detailRoute = route as? OverlayRoute.PatientDetail
     var showDeletePatientConfirm by remember(detailRoute?.patientId) { mutableStateOf(false) }
@@ -173,7 +183,10 @@ private fun PatientOverlayContent(
             }
         },
     ) {
-        AppOverlayEntryHost {
+        AppOverlayEntryHost(
+            visible = visible,
+            onExited = onExited,
+        ) {
             AppRouteContentHost(
                 targetState = route,
                 orderOf = ::patientOverlayOrder,
@@ -285,41 +298,46 @@ private fun ImageOverlayContent(
     onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
+    visible: Boolean,
+    onExited: (() -> Unit)?,
 ) {
-    when (route) {
-        is OverlayRoute.ImageAnalysis -> {
-            ImageAnalysisScreen(
-                fileId = route.fileId,
-                patientId = route.patientId,
-                examType = route.examType,
-                vm = scopedViewModels.imageAnalysisVm,
-                session = session,
-                imageRepository = container.imageFileRepository,
-                measurementRepository = container.measurementRepository,
-                aiRepository = container.aiInferenceRepository,
-                onSessionUpdated = onSessionUpdated,
-                onBack = { onRouteChange(null) },
-                onSessionExpired = onSessionExpired,
-            )
-        }
-
-        OverlayRoute.ImageUpload -> {
-            MobileShell(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                showBottomBar = false,
-                headerContent = {
-                    SimpleShellHeader(
-                        title = "上传影像",
-                        leadingGlyph = IconToken.BACK,
-                        onLeadingAction = { onRouteChange(null) },
-                    )
-                },
+    AppOverlayEntryHost(
+        visible = visible,
+        onExited = onExited,
     ) {
-        AppOverlayEntryHost {
-            ImageUploadScreen(
-                vm = scopedViewModels.imageUploadVm,
-                session = session,
+        when (route) {
+            is OverlayRoute.ImageAnalysis -> {
+                ImageAnalysisScreen(
+                    fileId = route.fileId,
+                    patientId = route.patientId,
+                    examType = route.examType,
+                    vm = scopedViewModels.imageAnalysisVm,
+                    session = session,
+                    imageRepository = container.imageFileRepository,
+                    measurementRepository = container.measurementRepository,
+                    aiRepository = container.aiInferenceRepository,
+                    onSessionUpdated = onSessionUpdated,
+                    onBack = { onRouteChange(null) },
+                    onSessionExpired = onSessionExpired,
+                )
+            }
+
+            OverlayRoute.ImageUpload -> {
+                MobileShell(
+                    selectedTab = selectedTab,
+                    onTabSelected = onTabSelected,
+                    showBottomBar = false,
+                    headerContent = {
+                        SimpleShellHeader(
+                            title = "上传影像",
+                            leadingGlyph = IconToken.BACK,
+                            onLeadingAction = { onRouteChange(null) },
+                        )
+                    },
+                ) {
+                    ImageUploadScreen(
+                        vm = scopedViewModels.imageUploadVm,
+                        session = session,
                         patientRepository = container.patientRepository,
                         imageRepository = container.imageFileRepository,
                         onSessionUpdated = onSessionUpdated,
@@ -337,9 +355,9 @@ private fun ImageOverlayContent(
                     )
                 }
             }
-        }
 
-        else -> Unit
+            else -> Unit
+        }
     }
 }
 
@@ -356,6 +374,8 @@ private fun ProfileOverlayContent(
     onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
+    visible: Boolean,
+    onExited: (() -> Unit)?,
 ) {
     val messagesState by scopedViewModels.messagesVm.state.collectAsState()
     val organizationState by scopedViewModels.organizationVm.state.collectAsState()
@@ -470,7 +490,10 @@ private fun ProfileOverlayContent(
             }
         },
     ) {
-        AppOverlayEntryHost {
+        AppOverlayEntryHost(
+            visible = visible,
+            onExited = onExited,
+        ) {
             AppRouteContentHost(
                 targetState = route,
                 orderOf = ::profileOverlayOrder,

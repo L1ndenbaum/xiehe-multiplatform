@@ -38,6 +38,8 @@ internal fun AppSessionCoordinator(
     }
     var selectedTab by remember { mutableIntStateOf(0) }
     var route by remember { mutableStateOf<OverlayRoute?>(null) }
+    var renderedOverlayRoute by remember { mutableStateOf<OverlayRoute?>(null) }
+    var overlayVisible by remember { mutableStateOf(false) }
     var authRoute by remember { mutableStateOf(AuthRoute.LOGIN) }
     var dashboardBootstrap by remember(session?.userId) { mutableStateOf(DashboardBootstrapState()) }
     var sessionExpiredMessage by remember { mutableStateOf<String?>(null) }
@@ -73,6 +75,8 @@ internal fun AppSessionCoordinator(
         }
         session = null
         route = null
+        renderedOverlayRoute = null
+        overlayVisible = false
         selectedTab = 0
         authRoute = AuthRoute.LOGIN
         dashboardBootstrap = DashboardBootstrapState()
@@ -92,6 +96,8 @@ internal fun AppSessionCoordinator(
                 session = it
                 selectedTab = 0
                 route = null
+                renderedOverlayRoute = null
+                overlayVisible = false
                 authRoute = AuthRoute.LOGIN
                 dashboardBootstrap = DashboardBootstrapState()
             },
@@ -102,8 +108,21 @@ internal fun AppSessionCoordinator(
     val activeSession = requireNotNull(session)
     val scopedViewModels = rememberSessionScopedViewModels(activeSession.userId)
 
-    PlatformBackHandler(enabled = route != null) {
+    PlatformBackHandler(enabled = renderedOverlayRoute != null) {
         route = null
+    }
+
+    LaunchedEffect(route) {
+        when {
+            route != null -> {
+                renderedOverlayRoute = route
+                overlayVisible = true
+            }
+
+            renderedOverlayRoute != null -> {
+                overlayVisible = false
+            }
+        }
     }
 
     LaunchedEffect(activeSession.refreshToken, activeSession.accessTokenExpiresAtEpochSeconds) {
@@ -183,8 +202,8 @@ internal fun AppSessionCoordinator(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        val currentRoute = route
-        if (currentRoute == null) {
+        val currentRoute = renderedOverlayRoute
+        if (route == null || currentRoute == null) {
             MainShellHost(
                 session = activeSession,
                 container = container,
@@ -197,9 +216,12 @@ internal fun AppSessionCoordinator(
                 onRouteChange = { route = it },
                 onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
             )
-        } else {
+        }
+
+        if (currentRoute != null) {
             OverlayHost(
                 route = currentRoute,
+                visible = overlayVisible,
                 session = activeSession,
                 container = container,
                 scopedViewModels = scopedViewModels,
@@ -210,6 +232,11 @@ internal fun AppSessionCoordinator(
                 onLogoutRequested = { resetToLogin(clearRemoteSession = false, activeSession = activeSession) },
                 onSessionUpdated = { session = it },
                 onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
+                onExited = {
+                    if (route == null) {
+                        renderedOverlayRoute = null
+                    }
+                },
             )
         }
 
@@ -239,6 +266,8 @@ internal fun AppSessionCoordinator(
         if (session == null) {
             selectedTab = 0
             route = null
+            renderedOverlayRoute = null
+            overlayVisible = false
             authRoute = AuthRoute.LOGIN
         }
     }

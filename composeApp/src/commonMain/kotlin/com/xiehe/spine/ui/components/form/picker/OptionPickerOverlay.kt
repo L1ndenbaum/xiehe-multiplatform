@@ -33,7 +33,8 @@ fun OptionPickerOverlay(
         onDismissRequest = onDismiss,
         modifier = modifier,
         showActionRow = false,
-    ) {
+        edgeToEdge = true,
+    ) { dismiss ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -52,7 +53,7 @@ fun OptionPickerOverlay(
                         )
                         .clickable {
                             onSelect(item)
-                            onDismiss()
+                            dismiss()
                         }
                         .padding(horizontal = 12.dp, vertical = 11.dp),
                     horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,

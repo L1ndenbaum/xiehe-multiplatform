@@ -47,11 +47,15 @@ fun AppModalHost(
     content: @Composable () -> Unit,
 ) {
     var rendered by remember { mutableStateOf(visible) }
+    var localVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(visible) {
         if (visible) {
             rendered = true
+            delay(16)
+            localVisible = true
         } else if (rendered) {
+            localVisible = false
             delay(AppMotion.modalDismissDelayMillis)
             rendered = false
             onDismissed?.invoke()
@@ -81,7 +85,7 @@ fun AppModalHost(
         contentAlignment = alignment,
     ) {
         AnimatedVisibility(
-            visible = visible,
+            visible = localVisible,
             enter = enter,
             exit = exit,
             label = "app_modal_visibility",
