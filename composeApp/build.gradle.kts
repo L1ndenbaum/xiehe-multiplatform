@@ -1,5 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 val isMac = org.gradle.internal.os.OperatingSystem.current().isMacOsX
 
@@ -9,7 +7,6 @@ plugins {
     alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeHotReload)
 }
 
 kotlin {
@@ -23,6 +20,7 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
+        withHostTestBuilder {}
     }
 
     if (isMac) {
@@ -36,19 +34,6 @@ kotlin {
             }
         }
     }
-
-    jvm()
-
-//    js {
-//        browser()
-//        binaries.executable()
-//    }
-
-//    @OptIn(ExperimentalWasmDsl::class)
-//    wasmJs {
-//        browser()
-//        binaries.executable()
-//    }
 
     sourceSets {
         androidMain.dependencies {
@@ -78,32 +63,13 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
-            implementation(libs.ktor.client.cio)
+        val androidHostTest by getting
+        androidHostTest.dependencies {
+            implementation(libs.kotlin.test)
         }
-//        jsMain.dependencies {
-//            implementation(libs.ktor.client.js)
-//        }
-//        wasmJsMain.dependencies {
-//            implementation(libs.ktor.client.js)
-//        }
     }
 }
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
-}
-
-compose.desktop {
-    application {
-        mainClass = "com.xiehe.spine.MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.xiehe.spine"
-            packageVersion = "1.0.0"
-        }
-    }
 }

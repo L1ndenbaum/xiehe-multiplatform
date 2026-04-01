@@ -18,7 +18,7 @@
 ### 2. CI job
 - JDK 17 + Gradle 缓存。
 - 执行命令：
-  - `./gradlew :androidApp:assembleDebug :composeApp:jvmTest --stacktrace`
+  - `./gradlew :composeApp:testAndroidHostTest :androidApp:assembleDebug --stacktrace`
 - 上传调试 APK 工件：`androidApp/build/outputs/apk/debug/*.apk`。
 
 ### 3. Release job
@@ -44,4 +44,3 @@
 - Android applicationId：`com.xiehe.spine`
 - 应用名资源：`androidApp/src/main/res/values/strings.xml`
 - 当前显示名称：`Mesh 智慧门诊`
-

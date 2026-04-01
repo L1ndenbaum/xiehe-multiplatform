@@ -32,7 +32,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Debug APK
-        run: ./gradlew :androidApp:assembleDebug :composeApp:jvmTest --stacktrace
+        run: ./gradlew :composeApp:testAndroidHostTest :androidApp:assembleDebug --stacktrace
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
