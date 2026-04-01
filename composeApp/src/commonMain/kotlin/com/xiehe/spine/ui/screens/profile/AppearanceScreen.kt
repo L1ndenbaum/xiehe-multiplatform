@@ -34,7 +34,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
@@ -53,6 +52,14 @@ private enum class SettingsPickerType {
 
 @Composable
 fun AppearanceScreen(vm: AppearanceViewModel) {
+    AppearanceScreen(vm = vm, saveTrigger = 0)
+}
+
+@Composable
+fun AppearanceScreen(
+    vm: AppearanceViewModel,
+    saveTrigger: Int,
+) {
     val preference by vm.state.collectAsState()
     val colors = SpineTheme.colors
     val shadowColor = colors.textPrimary.copy(alpha = if (colors.isDark) 0.22f else 0.08f)
@@ -69,6 +76,19 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
     LaunchedEffect(preference.brand, preference.mode) {
         selectedBrand = preference.brand
         darkModeEnabled = preference.mode == ThemeMode.DARK
+    }
+
+    LaunchedEffect(saveTrigger) {
+        if (saveTrigger <= 0) {
+            return@LaunchedEffect
+        }
+        vm.updateBrand(selectedBrand)
+        vm.updateMode(if (darkModeEnabled) ThemeMode.DARK else ThemeMode.LIGHT)
+        successMessage = buildString {
+            append("设置已保存")
+            if (!notificationsEnabled) append("，通知已关闭")
+            if (autoSaveEnabled) append("，已启用自动保存")
+        }
     }
 
     Box(
@@ -162,20 +182,6 @@ fun AppearanceScreen(vm: AppearanceViewModel) {
                     },
                 )
             }
-
-            Button(
-                text = "保存设置",
-                onClick = {
-                    vm.updateBrand(selectedBrand)
-                    vm.updateMode(if (darkModeEnabled) ThemeMode.DARK else ThemeMode.LIGHT)
-                    successMessage = buildString {
-                        append("设置已保存")
-                        if (!notificationsEnabled) append("，通知已关闭")
-                        if (autoSaveEnabled) append("，已启用自动保存")
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }

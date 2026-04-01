@@ -56,7 +56,8 @@ fun DashboardScreen(
     onOpenPatientForm: () -> Unit = {},
     onOpenImageUpload: () -> Unit = {},
     onOpenImagesTab: () -> Unit = {},
-    onOpenMessages: () -> Unit = {},
+    onOpenAppearance: () -> Unit = {},
+    onOpenOrganization: () -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
 
@@ -159,18 +160,18 @@ fun DashboardScreen(
                         onClick = onOpenImageUpload,
                     )
                     QuickActionItem(
-                        label = "影像中心",
-                        icon = IconToken.SCAN_SEARCH,
+                        label = "系统设置",
+                        icon = IconToken.SETTINGS,
                         colors = reviewActionGradient(colors),
                         modifier = Modifier.weight(1f),
-                        onClick = onOpenImagesTab,
+                        onClick = onOpenAppearance,
                     )
                     QuickActionItem(
-                        label = "消息通知",
-                        icon = IconToken.BELL_RING,
+                        label = "组织管理",
+                        icon = IconToken.USERS,
                         colors = messageActionGradient(colors),
                         modifier = Modifier.weight(1f),
-                        onClick = onOpenMessages,
+                        onClick = onOpenOrganization,
                     )
                 }
             }

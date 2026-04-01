@@ -433,6 +433,7 @@ private fun ProfileOverlayContent(
 ) {
     val messagesState by scopedViewModels.messagesVm.state.collectAsState()
     val organizationState by scopedViewModels.organizationVm.state.collectAsState()
+    var appearanceSaveTrigger by remember { mutableStateOf(0) }
     val canInviteMembers = organizationState.canInviteMembers(session.userId)
     val canCreateTeam =
         session.isSuperuser ||
@@ -450,6 +451,13 @@ private fun ProfileOverlayContent(
                         title = "系统设置",
                         leadingGlyph = IconToken.BACK,
                         onLeadingAction = { onRouteChange(null) },
+                        actionsContent = {
+                            HeaderTextAction(
+                                text = "保存设置",
+                                leadingGlyph = IconToken.SAVE,
+                                onClick = { appearanceSaveTrigger += 1 },
+                            )
+                        },
                     )
                 }
 
@@ -548,9 +556,12 @@ private fun ProfileOverlayContent(
                 label = "profile_overlay_content_transition",
             ) { currentRoute ->
                 when (currentRoute) {
-                    OverlayRoute.Appearance -> {
-                        AppearanceScreen(vm = appearanceVm)
-                    }
+                OverlayRoute.Appearance -> {
+                    AppearanceScreen(
+                        vm = appearanceVm,
+                        saveTrigger = appearanceSaveTrigger,
+                    )
+                }
 
                     OverlayRoute.PersonalInfo -> {
                         PersonalInfoScreen(

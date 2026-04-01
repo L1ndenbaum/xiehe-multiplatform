@@ -129,7 +129,8 @@ internal fun MainShellHost(
                     onOpenPatientForm = { onRouteChange(OverlayRoute.PatientForm) },
                     onOpenImageUpload = { onRouteChange(OverlayRoute.ImageUpload) },
                     onOpenImagesTab = { onTabSelected(2) },
-                    onOpenMessages = { onRouteChange(OverlayRoute.Messages) },
+                    onOpenAppearance = { onRouteChange(OverlayRoute.Appearance) },
+                    onOpenOrganization = { onRouteChange(OverlayRoute.Organization) },
                 )
 
                 1 -> PatientsScreen(
