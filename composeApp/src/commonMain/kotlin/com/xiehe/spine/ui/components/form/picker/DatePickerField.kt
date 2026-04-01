@@ -74,6 +74,7 @@ fun DateWheelPickerDialog(
         title = "",
         onDismissRequest = onDismissRequest,
         overlayMaxAlpha = 0f,
+        roundBottomCorners = true,
         onConfirm = {
             val result = formatDate(currentYear, currentMonth, dayIdx + 1)
             onConfirm(result)

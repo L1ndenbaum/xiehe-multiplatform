@@ -26,6 +26,7 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.form.picker.DatePickerField
+import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.form.picker.PickerDialog
@@ -191,37 +192,17 @@ fun PatientEditScreen(
 
     when (picker) {
         PatientEditPicker.GENDER -> {
-            PickerDialog(
-                title = "",
-                onDismissRequest = { picker = null },
-                showActionRow = false,
-            ) { dismiss ->
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "请选择患者性别", style = SpineTheme.typography.title)
-                    genderOptions.forEach { option ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color = if (state.gender == option.value) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
-                                    shape = RoundedCornerShape(SpineTheme.radius.md),
-                                )
-                                .clickable {
-                                    vm.updateGender(option.value)
-                                    dismiss()
-                                }
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(option.label, color = if (state.gender == option.value) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
-                            if (state.gender == option.value) {
-                                Text("✓", color = SpineTheme.colors.onPrimary)
-                            }
-                        }
+            OptionPickerOverlay(
+                title = "请选择患者性别",
+                options = genderOptions.map { it.label },
+                selected = genderOptions.firstOrNull { it.value == state.gender }?.label.orEmpty(),
+                onDismiss = { picker = null },
+                onSelect = { selectedLabel ->
+                    genderOptions.firstOrNull { it.label == selectedLabel }?.let { option ->
+                        vm.updateGender(option.value)
                     }
-                }
-            }
+                },
+            )
         }
 
         PatientEditPicker.PHONE_PREFIX -> {
