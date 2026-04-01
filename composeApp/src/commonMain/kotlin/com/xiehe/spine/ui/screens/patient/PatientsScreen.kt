@@ -321,14 +321,14 @@ private fun patientCardStyle(gender: String): PatientCardStyle {
     return if (gender == "女") {
         PatientCardStyle(
             avatarGradient = listOf(Color(0xFFF9A8D4), Color(0xFFEC4899)),
-            avatarText = "女",
+            avatarText = "♀",
             badgeBackground = Color(0xFFFDF2F8),
             badgeText = Color(0xFFDB2777),
         )
     } else {
         PatientCardStyle(
             avatarGradient = listOf(colors.primary.copy(alpha = 0.72f), colors.primary),
-            avatarText = "男",
+            avatarText = "♂",
             badgeBackground = colors.primaryMuted,
             badgeText = colors.primary,
         )
