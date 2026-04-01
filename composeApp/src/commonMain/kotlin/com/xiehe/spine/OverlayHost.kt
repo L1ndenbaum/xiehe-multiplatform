@@ -68,6 +68,7 @@ internal fun OverlayHost(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onRouteChange: (OverlayRoute?) -> Unit,
+    onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
 ) {
@@ -83,6 +84,7 @@ internal fun OverlayHost(
             selectedTab = selectedTab,
             onTabSelected = onTabSelected,
             onRouteChange = onRouteChange,
+            onLogoutRequested = onLogoutRequested,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )
@@ -97,6 +99,7 @@ internal fun OverlayHost(
             selectedTab = selectedTab,
             onTabSelected = onTabSelected,
             onRouteChange = onRouteChange,
+            onLogoutRequested = onLogoutRequested,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )
@@ -117,6 +120,7 @@ internal fun OverlayHost(
             selectedTab = selectedTab,
             onTabSelected = onTabSelected,
             onRouteChange = onRouteChange,
+            onLogoutRequested = onLogoutRequested,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )
@@ -132,6 +136,7 @@ private fun PatientOverlayContent(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onRouteChange: (OverlayRoute?) -> Unit,
+    onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
 ) {
@@ -358,6 +363,7 @@ private fun ImageOverlayContent(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onRouteChange: (OverlayRoute?) -> Unit,
+    onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
 ) {
@@ -428,6 +434,7 @@ private fun ProfileOverlayContent(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onRouteChange: (OverlayRoute?) -> Unit,
+    onLogoutRequested: suspend () -> Unit,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
 ) {
@@ -609,7 +616,7 @@ private fun ProfileOverlayContent(
                         ChangePasswordScreen(
                             session = session,
                             authRepository = container.authRepository,
-                            onSessionUpdated = onSessionUpdated,
+                            onPasswordChanged = onLogoutRequested,
                             onFinished = { onRouteChange(null) },
                             onSessionExpired = onSessionExpired,
                         )

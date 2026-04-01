@@ -63,7 +63,7 @@ private data class PasswordStrength(
 fun ChangePasswordScreen(
     session: UserSession,
     authRepository: AuthRepository,
-    onSessionUpdated: (UserSession) -> Unit,
+    onPasswordChanged: suspend () -> Unit,
     onFinished: () -> Unit = {},
     onSessionExpired: (String) -> Unit = {},
 ) {
@@ -164,6 +164,8 @@ fun ChangePasswordScreen(
                         onConfirm = {
                             when {
                                 newPassword.length < 8 -> errorMessage = "密码至少8位"
+                                !newPassword.any { it.isUpperCase() } -> errorMessage = "密码必须包含至少一个大写字母"
+                                !newPassword.any { it.isDigit() } -> errorMessage = "密码必须包含至少一个数字"
                                 newPassword == currentPassword -> errorMessage = "新密码不能与当前密码相同"
                                 newPassword != confirmPassword -> errorMessage = "两次密码不一致"
                                 else -> {
@@ -179,9 +181,8 @@ fun ChangePasswordScreen(
                                             )
                                         ) {
                                             is AppResult.Success -> {
-                                                onSessionUpdated(result.data.first)
                                                 submitting = false
-                                                step = PasswordStep.DONE
+                                                onPasswordChanged()
                                             }
 
                                             is AppResult.Failure -> {

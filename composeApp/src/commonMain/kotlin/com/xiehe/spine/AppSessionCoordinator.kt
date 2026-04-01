@@ -207,6 +207,7 @@ internal fun AppSessionCoordinator(
                 selectedTab = selectedTab,
                 onTabSelected = onTabSelected,
                 onRouteChange = { route = it },
+                onLogoutRequested = { resetToLogin(clearRemoteSession = false, activeSession = activeSession) },
                 onSessionUpdated = { session = it },
                 onSessionExpired = { onSessionEvent(SessionEvent.SessionExpired(it)) },
             )
