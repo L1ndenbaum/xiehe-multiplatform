@@ -2,7 +2,7 @@
 
 ## 1. 项目范围
 本项目是“协和医疗脊柱影像管理系统”的移动端重写工程，基于 Kotlin Compose Multiplatform。
-当前可编译与主交付平台是 Android，iOS/桌面/Web 保留扩展入口。
+当前支持平台为 Android 与 iOS 两个移动端。
 
 设计与实现约束：
 - UI 采用自定义 HEX 语义色系统，不依赖 Material3 颜色体系。
@@ -23,7 +23,10 @@
 - 平台层：文件选择/下载保存/图标渲染等 `expect/actual` 适配。
 
 ### 具体实现
-- 入口路由在 `composeApp/src/commonMain/kotlin/com/xiehe/spine/App.kt`。
+- 总入口在 `composeApp/src/commonMain/kotlin/com/xiehe/spine/App.kt`。
+- 一级 tab / shell 路由在 `composeApp/src/commonMain/kotlin/com/xiehe/spine/MainShellHost.kt`。
+- overlay 路由在 `composeApp/src/commonMain/kotlin/com/xiehe/spine/OverlayHost.kt`。
+- 共享动画 contract 与 modal host 在 `composeApp/src/commonMain/kotlin/com/xiehe/spine/ui/motion/`。
 - 依赖组装在 `composeApp/src/commonMain/kotlin/com/xiehe/spine/data/AppContainer.kt`。
 - Android 容器在 `androidApp/src/main/kotlin/com/xiehe/spine/AndroidAppContainer.kt`。
 

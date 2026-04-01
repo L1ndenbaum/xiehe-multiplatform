@@ -1,16 +1,8 @@
 package com.xiehe.spine.ui.screens.profile
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,13 +33,13 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.organization.OrganizationRepository
 import com.xiehe.spine.data.organization.OrganizationRole
 import com.xiehe.spine.ui.components.card.shared.Card
-import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.motion.AppConfirmDialogHost
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
 import com.xiehe.spine.ui.viewmodel.organization.selectedTeam
@@ -226,67 +218,33 @@ fun OrganizationInviteScreen(
             )
         }
 
-        if (showConfirm) {
-            val overlayAlpha by animateFloatAsState(
-                targetValue = 0.35f,
-                animationSpec = tween(220),
-                label = "organization_invite_overlay",
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = overlayAlpha))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { showConfirm = false },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                AnimatedVisibility(
-                    visible = showConfirm,
-                    enter = fadeIn(animationSpec = tween(220)) +
-                        slideInVertically(animationSpec = tween(220)) { it / 4 },
-                    exit = fadeOut(animationSpec = tween(220)) +
-                        slideOutVertically(animationSpec = tween(220)) { it / 5 },
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {},
-                            ),
-                    ) {
-                        OperationVerifyCard(
-                            title = "发送邀请",
-                            message = "确认向 $email 发送加入${team?.name ?: "当前组织"}的邀请，并授予${role.label}身份吗？",
-                            confirmText = "发送邀请",
-                            cancelText = "取消",
-                            confirmButtonColor = SpineTheme.colors.primary,
-                            cancelButtonColor = SpineTheme.colors.textSecondary,
-                            onCancel = { showConfirm = false },
-                            onConfirm = {
-                                showConfirm = false
-                                val teamId = team?.id ?: return@OperationVerifyCard
-                                vm.inviteMember(
-                                    session = session,
-                                    repository = repository,
-                                    teamId = teamId,
-                                    email = email.trim(),
-                                    role = role,
-                                    message = message.trim(),
-                                    onSessionUpdated = onSessionUpdated,
-                                    onSuccess = onFinished,
-                                    onSessionExpired = onSessionExpired,
-                                )
-                            },
-                        )
-                    }
-                }
-            }
-        }
+        AppConfirmDialogHost(
+            visible = showConfirm,
+            title = "发送邀请",
+            message = "确认向 $email 发送加入${team?.name ?: "当前组织"}的邀请，并授予${role.label}身份吗？",
+            confirmText = "发送邀请",
+            cancelText = "取消",
+            confirmButtonColor = SpineTheme.colors.primary,
+            cancelButtonColor = SpineTheme.colors.textSecondary,
+            confirmTextColor = SpineTheme.colors.onPrimary,
+            cancelTextColor = SpineTheme.colors.onPrimary,
+            onDismissRequest = { showConfirm = false },
+            onConfirm = {
+                showConfirm = false
+                val teamId = team?.id ?: return@AppConfirmDialogHost
+                vm.inviteMember(
+                    session = session,
+                    repository = repository,
+                    teamId = teamId,
+                    email = email.trim(),
+                    role = role,
+                    message = message.trim(),
+                    onSessionUpdated = onSessionUpdated,
+                    onSuccess = onFinished,
+                    onSessionExpired = onSessionExpired,
+                )
+            },
+        )
     }
 }
 

@@ -1,15 +1,7 @@
 package com.xiehe.spine.ui.screens.profile
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,11 +28,11 @@ import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.organization.OrganizationRepository
 import com.xiehe.spine.ui.components.card.shared.Card
-import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
+import com.xiehe.spine.ui.motion.AppConfirmDialogHost
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
 
@@ -207,67 +199,33 @@ fun OrganizationCreateTeamScreen(
             )
         }
 
-        if (showConfirm) {
-            val overlayAlpha by animateFloatAsState(
-                targetValue = 0.35f,
-                animationSpec = tween(220),
-                label = "organization_create_team_overlay",
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = overlayAlpha))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { showConfirm = false },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                AnimatedVisibility(
-                    visible = showConfirm,
-                    enter = fadeIn(animationSpec = tween(220)) +
-                        slideInVertically(animationSpec = tween(220)) { it / 4 },
-                    exit = fadeOut(animationSpec = tween(220)) +
-                        slideOutVertically(animationSpec = tween(220)) { it / 5 },
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {},
-                            ),
-                    ) {
-                        OperationVerifyCard(
-                            title = "创建团队",
-                            message = "确认创建团队$name，并将最大成员数设为${maxMembersValue ?: 0}人吗？",
-                            confirmText = "创建团队",
-                            cancelText = "取消",
-                            confirmButtonColor = SpineTheme.colors.primary,
-                            cancelButtonColor = SpineTheme.colors.textSecondary,
-                            onCancel = { showConfirm = false },
-                            onConfirm = {
-                                showConfirm = false
-                                vm.createTeam(
-                                    session = session,
-                                    repository = repository,
-                                    name = name,
-                                    description = description,
-                                    hospital = hospital,
-                                    department = department,
-                                    maxMembers = maxMembersValue,
-                                    onSessionUpdated = onSessionUpdated,
-                                    onSuccess = onFinished,
-                                    onSessionExpired = onSessionExpired,
-                                )
-                            },
-                        )
-                    }
-                }
-            }
-        }
+        AppConfirmDialogHost(
+            visible = showConfirm,
+            title = "创建团队",
+            message = "确认创建团队$name，并将最大成员数设为${maxMembersValue ?: 0}人吗？",
+            confirmText = "创建团队",
+            cancelText = "取消",
+            confirmButtonColor = SpineTheme.colors.primary,
+            cancelButtonColor = SpineTheme.colors.textSecondary,
+            confirmTextColor = SpineTheme.colors.onPrimary,
+            cancelTextColor = SpineTheme.colors.onPrimary,
+            onDismissRequest = { showConfirm = false },
+            onConfirm = {
+                showConfirm = false
+                vm.createTeam(
+                    session = session,
+                    repository = repository,
+                    name = name,
+                    description = description,
+                    hospital = hospital,
+                    department = department,
+                    maxMembers = maxMembersValue,
+                    onSessionUpdated = onSessionUpdated,
+                    onSuccess = onFinished,
+                    onSessionExpired = onSessionExpired,
+                )
+            },
+        )
     }
 }
 

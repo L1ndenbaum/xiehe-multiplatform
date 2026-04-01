@@ -1,16 +1,8 @@
 package com.xiehe.spine.ui.screens.profile
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +27,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +42,6 @@ import com.xiehe.spine.data.organization.OrganizationRepository
 import com.xiehe.spine.data.organization.OrganizationRole
 import com.xiehe.spine.data.organization.OrganizationTeamSummary
 import com.xiehe.spine.ui.components.card.shared.Card
-import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
@@ -59,6 +49,7 @@ import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.motion.AppConfirmDialogHost
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationTab
 import com.xiehe.spine.ui.viewmodel.organization.OrganizationViewModel
@@ -66,8 +57,6 @@ import com.xiehe.spine.ui.viewmodel.organization.canManageTarget
 import com.xiehe.spine.ui.viewmodel.organization.currentMember
 import com.xiehe.spine.ui.viewmodel.organization.selectedTeam
 import com.xiehe.spine.ui.viewmodel.organization.stableId
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 private enum class MemberManagementAction {
     CHANGE_ROLE,
@@ -83,7 +72,6 @@ fun OrganizationScreen(
     onSessionExpired: (String) -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     val team = state.selectedTeam
 
     var rolePickerMember by remember { mutableStateOf<OrganizationMember?>(null) }
@@ -191,132 +179,82 @@ fun OrganizationScreen(
             )
         }
 
-        if (confirmAction != null) {
-            val overlayAlpha by animateFloatAsState(
-                targetValue = if (confirmVisible) 0.35f else 0f,
-                animationSpec = tween(220),
-                label = "organization_confirm_overlay",
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = overlayAlpha))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {
-                            coroutineScope.launch {
-                                confirmVisible = false
-                                delay(220)
+        when (confirmAction) {
+            MemberManagementAction.CHANGE_ROLE -> {
+                val change = pendingRoleChange
+                if (change != null) {
+                    val (member, role) = change
+                    AppConfirmDialogHost(
+                        visible = confirmVisible,
+                        title = "变更身份",
+                        message = "确认将 ${member.displayName()} 的团队身份变更为${role.label}吗？",
+                        confirmText = "确认变更",
+                        cancelText = "取消",
+                        confirmButtonColor = SpineTheme.colors.primary,
+                        cancelButtonColor = SpineTheme.colors.textSecondary,
+                        confirmTextColor = SpineTheme.colors.onPrimary,
+                        cancelTextColor = SpineTheme.colors.onPrimary,
+                        onDismissRequest = { confirmVisible = false },
+                        onDismissed = {
+                            if (!confirmVisible) {
                                 confirmAction = null
-                                pendingDeleteMember = null
                                 pendingRoleChange = null
                             }
                         },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                AnimatedVisibility(
-                    visible = confirmVisible,
-                    enter = fadeIn(animationSpec = tween(220)) +
-                        slideInVertically(animationSpec = tween(220)) { it / 4 },
-                    exit = fadeOut(animationSpec = tween(220)) +
-                        slideOutVertically(animationSpec = tween(220)) { it / 5 },
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {},
-                            ),
-                    ) {
-                        when (confirmAction) {
-                            MemberManagementAction.CHANGE_ROLE -> {
-                                val (member, role) = pendingRoleChange ?: return@Box
-                                OperationVerifyCard(
-                                    title = "变更身份",
-                                    message = "确认将 ${member.displayName()} 的团队身份变更为${role.label}吗？",
-                                    confirmText = "确认变更",
-                                    cancelText = "取消",
-                                    confirmButtonColor = SpineTheme.colors.primary,
-                                    cancelButtonColor = SpineTheme.colors.textSecondary,
-                                    onCancel = {
-                                        coroutineScope.launch {
-                                            confirmVisible = false
-                                            delay(220)
-                                            confirmAction = null
-                                            pendingRoleChange = null
-                                        }
-                                    },
-                                    onConfirm = {
-                                        coroutineScope.launch {
-                                            confirmVisible = false
-                                            delay(220)
-                                            confirmAction = null
-                                            pendingRoleChange?.let { (target, selectedRole) ->
-                                                val teamId = team?.id ?: return@let
-                                                vm.updateMemberRole(
-                                                    session = session,
-                                                    repository = repository,
-                                                    teamId = teamId,
-                                                    member = target,
-                                                    role = selectedRole,
-                                                    onSessionUpdated = onSessionUpdated,
-                                                    onSessionExpired = onSessionExpired,
-                                                )
-                                            }
-                                            pendingRoleChange = null
-                                        }
-                                    },
-                                )
-                            }
-
-                            MemberManagementAction.REMOVE_MEMBER -> {
-                                val member = pendingDeleteMember ?: return@Box
-                                OperationVerifyCard(
-                                    title = "删除成员",
-                                    message = "确认将 ${member.displayName()} 从当前组织中移除吗？该操作不可撤销。",
-                                    confirmText = "删除成员",
-                                    cancelText = "取消",
-                                    confirmButtonColor = SpineTheme.colors.error,
-                                    cancelButtonColor = SpineTheme.colors.textSecondary,
-                                    onCancel = {
-                                        coroutineScope.launch {
-                                            confirmVisible = false
-                                            delay(220)
-                                            confirmAction = null
-                                            pendingDeleteMember = null
-                                        }
-                                    },
-                                    onConfirm = {
-                                        coroutineScope.launch {
-                                            confirmVisible = false
-                                            delay(220)
-                                            confirmAction = null
-                                            pendingDeleteMember?.let { target ->
-                                                val teamId = team?.id ?: return@let
-                                                vm.removeMember(
-                                                    session = session,
-                                                    repository = repository,
-                                                    teamId = teamId,
-                                                    member = target,
-                                                    onSessionUpdated = onSessionUpdated,
-                                                    onSessionExpired = onSessionExpired,
-                                                )
-                                            }
-                                            pendingDeleteMember = null
-                                        }
-                                    },
-                                )
-                            }
-
-                            null -> Unit
-                        }
-                    }
+                        onConfirm = {
+                            confirmVisible = false
+                            val teamId = team?.id ?: return@AppConfirmDialogHost
+                            vm.updateMemberRole(
+                                session = session,
+                                repository = repository,
+                                teamId = teamId,
+                                member = member,
+                                role = role,
+                                onSessionUpdated = onSessionUpdated,
+                                onSessionExpired = onSessionExpired,
+                            )
+                        },
+                    )
                 }
             }
+
+            MemberManagementAction.REMOVE_MEMBER -> {
+                val member = pendingDeleteMember
+                if (member != null) {
+                    AppConfirmDialogHost(
+                        visible = confirmVisible,
+                        title = "删除成员",
+                        message = "确认将 ${member.displayName()} 从当前组织中移除吗？该操作不可撤销。",
+                        confirmText = "删除成员",
+                        cancelText = "取消",
+                        confirmButtonColor = SpineTheme.colors.error,
+                        cancelButtonColor = SpineTheme.colors.textSecondary,
+                        confirmTextColor = SpineTheme.colors.onPrimary,
+                        cancelTextColor = SpineTheme.colors.onPrimary,
+                        onDismissRequest = { confirmVisible = false },
+                        onDismissed = {
+                            if (!confirmVisible) {
+                                confirmAction = null
+                                pendingDeleteMember = null
+                            }
+                        },
+                        onConfirm = {
+                            confirmVisible = false
+                            val teamId = team?.id ?: return@AppConfirmDialogHost
+                            vm.removeMember(
+                                session = session,
+                                repository = repository,
+                                teamId = teamId,
+                                member = member,
+                                onSessionUpdated = onSessionUpdated,
+                                onSessionExpired = onSessionExpired,
+                            )
+                        },
+                    )
+                }
+            }
+
+            null -> Unit
         }
     }
 }

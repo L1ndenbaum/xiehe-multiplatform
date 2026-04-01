@@ -2,8 +2,6 @@ package com.xiehe.spine.ui.screens.image
 
 import com.xiehe.spine.notifySessionExpired
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -11,7 +9,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,12 +48,13 @@ import com.xiehe.spine.ui.components.card.image.ImageTaskAction
 import com.xiehe.spine.ui.components.card.image.ImageTaskActionStyle
 import com.xiehe.spine.ui.components.card.image.ImageTaskCard
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.card.image.inferExamType
 import com.xiehe.spine.ui.components.form.file.rememberDownloadedFileSaver
+import com.xiehe.spine.ui.motion.AppConfirmDialogHost
+import com.xiehe.spine.ui.motion.AppMotion
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.image.ImageStatusFilter
 import com.xiehe.spine.ui.viewmodel.image.ImageTypeFilter
@@ -284,8 +282,10 @@ fun ImagesScreen(
 
         AnimatedVisibility(
             visible = downloadBannerVisible && !downloadBannerMessage.isNullOrBlank(),
-            enter = fadeIn(animationSpec = tween(220)) + slideInVertically(animationSpec = tween(220)) { it / 3 },
-            exit = fadeOut(animationSpec = tween(220)) + slideOutVertically(animationSpec = tween(220)) { it / 3 },
+            enter = fadeIn(animationSpec = AppMotion.toastEnterSpec()) +
+                slideInVertically(animationSpec = AppMotion.toastEnterOffsetSpec()) { it / 3 },
+            exit = fadeOut(animationSpec = AppMotion.toastExitSpec()) +
+                slideOutVertically(animationSpec = AppMotion.toastExitOffsetSpec()) { it / 3 },
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             Card(
@@ -303,92 +303,53 @@ fun ImagesScreen(
         }
 
         pendingDeleteItem?.let { item ->
-            val overlayAlpha by animateFloatAsState(
-                targetValue = if (deleteDialogVisible) 0.35f else 0f,
-                animationSpec = tween(220),
-                label = "delete_overlay_alpha",
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = overlayAlpha))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {
-                            coroutineScope.launch {
-                                deleteDialogVisible = false
-                                delay(220)
-                                pendingDeleteItem = null
-                            }
-                        },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                AnimatedVisibility(
-                    visible = deleteDialogVisible,
-                    enter = fadeIn(animationSpec = tween(220)) + slideInVertically(animationSpec = tween(220)) { it / 4 },
-                    exit = fadeOut(animationSpec = tween(220)) + slideOutVertically(animationSpec = tween(220)) { it / 5 },
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {},
-                            ),
-                    ) {
-                        OperationVerifyCard(
-                            title = "删除影像",
-                            message = "确认删除影像“${item.originalFilename}”吗？该操作不可恢复。",
-                            confirmText = "删除",
-                            cancelText = "取消",
-                            confirmButtonColor = SpineTheme.colors.error,
-                            cancelButtonColor = SpineTheme.colors.textSecondary,
-                            onCancel = {
-                                coroutineScope.launch {
-                                    deleteDialogVisible = false
-                                    delay(220)
-                                    pendingDeleteItem = null
-                                }
-                            },
-                            onConfirm = {
-                                coroutineScope.launch {
-                                    deleteDialogVisible = false
-                                    delay(220)
-                                    pendingDeleteItem = null
-                                    actionError = null
-                                    actionSuccess = null
-                                    actionLoadingMessage = "...正在删除中"
-                                    when (val result = repository.deleteImageFile(session, item.id)) {
-                                        is AppResult.Success -> {
-                                            val activeSession = result.data.first
-                                            onSessionUpdated(activeSession)
-                                            vm.refresh(
-                                                session = activeSession,
-                                                repository = repository,
-                                                onSessionUpdated = onSessionUpdated,
-                                                onSessionExpired = onSessionExpired,
-                                            )
-                                            actionSuccess = result.data.second
-                                        }
-
-                                        is AppResult.Failure -> {
-                                            if (result.notifySessionExpired(onSessionExpired)) {
-                                                actionError = null
-                                            } else {
-                                                actionError = result.message
-                                            }
-                                        }
-                                    }
-                                    actionLoadingMessage = null
-                                }
-                            },
-                        )
+            AppConfirmDialogHost(
+                visible = deleteDialogVisible,
+                title = "删除影像",
+                message = "确认删除影像“${item.originalFilename}”吗？该操作不可恢复。",
+                confirmText = "删除",
+                cancelText = "取消",
+                confirmButtonColor = SpineTheme.colors.error,
+                cancelButtonColor = SpineTheme.colors.textSecondary,
+                confirmTextColor = SpineTheme.colors.onPrimary,
+                cancelTextColor = SpineTheme.colors.onPrimary,
+                onDismissRequest = { deleteDialogVisible = false },
+                onDismissed = {
+                    if (!deleteDialogVisible) {
+                        pendingDeleteItem = null
                     }
-                }
-            }
+                },
+                onConfirm = {
+                    coroutineScope.launch {
+                        deleteDialogVisible = false
+                        actionError = null
+                        actionSuccess = null
+                        actionLoadingMessage = "...正在删除中"
+                        when (val result = repository.deleteImageFile(session, item.id)) {
+                            is AppResult.Success -> {
+                                val activeSession = result.data.first
+                                onSessionUpdated(activeSession)
+                                vm.refresh(
+                                    session = activeSession,
+                                    repository = repository,
+                                    onSessionUpdated = onSessionUpdated,
+                                    onSessionExpired = onSessionExpired,
+                                )
+                                actionSuccess = result.data.second
+                            }
+
+                            is AppResult.Failure -> {
+                                if (result.notifySessionExpired(onSessionExpired)) {
+                                    actionError = null
+                                } else {
+                                    actionError = result.message
+                                }
+                            }
+                        }
+                        actionLoadingMessage = null
+                    }
+                },
+            )
         }
     }
 

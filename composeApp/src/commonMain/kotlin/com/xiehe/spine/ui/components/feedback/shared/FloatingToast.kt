@@ -1,7 +1,6 @@
 package com.xiehe.spine.ui.components.feedback.shared
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.motion.AppMotion
 import com.xiehe.spine.ui.theme.SpineTheme
 import kotlinx.coroutines.delay
 
@@ -45,17 +45,17 @@ fun FloatingToast(
         visible = true
         delay(durationMillis)
         visible = false
-        delay(220)
+        delay(AppMotion.toastExitMillis.toLong())
         onDismiss()
     }
 
     AnimatedVisibility(
         visible = visible,
         modifier = modifier,
-        enter = fadeIn(animationSpec = tween(220)) +
-            slideInVertically(animationSpec = tween(220)) { -it / 3 },
-        exit = fadeOut(animationSpec = tween(220)) +
-            slideOutVertically(animationSpec = tween(220)) { -it / 4 },
+        enter = fadeIn(animationSpec = AppMotion.toastEnterSpec()) +
+            slideInVertically(animationSpec = AppMotion.toastEnterOffsetSpec()) { -it / 3 },
+        exit = fadeOut(animationSpec = AppMotion.toastExitSpec()) +
+            slideOutVertically(animationSpec = AppMotion.toastExitOffsetSpec()) { -it / 4 },
     ) {
         Row(
             modifier = Modifier

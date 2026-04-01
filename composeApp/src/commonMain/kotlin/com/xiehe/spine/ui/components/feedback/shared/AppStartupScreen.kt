@@ -1,11 +1,8 @@
 package com.xiehe.spine.ui.components.feedback.shared
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +22,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.ui.motion.AppMotion
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
@@ -38,10 +36,7 @@ fun AppStartupScreen(
     val startAngle by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
+        animationSpec = AppMotion.startupSpinSpec(),
         label = "app_startup_spin",
     )
     val backgroundBrush = remember(colors.primary, colors.info, colors.background) {

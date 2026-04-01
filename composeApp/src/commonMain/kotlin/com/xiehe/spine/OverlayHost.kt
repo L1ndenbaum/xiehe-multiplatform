@@ -1,42 +1,23 @@
 package com.xiehe.spine
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
-import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.navigation.shared.HeaderTextAction
 import com.xiehe.spine.ui.components.navigation.shared.SimpleShellHeader
+import com.xiehe.spine.ui.motion.AppConfirmDialogHost
+import com.xiehe.spine.ui.motion.AppOverlayEntryHost
+import com.xiehe.spine.ui.motion.AppRouteContentHost
 import com.xiehe.spine.ui.screens.image.ImageAnalysisScreen
 import com.xiehe.spine.ui.screens.image.ImageUploadScreen
 import com.xiehe.spine.ui.screens.message.MessagesScreen
@@ -55,8 +36,6 @@ import com.xiehe.spine.ui.viewmodel.organization.canInviteMembers
 import com.xiehe.spine.ui.viewmodel.organization.currentMember
 import com.xiehe.spine.ui.viewmodel.organization.selectedTeam
 import com.xiehe.spine.ui.viewmodel.profile.AppearanceViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun OverlayHost(
@@ -140,10 +119,8 @@ private fun PatientOverlayContent(
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val detailRoute = route as? OverlayRoute.PatientDetail
     var showDeletePatientConfirm by remember(detailRoute?.patientId) { mutableStateOf(false) }
-    var deletePatientConfirmVisible by remember(detailRoute?.patientId) { mutableStateOf(false) }
 
     MobileShell(
         selectedTab = selectedTab,
@@ -167,7 +144,6 @@ private fun PatientOverlayContent(
                                 text = "删除",
                                 onClick = {
                                     showDeletePatientConfirm = true
-                                    deletePatientConfirmVisible = false
                                 },
                                 fill = colors.error,
                                 borderColor = colors.error,
@@ -197,15 +173,10 @@ private fun PatientOverlayContent(
             }
         },
     ) {
-        OverlayContentEntry {
-            AnimatedContent(
+        AppOverlayEntryHost {
+            AppRouteContentHost(
                 targetState = route,
-                transitionSpec = {
-                    overlayContentTransition(
-                        initialOrder = patientOverlayOrder(initialState),
-                        targetOrder = patientOverlayOrder(targetState),
-                    )
-                },
+                orderOf = ::patientOverlayOrder,
                 label = "patient_overlay_content_transition",
             ) { currentRoute ->
                 when (currentRoute) {
@@ -231,91 +202,39 @@ private fun PatientOverlayContent(
                         )
 
                         if (showDeletePatientConfirm) {
-                            LaunchedEffect(showDeletePatientConfirm) {
-                                delay(16)
-                                deletePatientConfirmVisible = true
-                            }
-                            val overlayAlpha by animateFloatAsState(
-                                targetValue = if (deletePatientConfirmVisible) 0.35f else 0f,
-                                animationSpec = tween(220),
-                                label = "patient_delete_confirm_overlay_alpha",
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = overlayAlpha))
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                        onClick = {
-                                            coroutineScope.launch {
-                                                deletePatientConfirmVisible = false
-                                                delay(220)
-                                                showDeletePatientConfirm = false
-                                            }
+                            AppConfirmDialogHost(
+                                visible = showDeletePatientConfirm,
+                                title = "删除患者",
+                                message = "确认删除该患者吗？该操作会执行软删除，患者记录将不再显示在列表中。",
+                                confirmText = "删除",
+                                cancelText = "取消",
+                                confirmButtonColor = SpineTheme.colors.error,
+                                cancelButtonColor = SpineTheme.colors.textSecondary,
+                                confirmTextColor = SpineTheme.colors.onPrimary,
+                                cancelTextColor = SpineTheme.colors.onPrimary,
+                                onDismissRequest = { showDeletePatientConfirm = false },
+                                onConfirm = {
+                                    showDeletePatientConfirm = false
+                                    scopedViewModels.patientDetailVm.delete(
+                                        patientId = currentRoute.patientId,
+                                        session = session,
+                                        repository = container.patientRepository,
+                                        onSessionUpdated = onSessionUpdated,
+                                        onDeleted = { updatedSession ->
+                                            onSessionUpdated(updatedSession)
+                                            onTabSelected(1)
+                                            onRouteChange(null)
+                                            scopedViewModels.patientsVm.refresh(
+                                                session = updatedSession,
+                                                repository = container.patientRepository,
+                                                onSessionUpdated = onSessionUpdated,
+                                                onSessionExpired = onSessionExpired,
+                                            )
                                         },
-                                    ),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                AnimatedVisibility(
-                                    visible = deletePatientConfirmVisible,
-                                    enter = fadeIn(animationSpec = tween(220)) +
-                                        slideInVertically(animationSpec = tween(220)) { it / 4 },
-                                    exit = fadeOut(animationSpec = tween(220)) +
-                                        slideOutVertically(animationSpec = tween(220)) { it / 5 },
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(horizontal = 20.dp)
-                                            .clickable(
-                                                interactionSource = remember { MutableInteractionSource() },
-                                                indication = null,
-                                                onClick = {},
-                                            ),
-                                    ) {
-                                        OperationVerifyCard(
-                                            title = "删除患者",
-                                            message = "确认删除该患者吗？该操作会执行软删除，患者记录将不再显示在列表中。",
-                                            confirmText = "删除",
-                                            cancelText = "取消",
-                                            confirmButtonColor = SpineTheme.colors.error,
-                                            cancelButtonColor = SpineTheme.colors.textSecondary,
-                                            onCancel = {
-                                                coroutineScope.launch {
-                                                    deletePatientConfirmVisible = false
-                                                    delay(220)
-                                                    showDeletePatientConfirm = false
-                                                }
-                                            },
-                                            onConfirm = {
-                                                coroutineScope.launch {
-                                                    deletePatientConfirmVisible = false
-                                                    delay(220)
-                                                    showDeletePatientConfirm = false
-                                                }
-                                                scopedViewModels.patientDetailVm.delete(
-                                                    patientId = currentRoute.patientId,
-                                                    session = session,
-                                                    repository = container.patientRepository,
-                                                    onSessionUpdated = onSessionUpdated,
-                                                    onDeleted = { updatedSession ->
-                                                        onSessionUpdated(updatedSession)
-                                                        onTabSelected(1)
-                                                        onRouteChange(null)
-                                                        scopedViewModels.patientsVm.refresh(
-                                                            session = updatedSession,
-                                                            repository = container.patientRepository,
-                                                            onSessionUpdated = onSessionUpdated,
-                                                            onSessionExpired = onSessionExpired,
-                                                        )
-                                                    },
-                                                    onSessionExpired = onSessionExpired,
-                                                )
-                                            },
-                                        )
-                                    }
-                                }
-                            }
+                                        onSessionExpired = onSessionExpired,
+                                    )
+                                },
+                            )
                         }
                     }
 
@@ -396,11 +315,11 @@ private fun ImageOverlayContent(
                         onLeadingAction = { onRouteChange(null) },
                     )
                 },
-            ) {
-                OverlayContentEntry {
-                    ImageUploadScreen(
-                        vm = scopedViewModels.imageUploadVm,
-                        session = session,
+    ) {
+        AppOverlayEntryHost {
+            ImageUploadScreen(
+                vm = scopedViewModels.imageUploadVm,
+                session = session,
                         patientRepository = container.patientRepository,
                         imageRepository = container.imageFileRepository,
                         onSessionUpdated = onSessionUpdated,
@@ -551,15 +470,10 @@ private fun ProfileOverlayContent(
             }
         },
     ) {
-        OverlayContentEntry {
-            AnimatedContent(
+        AppOverlayEntryHost {
+            AppRouteContentHost(
                 targetState = route,
-                transitionSpec = {
-                    overlayContentTransition(
-                        initialOrder = profileOverlayOrder(initialState),
-                        targetOrder = profileOverlayOrder(targetState),
-                    )
-                },
+                orderOf = ::profileOverlayOrder,
                 label = "profile_overlay_content_transition",
             ) { currentRoute ->
                 when (currentRoute) {
@@ -639,29 +553,6 @@ private fun ProfileOverlayContent(
     }
 }
 
-@Composable
-private fun OverlayContentEntry(
-    content: @Composable () -> Unit,
-) {
-    var visible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        visible = true
-    }
-
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(animationSpec = tween(240)) +
-            slideInHorizontally(animationSpec = tween(260)) { full -> full / 5 },
-        exit = fadeOut(animationSpec = tween(0)),
-        label = "overlay_content_entry",
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            content()
-        }
-    }
-}
-
 private fun patientOverlayOrder(route: OverlayRoute): Int = when (route) {
     is OverlayRoute.PatientEdit -> 1
     is OverlayRoute.PatientDetail,
@@ -682,18 +573,3 @@ private fun profileOverlayOrder(route: OverlayRoute): Int = when (route) {
     -> 0
     else -> 0
 }
-
-private fun overlayContentTransition(
-    initialOrder: Int,
-    targetOrder: Int,
-) = (
-    fadeIn(animationSpec = tween(240)) +
-        slideInHorizontally(animationSpec = tween(260)) { full ->
-            if (targetOrder >= initialOrder) full / 6 else -full / 6
-        }
-    ).togetherWith(
-        fadeOut(animationSpec = tween(180)) +
-            slideOutHorizontally(animationSpec = tween(200)) { full ->
-                if (targetOrder >= initialOrder) -full / 7 else full / 7
-            },
-    )

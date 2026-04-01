@@ -5,11 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,12 +41,12 @@ import com.xiehe.spine.ui.components.analysis.image.ImageViewport
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.analysis.image.MeasureToolPanel
 import com.xiehe.spine.ui.components.analysis.image.MeasurementResultsPanel
-import com.xiehe.spine.ui.components.card.shared.OperationVerifyCard
 import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.form.file.FileSaveResult
 import com.xiehe.spine.ui.components.form.file.rememberDownloadedFileSaver
 import com.xiehe.spine.ui.components.form.file.rememberJsonFilePickerLauncher
+import com.xiehe.spine.ui.motion.AppConfirmDialogHost
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.image.AnalysisMeasurementKind
 import com.xiehe.spine.ui.viewmodel.image.ImageAnalysisViewModel
@@ -75,9 +71,7 @@ fun ImageAnalysisScreen(
     val state by vm.state.collectAsState()
     val scope = rememberCoroutineScope()
     var showAiConfirm by remember { mutableStateOf(false) }
-    var aiConfirmVisible by remember { mutableStateOf(false) }
     var showReportGenerateConfirm by remember { mutableStateOf(false) }
-    var reportGenerateConfirmVisible by remember { mutableStateOf(false) }
     val downloadedFileSaver = rememberDownloadedFileSaver()
     val jsonPicker = rememberJsonFilePickerLauncher { localJsonFile ->
         if (localJsonFile == null) {
@@ -254,7 +248,6 @@ fun ImageAnalysisScreen(
                 when (action) {
                     AnalysisBottomAction.AI_DETECT -> {
                         showAiConfirm = true
-                        aiConfirmVisible = false
                     }
                     AnalysisBottomAction.REPORT -> {
                         vm.openReportPanel(
@@ -273,79 +266,27 @@ fun ImageAnalysisScreen(
         )
     }
 
-    if (showAiConfirm) {
-        LaunchedEffect(showAiConfirm) {
-            if (showAiConfirm) {
-                delay(16)
-                aiConfirmVisible = true
+    AppConfirmDialogHost(
+        visible = showAiConfirm,
+        title = "AI检测确认",
+        message = "AI检测后，现有的测量结果会全部被覆盖，是否继续?",
+        confirmText = "继续",
+        cancelText = "取消",
+        confirmButtonColor = SpineTheme.colors.primary,
+        cancelButtonColor = SpineTheme.colors.textSecondary,
+        confirmTextColor = SpineTheme.colors.onPrimary,
+        cancelTextColor = SpineTheme.colors.onPrimary,
+        onDismissRequest = { showAiConfirm = false },
+        onConfirm = {
+            showAiConfirm = false
+            scope.launch {
+                vm.runAiDetect(
+                    fileId = fileId,
+                    repository = aiRepository,
+                )
             }
-        }
-        val overlayAlpha by animateFloatAsState(
-            targetValue = if (aiConfirmVisible) 0.36f else 0f,
-            animationSpec = tween(220),
-            label = "analysis_ai_confirm_overlay_alpha",
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = overlayAlpha))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        scope.launch {
-                            aiConfirmVisible = false
-                            delay(220)
-                            showAiConfirm = false
-                        }
-                    },
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            AnimatedVisibility(
-                visible = aiConfirmVisible,
-                enter = fadeIn(animationSpec = tween(220)) + slideInVertically(animationSpec = tween(220)) { it / 4 },
-                exit = fadeOut(animationSpec = tween(220)) + slideOutVertically(animationSpec = tween(220)) { it / 5 },
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {},
-                        ),
-                ) {
-                    OperationVerifyCard(
-                        title = "AI检测确认",
-                        message = "AI检测后，现有的测量结果会全部被覆盖，是否继续?",
-                        confirmText = "继续",
-                        cancelText = "取消",
-                        confirmButtonColor = SpineTheme.colors.primary,
-                        cancelButtonColor = SpineTheme.colors.textSecondary,
-                        onCancel = {
-                            scope.launch {
-                                aiConfirmVisible = false
-                                delay(220)
-                                showAiConfirm = false
-                            }
-                        },
-                        onConfirm = {
-                            scope.launch {
-                                aiConfirmVisible = false
-                                delay(220)
-                                showAiConfirm = false
-                                vm.runAiDetect(
-                                    fileId = fileId,
-                                    repository = aiRepository,
-                                )
-                            }
-                        },
-                    )
-                }
-            }
-        }
-    }
+        },
+    )
 
     if (state.showReportPanel) {
         PickerDialog(
@@ -365,88 +306,35 @@ fun ImageAnalysisScreen(
                 onReportTextChange = vm::updateReportText,
                 onGenerateByAi = {
                     showReportGenerateConfirm = true
-                    reportGenerateConfirmVisible = false
                 },
             )
         }
     }
 
-    if (showReportGenerateConfirm) {
-        LaunchedEffect(showReportGenerateConfirm) {
-            if (showReportGenerateConfirm) {
-                delay(16)
-                reportGenerateConfirmVisible = true
+    AppConfirmDialogHost(
+        visible = showReportGenerateConfirm,
+        title = "AI生成报告确认",
+        message = "AI生成报告后，现有的填写信息会被覆盖，是否继续?",
+        confirmText = "继续",
+        cancelText = "取消",
+        confirmButtonColor = SpineTheme.colors.primary,
+        cancelButtonColor = SpineTheme.colors.textSecondary,
+        confirmTextColor = SpineTheme.colors.onPrimary,
+        cancelTextColor = SpineTheme.colors.onPrimary,
+        onDismissRequest = { showReportGenerateConfirm = false },
+        onConfirm = {
+            showReportGenerateConfirm = false
+            scope.launch {
+                vm.generateReport(
+                    session = session,
+                    repository = measurementRepository,
+                    examType = examType,
+                    onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
+                )
             }
-        }
-        val overlayAlpha by animateFloatAsState(
-            targetValue = if (reportGenerateConfirmVisible) 0.36f else 0f,
-            animationSpec = tween(220),
-            label = "analysis_report_confirm_overlay_alpha",
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = overlayAlpha))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        scope.launch {
-                            reportGenerateConfirmVisible = false
-                            delay(220)
-                            showReportGenerateConfirm = false
-                        }
-                    },
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            AnimatedVisibility(
-                visible = reportGenerateConfirmVisible,
-                enter = fadeIn(animationSpec = tween(220)) + slideInVertically(animationSpec = tween(220)) { it / 4 },
-                exit = fadeOut(animationSpec = tween(220)) + slideOutVertically(animationSpec = tween(220)) { it / 5 },
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {},
-                        ),
-                ) {
-                    OperationVerifyCard(
-                        title = "AI生成报告确认",
-                        message = "AI生成报告后，现有的填写信息会被覆盖，是否继续?",
-                        confirmText = "继续",
-                        cancelText = "取消",
-                        confirmButtonColor = SpineTheme.colors.primary,
-                        cancelButtonColor = SpineTheme.colors.textSecondary,
-                        onCancel = {
-                            scope.launch {
-                                reportGenerateConfirmVisible = false
-                                delay(220)
-                                showReportGenerateConfirm = false
-                            }
-                        },
-                        onConfirm = {
-                            scope.launch {
-                                reportGenerateConfirmVisible = false
-                                delay(220)
-                                showReportGenerateConfirm = false
-                                vm.generateReport(
-                                    session = session,
-                                    repository = measurementRepository,
-                                    examType = examType,
-                                    onSessionUpdated = onSessionUpdated,
-                                    onSessionExpired = onSessionExpired,
-                                )
-                            }
-                        },
-                    )
-                }
-            }
-        }
-    }
+        },
+    )
 
     if (state.showToolsPanel) {
         PickerDialog(

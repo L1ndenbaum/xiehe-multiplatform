@@ -5,7 +5,6 @@ import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.ui.motion.AppMotion
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
@@ -56,7 +56,7 @@ fun BottomTabBar(
         val indicatorWidth = (maxWidth - (tabSpacing * (tabCount - 1))) / tabCount
         val indicatorOffset by animateDpAsState(
             targetValue = (indicatorWidth + tabSpacing) * selectedIndex.coerceIn(0, tabCount - 1),
-            animationSpec = tween(260),
+            animationSpec = AppMotion.tabIndicatorSpec(),
             label = "bottom_tab_indicator_offset",
         )
 
@@ -85,7 +85,7 @@ fun BottomTabBar(
                 val selected = selectedIndex == index
                 val labelColor by animateColorAsState(
                     targetValue = if (selected) colors.onPrimary else colors.tabInactive,
-                    animationSpec = tween(180),
+                    animationSpec = AppMotion.tabLabelColorSpec(),
                     label = "bottom_tab_label_color",
                 )
                 Column(

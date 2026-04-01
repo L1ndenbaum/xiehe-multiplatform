@@ -1,12 +1,5 @@
 package com.xiehe.spine
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,6 +11,7 @@ import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.navigation.shared.DashboardShellHeader
 import com.xiehe.spine.ui.components.navigation.shared.SearchShellHeader
 import com.xiehe.spine.ui.components.navigation.shared.SimpleShellHeader
+import com.xiehe.spine.ui.motion.AppRouteContentHost
 import com.xiehe.spine.ui.screens.dashboard.DashboardScreen
 import com.xiehe.spine.ui.screens.image.ImagesScreen
 import com.xiehe.spine.ui.screens.patient.PatientsScreen
@@ -90,18 +84,9 @@ internal fun MainShellHost(
             }
         },
     ) {
-        AnimatedContent(
+        AppRouteContentHost(
             targetState = selectedTab,
-            transitionSpec = {
-                val direction = if (targetState >= initialState) 1 else -1
-                (fadeIn(animationSpec = tween(240)) + slideInHorizontally(animationSpec = tween(260)) { full ->
-                    direction * full / 6
-                }).togetherWith(
-                    fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(200)) { full ->
-                        -direction * full / 7
-                    },
-                )
-            },
+            orderOf = { it },
             label = "main_tab_content_transition",
         ) { tab ->
             when (tab) {
