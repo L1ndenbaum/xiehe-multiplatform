@@ -44,6 +44,8 @@ data class ImagesUiState(
     val statusFilter: ImageStatusFilter = ImageStatusFilter.ALL,
     val items: List<ImageFileSummary> = emptyList(),
     val filteredItems: List<ImageFileSummary> = emptyList(),
+    val summaryTotalCount: Int = 0,
+    val summaryReviewedCount: Int = 0,
     val errorMessage: String? = null,
 )
 
@@ -110,6 +112,10 @@ class ImagesViewModel : BaseViewModel() {
                             loading = false,
                             lastLoadedAtEpochSeconds = currentEpochSeconds(),
                             items = payload,
+                            summaryTotalCount = payload.size,
+                            summaryReviewedCount = payload.count { image ->
+                                normalizeImageStatus(image.status) == ImageWorkflowStatus.PROCESSED
+                            },
                             errorMessage = null,
                         )
                         next.copy(filteredItems = applyFilters(next))
@@ -127,6 +133,34 @@ class ImagesViewModel : BaseViewModel() {
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+
+    fun syncReviewSummary(
+        session: UserSession,
+        repository: ImageFileRepository,
+        onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
+    ) {
+        scope.launch {
+            when (val result = repository.loadAllImageFiles(session)) {
+                is AppResult.Success -> {
+                    onSessionUpdated(result.data.first)
+                    val images = result.data.second
+                    _state.update {
+                        it.copy(
+                            summaryTotalCount = images.size,
+                            summaryReviewedCount = images.count { image ->
+                                normalizeImageStatus(image.status) == ImageWorkflowStatus.PROCESSED
+                            },
+                        )
+                    }
+                }
+
+                is AppResult.Failure -> {
+                    result.notifySessionExpired(onSessionExpired)
                 }
             }
         }

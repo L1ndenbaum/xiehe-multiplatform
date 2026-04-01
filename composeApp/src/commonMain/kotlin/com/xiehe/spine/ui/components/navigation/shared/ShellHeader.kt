@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.currentHour24
 import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
@@ -78,7 +79,7 @@ fun DashboardShellHeader(
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        text = "早上好",
+                        text = dashboardGreetingMessage(),
                         style = SpineTheme.typography.subhead,
                         color = Color.White.copy(alpha = 0.72f),
                     )
@@ -115,6 +116,17 @@ fun DashboardShellHeader(
                 )
             }
         }
+    }
+}
+
+private fun dashboardGreetingMessage(): String {
+    return when (currentHour24().coerceIn(0, 23)) {
+        in 0..5 -> "已是凌晨了"
+        in 6..8 -> "早上好"
+        in 9..10 -> "上午好"
+        in 11..12 -> "中午好"
+        in 13..16 -> "下午好"
+        else -> "晚上好"
     }
 }
 

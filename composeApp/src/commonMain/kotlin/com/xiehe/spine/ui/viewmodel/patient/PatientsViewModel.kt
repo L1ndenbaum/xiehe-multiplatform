@@ -40,6 +40,7 @@ data class PatientsUiState(
     val genderFilter: GenderFilter = GenderFilter.ALL,
     val ageFilter: AgeFilter = AgeFilter.ALL,
     val items: List<PatientSummary> = emptyList(),
+    val managedTotalCount: Int = 0,
     val page: Int = 1,
     val totalPages: Int = 1,
     val errorMessage: String? = null,
@@ -136,6 +137,7 @@ class PatientsViewModel : BaseViewModel() {
                             loading = false,
                             loadingMore = false,
                             items = if (append) it.items + payload.items else payload.items,
+                            managedTotalCount = payload.pagination.total,
                             page = payload.pagination.page,
                             totalPages = payload.pagination.totalPages.coerceAtLeast(1),
                         )
@@ -160,6 +162,33 @@ class PatientsViewModel : BaseViewModel() {
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+
+    fun syncManagedTotalCount(
+        session: UserSession,
+        repository: PatientRepository,
+        onSessionUpdated: (UserSession) -> Unit,
+        onSessionExpired: (String) -> Unit = {},
+    ) {
+        scope.launch {
+            when (
+                val result = repository.loadPatients(
+                    session = session,
+                    page = 1,
+                    pageSize = 1,
+                    search = "",
+                )
+            ) {
+                is AppResult.Success -> {
+                    onSessionUpdated(result.data.first)
+                    _state.update { it.copy(managedTotalCount = result.data.second.pagination.total) }
+                }
+
+                is AppResult.Failure -> {
+                    result.notifySessionExpired(onSessionExpired)
                 }
             }
         }

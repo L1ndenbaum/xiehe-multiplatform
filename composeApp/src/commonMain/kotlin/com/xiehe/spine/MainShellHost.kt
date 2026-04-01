@@ -164,6 +164,14 @@ internal fun MainShellHost(
 
                 else -> ProfileScreen(
                     session = session,
+                    personalInfoVm = scopedViewModels.personalInfoVm,
+                    patientsVm = scopedViewModels.patientsVm,
+                    imagesVm = scopedViewModels.imagesVm,
+                    authRepository = container.authRepository,
+                    patientRepository = container.patientRepository,
+                    imageRepository = container.imageFileRepository,
+                    onSessionUpdated = onSessionUpdated,
+                    onSessionExpired = onSessionExpired,
                     onOpenAppearance = { onRouteChange(OverlayRoute.Appearance) },
                     onOpenPersonalInfo = { onRouteChange(OverlayRoute.PersonalInfo) },
                     onOpenOrganization = { onRouteChange(OverlayRoute.Organization) },

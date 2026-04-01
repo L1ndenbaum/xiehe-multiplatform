@@ -19,6 +19,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +30,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.image.ImageFileRepository
+import com.xiehe.spine.data.image.ImageWorkflowStatus
+import com.xiehe.spine.data.image.normalizeImageStatus
+import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.ui.components.card.profile.ProfileMenuRow
 import com.xiehe.spine.ui.components.card.profile.ProfileOrganizationPalette
@@ -39,18 +47,64 @@ import com.xiehe.spine.ui.components.feedback.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
+import com.xiehe.spine.ui.viewmodel.image.ImagesViewModel
+import com.xiehe.spine.ui.viewmodel.patient.PatientsViewModel
+import com.xiehe.spine.ui.viewmodel.profile.PersonalInfoViewModel
 
 @Composable
 fun ProfileScreen(
     session: UserSession,
+    personalInfoVm: PersonalInfoViewModel,
+    patientsVm: PatientsViewModel,
+    imagesVm: ImagesViewModel,
+    authRepository: AuthRepository,
+    patientRepository: PatientRepository,
+    imageRepository: ImageFileRepository,
+    onSessionUpdated: (UserSession) -> Unit,
+    onSessionExpired: (String) -> Unit = {},
     onOpenAppearance: () -> Unit,
     onOpenPersonalInfo: () -> Unit,
     onOpenOrganization: () -> Unit,
     onOpenChangePassword: () -> Unit,
     onLogout: () -> Unit,
 ) {
+    val personalInfoState by personalInfoVm.state.collectAsState()
+    val patientsState by patientsVm.state.collectAsState()
+    val imagesState by imagesVm.state.collectAsState()
     val colors = SpineTheme.colors
-    val displayName = session.fullName?.takeIf { it.isNotBlank() } ?: session.username
+    LaunchedEffect(session.accessToken) {
+        personalInfoVm.seedFromSession(session)
+        personalInfoVm.load(
+            session = session,
+            repository = authRepository,
+            onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
+        )
+        patientsVm.syncManagedTotalCount(
+            session = session,
+            repository = patientRepository,
+            onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
+        )
+        imagesVm.syncReviewSummary(
+            session = session,
+            repository = imageRepository,
+            onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
+        )
+    }
+    val displayName = personalInfoState.realName.ifBlank {
+        session.fullName?.takeIf { it.isNotBlank() } ?: session.username
+    }
+    val roleLabel = profileRoleLabel(personalInfoState.role)
+    val titleLabel = personalInfoState.title.ifBlank { "未设置职称" }
+    val reviewedCount = imagesState.summaryReviewedCount
+    val imageTotalCount = imagesState.summaryTotalCount
+    val completionRate = if (imageTotalCount == 0) {
+        "0%"
+    } else {
+        "${((reviewedCount * 100f) / imageTotalCount.toFloat()).toInt()}%"
+    }
     val scrollState = rememberScrollState()
     val cardShape = RoundedCornerShape(24.dp)
     val shadowColor = colors.textPrimary.copy(alpha = if (colors.isDark) 0.22f else 0.08f)
@@ -103,8 +157,8 @@ fun ProfileScreen(
                             color = colors.textPrimary,
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ProfileTag(text = "医生", active = true)
-                            ProfileTag(text = "已认证", active = false)
+                            ProfileTag(text = roleLabel, active = true)
+                            ProfileTag(text = titleLabel, active = false)
                         }
                     }
                 }
@@ -132,11 +186,11 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ProfileStat(label = "管理患者", value = "128", modifier = Modifier.weight(1f))
+                ProfileStat(label = "管理患者", value = patientsState.managedTotalCount.toString(), modifier = Modifier.weight(1f))
                 ProfileStatDivider(color = colors.borderSubtle)
-                ProfileStat(label = "本月审核", value = "56", modifier = Modifier.weight(1f))
+                ProfileStat(label = "已审核", value = reviewedCount.toString(), modifier = Modifier.weight(1f))
                 ProfileStatDivider(color = colors.borderSubtle)
-                ProfileStat(label = "完成率", value = "98%", modifier = Modifier.weight(1f))
+                ProfileStat(label = "完成率", value = completionRate, modifier = Modifier.weight(1f))
             }
         }
 
@@ -217,4 +271,17 @@ private fun ProfileStatDivider(color: Color) {
             .height(46.dp)
             .background(color),
     )
+}
+
+private fun profileRoleLabel(role: String): String {
+    return when (role.trim().lowercase()) {
+        "doctor" -> "医生"
+        "admin" -> "管理员"
+        "system_admin", "system-admin" -> "系统管理员"
+        "team_admin", "team-admin" -> "团队管理员"
+        "member" -> "成员"
+        "guest" -> "访客"
+        "" -> "未设置角色"
+        else -> role
+    }
 }

@@ -30,6 +30,7 @@ data class PersonalInfoUiState(
     val phone: String = "",
     val position: String = "",
     val title: String = "",
+    val role: String = "",
     val department: String = "",
     val errorMessage: String? = null,
     val successMessage: String? = null,
@@ -176,6 +177,7 @@ class PersonalInfoViewModel : BaseViewModel() {
         val phone = (profile.phone ?: "").trim()
         val position = (profile.position ?: "").trim()
         val title = (profile.title ?: "").trim()
+        val role = (profile.role ?: "").trim()
         val department = (profile.department ?: "").trim()
         baseline = EditableSnapshot(
             realName = realName,
@@ -194,6 +196,7 @@ class PersonalInfoViewModel : BaseViewModel() {
                 phone = phone,
                 position = position,
                 title = title,
+                role = role,
                 department = department,
                 errorMessage = null,
             )
