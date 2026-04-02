@@ -1,11 +1,6 @@
 package com.xiehe.spine.ui.screens.image
 
 import com.xiehe.spine.notifySessionExpired
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.model.AppResult
@@ -47,6 +42,7 @@ import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.card.image.ImageTaskAction
 import com.xiehe.spine.ui.components.card.image.ImageTaskActionStyle
 import com.xiehe.spine.ui.components.card.image.ImageTaskCard
+import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.components.feedback.shared.Text
@@ -54,19 +50,21 @@ import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.card.image.inferExamType
 import com.xiehe.spine.ui.components.form.file.rememberDownloadedFileSaver
 import com.xiehe.spine.ui.motion.AppConfirmDialogHost
-import com.xiehe.spine.ui.motion.AppMotion
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.image.ImageStatusFilter
 import com.xiehe.spine.ui.viewmodel.image.ImageTypeFilter
 import com.xiehe.spine.ui.viewmodel.image.ImagesViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private enum class ImagesPicker {
     TYPE,
     STATUS,
 }
+
+private data class DownloadToastState(
+    val id: Int,
+    val message: String,
+)
 
 @Composable
 fun ImagesScreen(
@@ -85,9 +83,8 @@ fun ImagesScreen(
     var actionError by remember { mutableStateOf<String?>(null) }
     var actionSuccess by remember { mutableStateOf<String?>(null) }
     var actionLoadingMessage by remember { mutableStateOf<String?>(null) }
-    var downloadBannerMessage by remember { mutableStateOf<String?>(null) }
-    var downloadBannerVisible by remember { mutableStateOf(false) }
-    var downloadBannerJob by remember { mutableStateOf<Job?>(null) }
+    var downloadToast by remember { mutableStateOf<DownloadToastState?>(null) }
+    var nextDownloadToastId by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
     val saver = rememberDownloadedFileSaver()
 
@@ -207,17 +204,11 @@ fun ImagesScreen(
                                                                 append(saveResult.location)
                                                             }
                                                         }
-                                                        downloadBannerMessage = downloadHint
-                                                        downloadBannerVisible = true
-                                                        downloadBannerJob?.cancel()
-                                                        downloadBannerJob = coroutineScope.launch {
-                                                            delay(2300)
-                                                            downloadBannerVisible = false
-                                                            delay(220)
-                                                            if (!downloadBannerVisible) {
-                                                                downloadBannerMessage = null
-                                                            }
-                                                        }
+                                                        downloadToast = DownloadToastState(
+                                                            id = nextDownloadToastId + 1,
+                                                            message = downloadHint,
+                                                        )
+                                                        nextDownloadToastId += 1
                                                     }
 
                                                     is FileSaveResult.Failure -> {
@@ -280,24 +271,16 @@ fun ImagesScreen(
             LoadingOverlay(message = actionLoadingMessage ?: "...正在加载中")
         }
 
-        AnimatedVisibility(
-            visible = downloadBannerVisible && !downloadBannerMessage.isNullOrBlank(),
-            enter = fadeIn(animationSpec = AppMotion.toastEnterSpec()) +
-                slideInVertically(animationSpec = AppMotion.toastEnterOffsetSpec()) { it / 3 },
-            exit = fadeOut(animationSpec = AppMotion.toastExitSpec()) +
-                slideOutVertically(animationSpec = AppMotion.toastExitOffsetSpec()) { it / 3 },
-            modifier = Modifier.align(Alignment.BottomCenter),
-        ) {
-            Card(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
-                    .fillMaxWidth(),
-            ) {
-                Text(
-                    text = downloadBannerMessage.orEmpty(),
-                    style = SpineTheme.typography.caption,
-                    color = SpineTheme.colors.textSecondary,
-                    maxLines = 2,
+        downloadToast?.let { toast ->
+            key(toast.id) {
+                FloatingToast(
+                    message = toast.message,
+                    accentColor = SpineTheme.colors.info,
+                    icon = IconToken.DOWNLOAD,
+                    onDismiss = { downloadToast = null },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 24.dp),
                 )
             }
         }

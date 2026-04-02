@@ -14,8 +14,8 @@ class AndroidImageBinaryStore(
         }
     }
 
-    override suspend fun read(fileId: Int): ByteArray? = withContext(Dispatchers.IO) {
-        val target = imageFile(fileId)
+    override suspend fun read(userId: Int, fileId: Int): ByteArray? = withContext(Dispatchers.IO) {
+        val target = imageFile(userId, fileId)
         if (!target.exists() || !target.isFile) {
             return@withContext null
         }
@@ -23,36 +23,38 @@ class AndroidImageBinaryStore(
     }
 
     override suspend fun write(
+        userId: Int,
         fileId: Int,
         bytes: ByteArray,
         mimeType: String?,
         fileName: String?,
     ) {
         withContext(Dispatchers.IO) {
-            val target = imageFile(fileId)
+            val target = imageFile(userId, fileId)
+            target.parentFile?.mkdirs()
             val tmp = File(target.absolutePath + ".tmp")
             runCatching {
                 tmp.outputStream().use { output ->
                     output.write(bytes)
-                output.flush()
-            }
-            if (target.exists()) {
-                target.delete()
-            }
-            tmp.renameTo(target)
+                    output.flush()
+                }
+                if (target.exists()) {
+                    target.delete()
+                }
+                tmp.renameTo(target)
             }.onFailure {
                 tmp.delete()
             }
         }
     }
 
-    override suspend fun delete(fileId: Int) {
+    override suspend fun delete(userId: Int, fileId: Int) {
         withContext(Dispatchers.IO) {
-            imageFile(fileId).delete()
+            imageFile(userId, fileId).delete()
         }
     }
 
-    private fun imageFile(fileId: Int): File {
-        return File(rootDir, "image_$fileId.bin")
+    private fun imageFile(userId: Int, fileId: Int): File {
+        return File(File(rootDir, "user_$userId"), "image_$fileId.bin")
     }
 }

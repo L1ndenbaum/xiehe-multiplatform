@@ -59,8 +59,8 @@ private class IosImageBinaryStore : ImageBinaryStore {
         target
     }
 
-    override suspend fun read(fileId: Int): ByteArray? = withContext(Dispatchers.Default) {
-        val path = imageFile(fileId)
+    override suspend fun read(userId: Int, fileId: Int): ByteArray? = withContext(Dispatchers.Default) {
+        val path = imageFile(userId, fileId)
         val file = fopen(path, "rb") ?: return@withContext null
         try {
             fseek(file, 0, SEEK_END)
@@ -80,13 +80,16 @@ private class IosImageBinaryStore : ImageBinaryStore {
     }
 
     override suspend fun write(
+        userId: Int,
         fileId: Int,
         bytes: ByteArray,
         mimeType: String?,
         fileName: String?,
     ) {
         withContext(Dispatchers.Default) {
-            val target = imageFile(fileId)
+            val userDir = "$rootDir/user_$userId"
+            mkdir(userDir, (S_IRWXU or S_IRWXG or S_IROTH or S_IXOTH).convert())
+            val target = imageFile(userId, fileId)
             val file = fopen(target, "wb") ?: return@withContext
             try {
                 if (bytes.isNotEmpty()) {
@@ -100,14 +103,14 @@ private class IosImageBinaryStore : ImageBinaryStore {
         }
     }
 
-    override suspend fun delete(fileId: Int) {
+    override suspend fun delete(userId: Int, fileId: Int) {
         withContext(Dispatchers.Default) {
-            remove(imageFile(fileId))
+            remove(imageFile(userId, fileId))
         }
     }
 
-    private fun imageFile(fileId: Int): String {
-        return "$rootDir/image_$fileId.bin"
+    private fun imageFile(userId: Int, fileId: Int): String {
+        return "$rootDir/user_$userId/image_$fileId.bin"
     }
 }
 

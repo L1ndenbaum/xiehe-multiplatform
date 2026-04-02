@@ -76,7 +76,8 @@ class AppContainer private constructor(
                 ),
                 patientRepository = PatientRepository(
                     apiClient = instrumentedApiClient,
-                    authRepository = authRepository
+                    authRepository = authRepository,
+                    imageCacheRepository = imageCacheRepository,
                 ),
                 imageFileRepository = ImageFileRepository(
                     apiClient = instrumentedApiClient,

@@ -246,7 +246,7 @@ private fun ImageThumbnail(
                     runCatching { result.data.second.decodeToImageBitmap() }.getOrNull()
                 }
                 if (bitmap == null && retryNonce == 0) {
-                    repository.evictImageCache(fileId)
+                    repository.evictImageCache(session.userId, fileId)
                     retryNonce += 1
                     return@LaunchedEffect
                 }

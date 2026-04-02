@@ -1,6 +1,7 @@
 package com.xiehe.spine.data.cache
 
 import com.xiehe.spine.core.store.KeyValueStore
+import com.xiehe.spine.data.image.ImageFilePageData
 import com.xiehe.spine.data.image.ImageFileSummary
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -12,17 +13,19 @@ class ImageCacheRepository(
     private val json: Json,
     private val binaryStore: ImageBinaryStore,
 ) {
-    suspend fun getImageBytes(fileId: Int): ByteArray? {
-        return binaryStore.read(fileId)
+    suspend fun getImageBytes(userId: Int, fileId: Int): ByteArray? {
+        return binaryStore.read(userId = userId, fileId = fileId)
     }
 
     suspend fun putImageBytes(
+        userId: Int,
         fileId: Int,
         bytes: ByteArray,
         mimeType: String?,
         fileName: String?,
     ) {
         binaryStore.write(
+            userId = userId,
             fileId = fileId,
             bytes = bytes,
             mimeType = mimeType,
@@ -30,53 +33,60 @@ class ImageCacheRepository(
         )
     }
 
-    suspend fun removeImage(fileId: Int) {
-        binaryStore.delete(fileId)
+    suspend fun removeImage(userId: Int, fileId: Int) {
+        binaryStore.delete(userId = userId, fileId = fileId)
     }
 
-    fun getImageListSnapshot(): List<ImageFileSummary>? {
-        val raw = store.getString(KEY_IMAGE_LIST) ?: return null
+    fun getCanonicalImageListSnapshot(userId: Int): List<ImageFileSummary>? {
+        val raw = store.getString(canonicalListKey(userId)) ?: return null
         return runCatching {
             json.decodeFromString(ListSerializer(ImageFileSummary.serializer()), raw)
         }.getOrNull()
     }
 
-    fun putImageListSnapshot(items: List<ImageFileSummary>) {
+    fun putCanonicalImageListSnapshot(userId: Int, items: List<ImageFileSummary>) {
         val encoded = json.encodeToString(
             ListSerializer(ImageFileSummary.serializer()),
             items,
         )
-        store.putString(KEY_IMAGE_LIST, encoded)
+        store.putString(canonicalListKey(userId), encoded)
     }
 
-    fun mergeImageItems(items: List<ImageFileSummary>) {
-        if (items.isEmpty()) {
-            return
+    fun getPagedImageSnapshot(userId: Int): ImageFilePageData? {
+        val raw = store.getString(pagedListKey(userId)) ?: return null
+        return runCatching {
+            json.decodeFromString(ImageFilePageData.serializer(), raw)
+        }.getOrNull()
+    }
+
+    fun putPagedImageSnapshot(userId: Int, page: ImageFilePageData) {
+        store.putString(
+            pagedListKey(userId),
+            json.encodeToString(ImageFilePageData.serializer(), page),
+        )
+    }
+
+    fun removeImageItem(userId: Int, fileId: Int) {
+        getCanonicalImageListSnapshot(userId)?.let { current ->
+            putCanonicalImageListSnapshot(userId, current.filterNot { it.id == fileId })
         }
-        val merged = linkedMapOf<Int, ImageFileSummary>()
-        getImageListSnapshot().orEmpty().forEach { existing ->
-            merged[existing.id] = existing
+        getPagedImageSnapshot(userId)?.let { current ->
+            putPagedImageSnapshot(
+                userId = userId,
+                page = current.copy(items = current.items.filterNot { it.id == fileId }),
+            )
         }
-        items.forEach { incoming ->
-            merged[incoming.id] = incoming
-        }
-        putImageListSnapshot(merged.values.toList())
     }
 
-    fun removeImageItem(fileId: Int) {
-        val current = getImageListSnapshot().orEmpty()
-        putImageListSnapshot(current.filterNot { it.id == fileId })
+    fun getPatientNameById(userId: Int, patientId: Int): String? {
+        return getPatientNameMap(userId)[patientId.toString()]
     }
 
-    fun getPatientNameById(patientId: Int): String? {
-        return getPatientNameMap()[patientId.toString()]
-    }
-
-    fun putPatientNameMap(map: Map<Int, String>) {
+    fun putPatientNameMap(userId: Int, map: Map<Int, String>) {
         if (map.isEmpty()) {
             return
         }
-        val current = getPatientNameMap().toMutableMap()
+        val current = getPatientNameMap(userId).toMutableMap()
         map.forEach { (id, name) ->
             if (name.isNotBlank()) {
                 current[id.toString()] = name
@@ -86,11 +96,51 @@ class ImageCacheRepository(
             MapSerializer(String.serializer(), String.serializer()),
             current,
         )
-        store.putString(KEY_PATIENT_NAME_MAP, encoded)
+        store.putString(patientNameKey(userId), encoded)
     }
 
-    private fun getPatientNameMap(): Map<String, String> {
-        val raw = store.getString(KEY_PATIENT_NAME_MAP) ?: return emptyMap()
+    fun syncPatientName(userId: Int, patientId: Int, patientName: String) {
+        if (patientName.isBlank()) {
+            return
+        }
+        putPatientNameMap(userId, mapOf(patientId to patientName))
+        updatePatientNameInSnapshots(userId, patientId, patientName)
+    }
+
+    fun removePatient(userId: Int, patientId: Int) {
+        val updatedMap = getPatientNameMap(userId).toMutableMap().apply {
+            remove(patientId.toString())
+        }
+        store.putString(
+            patientNameKey(userId),
+            json.encodeToString(MapSerializer(String.serializer(), String.serializer()), updatedMap),
+        )
+        updatePatientNameInSnapshots(userId, patientId, patientName = null)
+    }
+
+    private fun updatePatientNameInSnapshots(userId: Int, patientId: Int, patientName: String?) {
+        getCanonicalImageListSnapshot(userId)?.let { current ->
+            putCanonicalImageListSnapshot(
+                userId = userId,
+                items = current.map { item ->
+                    if (item.patientId == patientId) item.copy(patientName = patientName) else item
+                },
+            )
+        }
+        getPagedImageSnapshot(userId)?.let { current ->
+            putPagedImageSnapshot(
+                userId = userId,
+                page = current.copy(
+                    items = current.items.map { item ->
+                        if (item.patientId == patientId) item.copy(patientName = patientName) else item
+                    },
+                ),
+            )
+        }
+    }
+
+    private fun getPatientNameMap(userId: Int): Map<String, String> {
+        val raw = store.getString(patientNameKey(userId)) ?: return emptyMap()
         return runCatching {
             json.decodeFromString(
                 MapSerializer(String.serializer(), String.serializer()),
@@ -99,8 +149,15 @@ class ImageCacheRepository(
         }.getOrDefault(emptyMap())
     }
 
-    private companion object {
-        const val KEY_IMAGE_LIST = "image_cache.list.v1"
-        const val KEY_PATIENT_NAME_MAP = "image_cache.patient_name_map.v1"
+    private fun canonicalListKey(userId: Int): String {
+        return "image_cache.user_${userId}.canonical_list.v1"
+    }
+
+    private fun pagedListKey(userId: Int): String {
+        return "image_cache.user_${userId}.page_snapshot.v1"
+    }
+
+    private fun patientNameKey(userId: Int): String {
+        return "image_cache.user_${userId}.patient_name_map.v1"
     }
 }

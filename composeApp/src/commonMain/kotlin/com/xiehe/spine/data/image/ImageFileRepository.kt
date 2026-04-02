@@ -5,7 +5,6 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.ApiClient
 import com.xiehe.spine.data.ApiEnvelope
 import com.xiehe.spine.data.ApiErrorEnvelope
-import com.xiehe.spine.data.patient.Pagination
 import com.xiehe.spine.data.patient.PatientDetail
 import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.cache.ImageCacheRepository
@@ -33,7 +32,9 @@ class ImageFileRepository(
     private val fileLocks = mutableMapOf<Int, Mutex>()
     private val fileLocksGuard = Mutex()
     private val memoryCacheGuard = Mutex()
-    private val memoryImageCache = linkedMapOf<Int, ByteArray>()
+    private data class MemoryImageKey(val userId: Int, val fileId: Int)
+
+    private val memoryImageCache = linkedMapOf<MemoryImageKey, ByteArray>()
     private val maxMemoryEntries = 24
 
     suspend fun loadImageFiles(session: UserSession): AppResult<Pair<UserSession, ImageFilePageData>> {
@@ -44,7 +45,7 @@ class ImageFileRepository(
         ) {
             is AppResult.Success -> {
                 var activeSession = result.data.first
-                var mergedItems = withPatientNameCache(result.data.second.items)
+                var mergedItems = withPatientNameCache(activeSession.userId, result.data.second.items)
 
                 val unresolvedIds = mergedItems
                     .asSequence()
@@ -55,7 +56,7 @@ class ImageFileRepository(
                     val resolvedById = resolvePatientNamesByIds(activeSession, unresolvedIds)
                     activeSession = resolvedById.first
                     if (resolvedById.second.isNotEmpty()) {
-                        cacheRepository.putPatientNameMap(resolvedById.second)
+                        cacheRepository.putPatientNameMap(activeSession.userId, resolvedById.second)
                         mergedItems = mergedItems.map { item ->
                             val patientId = item.patientId
                             if (patientId == null || !item.patientName.isNullOrBlank()) {
@@ -68,8 +69,12 @@ class ImageFileRepository(
                     }
                 }
 
-                cacheRepository.mergeImageItems(mergedItems)
+                cacheRepository.putPagedImageSnapshot(
+                    userId = activeSession.userId,
+                    page = result.data.second.copy(items = mergedItems, fromCache = false),
+                )
                 cacheRepository.putPatientNameMap(
+                    userId = activeSession.userId,
                     mergedItems
                         .mapNotNull { item ->
                             val patientId = item.patientId ?: return@mapNotNull null
@@ -83,21 +88,12 @@ class ImageFileRepository(
             }
 
             is AppResult.Failure -> {
-                val cachedItems = cacheRepository.getImageListSnapshot().orEmpty()
-                if (cachedItems.isEmpty() || result.isUnauthorized) {
+                val cachedPage = cacheRepository.getPagedImageSnapshot(session.userId)
+                if (cachedPage == null || cachedPage.items.isEmpty() || result.isUnauthorized) {
                     result
                 } else {
                     AppResult.Success(
-                        session to ImageFilePageData(
-                            items = cachedItems,
-                            pagination = Pagination(
-                                total = cachedItems.size,
-                                page = 1,
-                                pageSize = cachedItems.size.coerceAtLeast(1),
-                                totalPages = 1,
-                            ),
-                            fromCache = true,
-                        ),
+                        session to cachedPage.copy(fromCache = true),
                     )
                 }
             }
@@ -126,7 +122,7 @@ class ImageFileRepository(
                 }
 
                 is AppResult.Failure -> {
-                    val fallback = cacheRepository.getImageListSnapshot().orEmpty()
+                    val fallback = cacheRepository.getCanonicalImageListSnapshot(activeSession.userId).orEmpty()
                     return if (fallback.isNotEmpty() && !result.isUnauthorized) {
                         AppResult.Success(activeSession to fallback)
                     } else {
@@ -136,7 +132,7 @@ class ImageFileRepository(
             }
         }
 
-        var merged = withPatientNameCache(aggregate.values.toList())
+        var merged = withPatientNameCache(activeSession.userId, aggregate.values.toList())
         val unresolvedIds = merged
             .asSequence()
             .filter { it.patientId != null && it.patientName.isNullOrBlank() }
@@ -146,7 +142,7 @@ class ImageFileRepository(
             val resolvedById = resolvePatientNamesByIds(activeSession, unresolvedIds)
             activeSession = resolvedById.first
             if (resolvedById.second.isNotEmpty()) {
-                cacheRepository.putPatientNameMap(resolvedById.second)
+                cacheRepository.putPatientNameMap(activeSession.userId, resolvedById.second)
                 merged = merged.map { item ->
                     val patientId = item.patientId
                     if (patientId == null || !item.patientName.isNullOrBlank()) {
@@ -158,8 +154,9 @@ class ImageFileRepository(
                 }
             }
         }
-        cacheRepository.putImageListSnapshot(merged)
+        cacheRepository.putCanonicalImageListSnapshot(activeSession.userId, merged)
         cacheRepository.putPatientNameMap(
+            userId = activeSession.userId,
             merged
                 .mapNotNull { item ->
                     val patientId = item.patientId ?: return@mapNotNull null
@@ -229,18 +226,18 @@ class ImageFileRepository(
         session: UserSession,
         fileId: Int,
     ): AppResult<Pair<UserSession, ByteArray>> {
-        getMemoryBytes(fileId)?.let { cached ->
+        getMemoryBytes(session.userId, fileId)?.let { cached ->
             return AppResult.Success(session to cached)
         }
-        cacheRepository.getImageBytes(fileId)?.let { cached ->
-            putMemoryBytes(fileId, cached)
+        cacheRepository.getImageBytes(session.userId, fileId)?.let { cached ->
+            putMemoryBytes(session.userId, fileId, cached)
             return AppResult.Success(session to cached)
         }
 
         val fileLock = lockForFile(fileId)
         return fileLock.withLock {
-            cacheRepository.getImageBytes(fileId)?.let { cached ->
-                putMemoryBytes(fileId, cached)
+            cacheRepository.getImageBytes(session.userId, fileId)?.let { cached ->
+                putMemoryBytes(session.userId, fileId, cached)
                 return@withLock AppResult.Success(session to cached)
             }
 
@@ -269,8 +266,9 @@ class ImageFileRepository(
                 }
             ) {
                 is AppResult.Success -> {
-                    putMemoryBytes(fileId, network.data.second)
+                    putMemoryBytes(network.data.first.userId, fileId, network.data.second)
                     cacheRepository.putImageBytes(
+                        userId = network.data.first.userId,
                         fileId = fileId,
                         bytes = network.data.second,
                         mimeType = null,
@@ -284,17 +282,17 @@ class ImageFileRepository(
         }
     }
 
-    suspend fun evictImageCache(fileId: Int) {
-        removeMemoryBytes(fileId)
-        cacheRepository.removeImage(fileId)
+    suspend fun evictImageCache(userId: Int, fileId: Int) {
+        removeMemoryBytes(userId, fileId)
+        cacheRepository.removeImage(userId, fileId)
     }
 
-    suspend fun getCachedPatientName(patientId: Int): String? {
-        return cacheRepository.getPatientNameById(patientId)
+    suspend fun getCachedPatientName(userId: Int, patientId: Int): String? {
+        return cacheRepository.getPatientNameById(userId, patientId)
     }
 
-    suspend fun getCachedImageList(): List<ImageFileSummary> {
-        return cacheRepository.getImageListSnapshot().orEmpty()
+    suspend fun getCachedImageList(userId: Int): List<ImageFileSummary> {
+        return cacheRepository.getCanonicalImageListSnapshot(userId).orEmpty()
     }
 
     suspend fun uploadSingleImage(
@@ -375,9 +373,9 @@ class ImageFileRepository(
             }
         ) {
             is AppResult.Success -> {
-                removeMemoryBytes(imageId)
-                cacheRepository.removeImage(imageId)
-                cacheRepository.removeImageItem(imageId)
+                removeMemoryBytes(result.data.first.userId, imageId)
+                cacheRepository.removeImage(result.data.first.userId, imageId)
+                cacheRepository.removeImageItem(result.data.first.userId, imageId)
                 AppResult.Success(result.data)
             }
 
@@ -400,6 +398,7 @@ class ImageFileRepository(
     }
 
     private suspend fun withPatientNameCache(
+        userId: Int,
         items: List<ImageFileSummary>,
     ): List<ImageFileSummary> {
         if (items.isEmpty()) {
@@ -410,7 +409,7 @@ class ImageFileRepository(
             if (currentName.isNotBlank()) {
                 item
             } else {
-                val cachedName = item.patientId?.let { cacheRepository.getPatientNameById(it) }
+                val cachedName = item.patientId?.let { cacheRepository.getPatientNameById(userId, it) }
                 if (cachedName.isNullOrBlank()) item else item.copy(patientName = cachedName)
             }
         }
@@ -449,16 +448,23 @@ class ImageFileRepository(
         }
     }
 
-    private suspend fun getMemoryBytes(fileId: Int): ByteArray? {
-        return memoryCacheGuard.withLock {
-            memoryImageCache[fileId]
+    suspend fun clearMemoryCacheForUser(userId: Int) {
+        memoryCacheGuard.withLock {
+            memoryImageCache.keys.removeAll { it.userId == userId }
         }
     }
 
-    private suspend fun putMemoryBytes(fileId: Int, bytes: ByteArray) {
+    private suspend fun getMemoryBytes(userId: Int, fileId: Int): ByteArray? {
+        return memoryCacheGuard.withLock {
+            memoryImageCache[MemoryImageKey(userId = userId, fileId = fileId)]
+        }
+    }
+
+    private suspend fun putMemoryBytes(userId: Int, fileId: Int, bytes: ByteArray) {
         memoryCacheGuard.withLock {
-            memoryImageCache.remove(fileId)
-            memoryImageCache[fileId] = bytes
+            val key = MemoryImageKey(userId = userId, fileId = fileId)
+            memoryImageCache.remove(key)
+            memoryImageCache[key] = bytes
             while (memoryImageCache.size > maxMemoryEntries) {
                 val eldest = memoryImageCache.entries.firstOrNull()?.key ?: break
                 memoryImageCache.remove(eldest)
@@ -466,9 +472,9 @@ class ImageFileRepository(
         }
     }
 
-    private suspend fun removeMemoryBytes(fileId: Int) {
+    private suspend fun removeMemoryBytes(userId: Int, fileId: Int) {
         memoryCacheGuard.withLock {
-            memoryImageCache.remove(fileId)
+            memoryImageCache.remove(MemoryImageKey(userId = userId, fileId = fileId))
         }
     }
 

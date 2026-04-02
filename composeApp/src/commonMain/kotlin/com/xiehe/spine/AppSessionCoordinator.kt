@@ -44,6 +44,7 @@ internal fun AppSessionCoordinator(
     var dashboardBootstrap by remember(session?.userId) { mutableStateOf(DashboardBootstrapState()) }
     var sessionExpiredMessage by remember { mutableStateOf<String?>(null) }
     var handlingSessionExpiry by remember { mutableStateOf(false) }
+    var previousUserId by remember { mutableStateOf(session?.userId) }
 
     val onTabSelected: (Int) -> Unit = remember {
         { tab ->
@@ -64,6 +65,7 @@ internal fun AppSessionCoordinator(
     }
 
     suspend fun resetToLogin(clearRemoteSession: Boolean, activeSession: UserSession? = session) {
+        activeSession?.let { container.imageFileRepository.clearMemoryCacheForUser(it.userId) }
         if (clearRemoteSession) {
             if (activeSession != null) {
                 container.authRepository.logout(activeSession)
@@ -107,6 +109,14 @@ internal fun AppSessionCoordinator(
 
     val activeSession = requireNotNull(session)
     val scopedViewModels = rememberSessionScopedViewModels(activeSession.userId)
+
+    LaunchedEffect(activeSession.userId) {
+        val previous = previousUserId
+        if (previous != null && previous != activeSession.userId) {
+            container.imageFileRepository.clearMemoryCacheForUser(previous)
+        }
+        previousUserId = activeSession.userId
+    }
 
     PlatformBackHandler(enabled = renderedOverlayRoute != null) {
         route = null
