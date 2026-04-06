@@ -216,26 +216,28 @@ private fun PendingTaskRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Dashboard 待处理任务部分 列表项的 状态圆点
+        // Dashboard 待处理任务部分 列表项的 状态圆点，这里先不需要
 //        Box(
 //            modifier = Modifier
 //                .size(8.dp)
 //                .clip(CircleShape)
 //                .background(priority.dotColor),
 //        )
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(colors.primaryMuted),
-            contentAlignment = Alignment.Center,
-        ) {
-            AppIcon(
-                glyph = IconToken.USER_ROUND,
-                tint = colors.primary,
-                modifier = Modifier.size(18.dp),
-            )
-        }
+
+        // Dashboard 待处理任务部分 列表项的 用户图标，这里先不需要
+//        Box(
+//            modifier = Modifier
+//                .size(40.dp)
+//                .clip(RoundedCornerShape(12.dp))
+//                .background(colors.primaryMuted),
+//            contentAlignment = Alignment.Center,
+//        ) {
+//            AppIcon(
+//                glyph = IconToken.USER_ROUND,
+//                tint = colors.primary,
+//                modifier = Modifier.size(18.dp),
+//            )
+//        }
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(5.dp),

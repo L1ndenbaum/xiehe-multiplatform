@@ -18,6 +18,7 @@ import spine.composeapp.generated.resources.icons_action_icon_export
 import spine.composeapp.generated.resources.icons_action_icon_eye
 import spine.composeapp.generated.resources.icons_action_icon_eye_off
 import spine.composeapp.generated.resources.icons_action_icon_import
+import spine.composeapp.generated.resources.icons_action_icon_magicwand
 import spine.composeapp.generated.resources.icons_action_icon_minus
 import spine.composeapp.generated.resources.icons_action_icon_phone
 import spine.composeapp.generated.resources.icons_action_icon_save
@@ -108,6 +109,7 @@ internal fun IconToken.composeDrawable(): DrawableResource {
         IconToken.CHEVRON_DOWN -> Res.drawable.icons_action_icon_chevron_down
         IconToken.EYE -> Res.drawable.icons_action_icon_eye
         IconToken.EYE_OFF -> Res.drawable.icons_action_icon_eye_off
+        IconToken.MAGIC_WAND -> Res.drawable.icons_action_icon_magicwand
         IconToken.DOWNLOAD -> Res.drawable.icons_action_icon_download
         IconToken.DELETE -> Res.drawable.icons_action_icon_delete
         IconToken.AI_DETECT -> Res.drawable.icons_analysis_icon_ai_detect

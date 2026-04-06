@@ -47,6 +47,7 @@ private fun IconToken.androidDrawableName(): String {
         IconToken.HOURGLASS -> "icons_status_icon_hourglass"
         IconToken.CHECK -> "icons_status_icon_check"
         IconToken.IMAGE -> "icons_status_icon_image"
+        IconToken.MAGIC_WAND -> "icons_action_icon_magicwand"
         IconToken.SCAN_SEARCH -> "icons_status_icon_scan_search"
         IconToken.SEARCH -> "icons_action_icon_search"
         IconToken.PHONE -> "icons_action_icon_phone"

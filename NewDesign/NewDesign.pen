@@ -575,9 +575,9 @@
           "name": "Component/PatientCard",
           "reusable": true,
           "width": 392,
-          "height": 183,
+          "height": 76,
           "fill": "#FFFFFF",
-          "cornerRadius": 24,
+          "cornerRadius": 20,
           "stroke": {
             "thickness": 1,
             "fill": "#E2E8F0"
@@ -585,32 +585,38 @@
           "effect": {
             "type": "shadow",
             "shadowType": "outer",
-            "color": "#0F172A12",
+            "color": "#0F172A10",
             "offset": {
               "x": 0,
-              "y": 10
+              "y": 8
             },
-            "blur": 20
+            "blur": 18
           },
-          "layout": "vertical",
-          "gap": 10,
-          "padding": 16,
+          "gap": 12,
+          "padding": [
+            12,
+            14
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
           "children": [
             {
               "type": "frame",
               "id": "BjVnZ",
               "name": "pcTop",
               "width": "fill_container",
-              "height": 88,
               "fill": "#00000000",
-              "gap": 12,
+              "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
                   "id": "uzMIG",
+                  "x": 0,
+                  "y": 20,
                   "name": "pcAvatar",
-                  "width": 48,
-                  "height": 48,
+                  "enabled": false,
+                  "width": 0,
+                  "height": 0,
                   "fill": {
                     "type": "gradient",
                     "gradientType": "linear",
@@ -650,17 +656,15 @@
                   "id": "jNoEQ",
                   "name": "pcInfo",
                   "width": "fill_container",
-                  "height": 88,
                   "fill": "#00000000",
                   "layout": "vertical",
-                  "gap": 6,
+                  "gap": 4,
                   "children": [
                     {
                       "type": "frame",
                       "id": "QDvel",
                       "name": "pcNameRow",
                       "width": "fill_container",
-                      "height": 20,
                       "fill": "#00000000",
                       "gap": 8,
                       "alignItems": "center",
@@ -677,17 +681,19 @@
                         {
                           "type": "frame",
                           "id": "P6mzR",
-                          "width": 28,
-                          "height": 18,
-                          "fill": "#F5F3FF",
+                          "fill": "#EEF2FF",
                           "cornerRadius": 999,
+                          "padding": [
+                            6,
+                            2
+                          ],
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "text",
                               "id": "06zTO",
-                              "fill": "#7C3AED",
+                              "fill": "#6366F1",
                               "content": "男",
                               "fontFamily": "Inter",
                               "fontSize": 10,
@@ -698,39 +704,47 @@
                       ]
                     },
                     {
-                      "type": "text",
-                      "id": "1nIyU",
-                      "fill": "#64748B",
-                      "content": "45岁",
-                      "fontFamily": "Inter",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
-                    },
-                    {
                       "type": "frame",
                       "id": "LTwWM",
                       "name": "phoneRow",
                       "width": "fill_container",
-                      "height": 20,
                       "fill": "#00000000",
-                      "gap": 8,
+                      "gap": 6,
                       "alignItems": "center",
                       "children": [
+                        {
+                          "type": "text",
+                          "id": "1nIyU",
+                          "fill": "#475569",
+                          "content": "45岁",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZPBlV",
+                          "name": "dot",
+                          "fill": "#94A3B8",
+                          "content": "·",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
                         {
                           "type": "frame",
                           "id": "hXm9p",
                           "name": "phoneIconWrapA",
-                          "width": 20,
-                          "height": 20,
-                          "fill": "#F1F5F9",
-                          "cornerRadius": 6,
+                          "width": 14,
+                          "height": 14,
+                          "fill": "#00000000",
                           "layout": "none",
                           "children": [
                             {
                               "type": "icon_font",
                               "id": "xcZ4S",
-                              "x": 3,
-                              "y": 3,
+                              "x": 0,
+                              "y": 0,
                               "name": "phoneGlyph",
                               "width": 14,
                               "height": 14,
@@ -743,7 +757,7 @@
                         {
                           "type": "text",
                           "id": "hORiU",
-                          "fill": "#475569",
+                          "fill": "#64748B",
                           "content": "138****5678",
                           "fontFamily": "Inter",
                           "fontSize": 13,
@@ -758,29 +772,31 @@
             {
               "type": "frame",
               "id": "5d5W5",
+              "x": 139.33333333333334,
+              "y": 37.5,
               "name": "pcDivider",
-              "width": "fill_container",
-              "height": 1,
+              "enabled": false,
+              "width": 0,
+              "height": 0,
               "fill": "#E2E8F0"
             },
             {
               "type": "frame",
               "id": "mOBtE",
               "name": "pcActions",
-              "width": "fill_container",
-              "height": 42,
+              "height": 32,
               "fill": "#00000000",
-              "gap": 10,
+              "gap": 8,
+              "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
                   "id": "2rn6J",
                   "name": "editBtn",
-                  "width": "fill_container",
-                  "height": 42,
+                  "width": 32,
+                  "height": 32,
                   "fill": "#ECFDF5",
-                  "cornerRadius": 14,
-                  "gap": 6,
+                  "cornerRadius": 10,
                   "justifyContent": "center",
                   "alignItems": "center",
                   "children": [
@@ -788,8 +804,8 @@
                       "type": "icon_font",
                       "id": "lkYcX",
                       "name": "editIconA",
-                      "width": 14,
-                      "height": 14,
+                      "width": 16,
+                      "height": 16,
                       "iconFontName": "pencil",
                       "iconFontFamily": "lucide",
                       "fill": "#059669"
@@ -797,6 +813,9 @@
                     {
                       "type": "text",
                       "id": "Inr2j",
+                      "x": 9.5,
+                      "y": 6.5,
+                      "enabled": false,
                       "fill": "#059669",
                       "content": "编辑",
                       "fontFamily": "Inter",
@@ -809,29 +828,10 @@
                   "type": "frame",
                   "id": "yEnqh",
                   "name": "viewBtn",
-                  "width": "fill_container",
-                  "height": 42,
-                  "fill": {
-                    "type": "gradient",
-                    "gradientType": "linear",
-                    "enabled": true,
-                    "rotation": 90,
-                    "size": {
-                      "height": 1
-                    },
-                    "colors": [
-                      {
-                        "color": "#8B5CF6",
-                        "position": 0
-                      },
-                      {
-                        "color": "#7C3AED",
-                        "position": 1
-                      }
-                    ]
-                  },
-                  "cornerRadius": 14,
-                  "gap": 6,
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#8B5CF6",
+                  "cornerRadius": 10,
                   "justifyContent": "center",
                   "alignItems": "center",
                   "children": [
@@ -839,8 +839,8 @@
                       "type": "icon_font",
                       "id": "qUhge",
                       "name": "viewIconA",
-                      "width": 14,
-                      "height": 14,
+                      "width": 16,
+                      "height": 16,
                       "iconFontName": "eye",
                       "iconFontFamily": "lucide",
                       "fill": "#FFFFFF"
@@ -848,6 +848,9 @@
                     {
                       "type": "text",
                       "id": "MK7P1",
+                      "x": 9.5,
+                      "y": 6.5,
+                      "enabled": false,
                       "fill": "#FFFFFF",
                       "content": "查看",
                       "fontFamily": "Inter",
@@ -4414,7 +4417,6 @@
           "y": 190,
           "name": "ptMain",
           "width": 343,
-          "height": 1015,
           "fill": "#00000000",
           "layout": "vertical",
           "gap": 12,
@@ -4442,478 +4444,292 @@
               }
             },
             {
-              "id": "qUlTr",
+              "id": "jcwfP",
               "type": "ref",
               "ref": "etLs3",
-              "width": 343,
+              "width": "fill_container",
+              "height": "fit_content",
+              "name": "q1",
               "x": 0,
               "y": 52,
-              "height": 183,
               "descendants": {
                 "BjVnZ": {
                   "width": "fill_container",
-                  "x": 16,
-                  "y": 16
-                },
-                "dYHyY": {
-                  "x": 15.5,
-                  "y": 12.5
+                  "height": "fit_content",
+                  "y": 12
                 },
                 "jNoEQ": {
                   "width": "fill_container",
-                  "x": 60
+                  "height": "fit_content"
                 },
                 "QDvel": {
                   "width": "fill_container"
                 },
                 "5GOtN": {
-                  "content": "王**",
-                  "y": -1.5
+                  "content": "王**"
                 },
                 "P6mzR": {
-                  "x": 42,
-                  "y": 1
+                  "fill": "#EEF2FF"
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#7C3AED",
-                  "x": 9,
-                  "y": 2
-                },
-                "1nIyU": {
-                  "content": "45岁",
-                  "y": 26
+                  "fill": "#6366F1"
                 },
                 "LTwWM": {
                   "width": "fill_container",
-                  "y": 51
+                  "height": "fit_content",
+                  "y": 30
+                },
+                "1nIyU": {
+                  "y": 0
+                },
+                "ZPBlV": {
+                  "x": 36,
+                  "y": 1.5
+                },
+                "hXm9p": {
+                  "x": 47,
+                  "y": 2.5
                 },
                 "hORiU": {
-                  "x": 28,
-                  "y": 2
-                },
-                "5d5W5": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 114
+                  "x": 67,
+                  "y": 1.5
                 },
                 "mOBtE": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 125
-                },
-                "2rn6J": {
-                  "width": "fill_container"
-                },
-                "lkYcX": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "Inr2j": {
-                  "x": 71.75,
-                  "y": 11.5
-                },
-                "yEnqh": {
-                  "width": "fill_container",
-                  "x": 160.5
-                },
-                "qUhge": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "MK7P1": {
-                  "x": 71.75,
-                  "y": 11.5
+                  "x": 257,
+                  "y": 20.5
                 }
               }
             },
             {
-              "id": "tkLGK",
+              "id": "hrhXK",
               "type": "ref",
               "ref": "etLs3",
-              "width": 343,
+              "width": "fill_container",
+              "height": "fit_content",
+              "name": "q2",
               "x": 0,
-              "y": 247,
-              "height": 183,
+              "y": 137,
               "descendants": {
                 "BjVnZ": {
                   "width": "fill_container",
-                  "x": 16,
-                  "y": 16
-                },
-                "uzMIG": {
-                  "fill": {
-                    "type": "gradient",
-                    "gradientType": "linear",
-                    "enabled": true,
-                    "rotation": 135,
-                    "size": {
-                      "height": 1
-                    },
-                    "colors": [
-                      {
-                        "color": "#F9A8D4",
-                        "position": 0
-                      },
-                      {
-                        "color": "#EC4899",
-                        "position": 1
-                      }
-                    ]
-                  }
-                },
-                "dYHyY": {
-                  "content": "女",
-                  "x": 15.5,
-                  "y": 12.5
+                  "height": "fit_content",
+                  "y": 12
                 },
                 "jNoEQ": {
                   "width": "fill_container",
-                  "x": 60
+                  "height": "fit_content"
                 },
                 "QDvel": {
                   "width": "fill_container"
                 },
                 "5GOtN": {
-                  "content": "李**",
-                  "y": -1.5
+                  "content": "李**"
                 },
                 "P6mzR": {
-                  "fill": "#FDF2F8",
-                  "x": 42,
-                  "y": 1
+                  "fill": "#FDF2F8"
                 },
                 "06zTO": {
                   "content": "女",
-                  "fill": "#DB2777",
-                  "x": 9,
-                  "y": 2
-                },
-                "1nIyU": {
-                  "content": "32岁",
-                  "y": 26
+                  "fill": "#DB2777"
                 },
                 "LTwWM": {
                   "width": "fill_container",
-                  "y": 51
+                  "height": "fit_content",
+                  "y": 30
+                },
+                "1nIyU": {
+                  "y": 0
+                },
+                "ZPBlV": {
+                  "x": 36,
+                  "y": 1.5
+                },
+                "hXm9p": {
+                  "x": 47,
+                  "y": 2.5
                 },
                 "hORiU": {
-                  "x": 28,
-                  "y": 2
-                },
-                "5d5W5": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 114
+                  "x": 67,
+                  "y": 1.5
                 },
                 "mOBtE": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 125
-                },
-                "2rn6J": {
-                  "width": "fill_container"
-                },
-                "lkYcX": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "Inr2j": {
-                  "x": 71.75,
-                  "y": 11.5
-                },
-                "yEnqh": {
-                  "width": "fill_container",
-                  "x": 160.5
-                },
-                "qUhge": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "MK7P1": {
-                  "x": 71.75,
-                  "y": 11.5
+                  "x": 257,
+                  "y": 20.5
                 }
               }
             },
             {
-              "id": "wmfJD",
+              "id": "4vvri",
               "type": "ref",
               "ref": "etLs3",
-              "width": 343,
+              "width": "fill_container",
+              "height": "fit_content",
+              "name": "q3",
               "x": 0,
-              "y": 442,
-              "height": 183,
+              "y": 222,
               "descendants": {
                 "BjVnZ": {
                   "width": "fill_container",
-                  "x": 16,
-                  "y": 16
-                },
-                "dYHyY": {
-                  "x": 15.5,
-                  "y": 12.5
+                  "height": "fit_content",
+                  "y": 12
                 },
                 "jNoEQ": {
                   "width": "fill_container",
-                  "x": 60
+                  "height": "fit_content"
                 },
                 "QDvel": {
                   "width": "fill_container"
                 },
                 "5GOtN": {
-                  "content": "张**",
-                  "y": -1.5
+                  "content": "张**"
                 },
                 "P6mzR": {
-                  "x": 42,
-                  "y": 1
+                  "fill": "#EEF2FF"
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#7C3AED",
-                  "x": 9,
-                  "y": 2
-                },
-                "1nIyU": {
-                  "content": "58岁",
-                  "y": 26
+                  "fill": "#6366F1"
                 },
                 "LTwWM": {
                   "width": "fill_container",
-                  "y": 51
+                  "height": "fit_content",
+                  "y": 30
+                },
+                "1nIyU": {
+                  "y": 0
+                },
+                "ZPBlV": {
+                  "x": 36,
+                  "y": 1.5
+                },
+                "hXm9p": {
+                  "x": 47,
+                  "y": 2.5
                 },
                 "hORiU": {
-                  "x": 28,
-                  "y": 2
-                },
-                "5d5W5": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 114
+                  "x": 67,
+                  "y": 1.5
                 },
                 "mOBtE": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 125
-                },
-                "2rn6J": {
-                  "width": "fill_container"
-                },
-                "lkYcX": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "Inr2j": {
-                  "x": 71.75,
-                  "y": 11.5
-                },
-                "yEnqh": {
-                  "width": "fill_container",
-                  "x": 160.5
-                },
-                "qUhge": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "MK7P1": {
-                  "x": 71.75,
-                  "y": 11.5
+                  "x": 257,
+                  "y": 20.5
                 }
               }
             },
             {
-              "id": "Uljym",
+              "id": "rJ7kl",
               "type": "ref",
               "ref": "etLs3",
-              "width": 343,
+              "width": "fill_container",
+              "height": "fit_content",
+              "name": "q4",
               "x": 0,
-              "y": 637,
-              "height": 183,
+              "y": 307,
               "descendants": {
                 "BjVnZ": {
                   "width": "fill_container",
-                  "x": 16,
-                  "y": 16
-                },
-                "uzMIG": {
-                  "fill": {
-                    "type": "gradient",
-                    "gradientType": "linear",
-                    "enabled": true,
-                    "rotation": 135,
-                    "size": {
-                      "height": 1
-                    },
-                    "colors": [
-                      {
-                        "color": "#F9A8D4",
-                        "position": 0
-                      },
-                      {
-                        "color": "#EC4899",
-                        "position": 1
-                      }
-                    ]
-                  }
-                },
-                "dYHyY": {
-                  "content": "女",
-                  "x": 15.5,
-                  "y": 12.5
+                  "height": "fit_content",
+                  "y": 12
                 },
                 "jNoEQ": {
                   "width": "fill_container",
-                  "x": 60
+                  "height": "fit_content"
                 },
                 "QDvel": {
                   "width": "fill_container"
                 },
                 "5GOtN": {
-                  "content": "刘**",
-                  "y": -1.5
+                  "content": "刘**"
                 },
                 "P6mzR": {
-                  "fill": "#FDF2F8",
-                  "x": 42,
-                  "y": 1
+                  "fill": "#FDF2F8"
                 },
                 "06zTO": {
                   "content": "女",
-                  "fill": "#DB2777",
-                  "x": 9,
-                  "y": 2
-                },
-                "1nIyU": {
-                  "content": "28岁",
-                  "y": 26
+                  "fill": "#DB2777"
                 },
                 "LTwWM": {
                   "width": "fill_container",
-                  "y": 51
+                  "height": "fit_content",
+                  "y": 30
+                },
+                "1nIyU": {
+                  "y": 0
+                },
+                "ZPBlV": {
+                  "x": 36,
+                  "y": 1.5
+                },
+                "hXm9p": {
+                  "x": 47,
+                  "y": 2.5
                 },
                 "hORiU": {
-                  "x": 28,
-                  "y": 2
-                },
-                "5d5W5": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 114
+                  "x": 67,
+                  "y": 1.5
                 },
                 "mOBtE": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 125
-                },
-                "2rn6J": {
-                  "width": "fill_container"
-                },
-                "lkYcX": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "Inr2j": {
-                  "x": 71.75,
-                  "y": 11.5
-                },
-                "yEnqh": {
-                  "width": "fill_container",
-                  "x": 160.5
-                },
-                "qUhge": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "MK7P1": {
-                  "x": 71.75,
-                  "y": 11.5
+                  "x": 257,
+                  "y": 20.5
                 }
               }
             },
             {
-              "id": "ARtqC",
+              "id": "EuBNa",
               "type": "ref",
               "ref": "etLs3",
-              "width": 343,
+              "width": "fill_container",
+              "height": "fit_content",
+              "name": "q5",
               "x": 0,
-              "y": 832,
-              "height": 183,
+              "y": 392,
               "descendants": {
                 "BjVnZ": {
                   "width": "fill_container",
-                  "x": 16,
-                  "y": 16
-                },
-                "dYHyY": {
-                  "x": 15.5,
-                  "y": 12.5
+                  "height": "fit_content",
+                  "y": 12
                 },
                 "jNoEQ": {
                   "width": "fill_container",
-                  "x": 60
+                  "height": "fit_content"
                 },
                 "QDvel": {
                   "width": "fill_container"
                 },
                 "5GOtN": {
-                  "content": "陈**",
-                  "y": -1.5
+                  "content": "陈**"
                 },
                 "P6mzR": {
-                  "x": 42,
-                  "y": 1
+                  "fill": "#EEF2FF"
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#7C3AED",
-                  "x": 9,
-                  "y": 2
-                },
-                "1nIyU": {
-                  "content": "51岁",
-                  "y": 26
+                  "fill": "#6366F1"
                 },
                 "LTwWM": {
                   "width": "fill_container",
-                  "y": 51
+                  "height": "fit_content",
+                  "y": 30
+                },
+                "1nIyU": {
+                  "y": 0
+                },
+                "ZPBlV": {
+                  "x": 36,
+                  "y": 1.5
+                },
+                "hXm9p": {
+                  "x": 47,
+                  "y": 2.5
                 },
                 "hORiU": {
-                  "x": 28,
-                  "y": 2
-                },
-                "5d5W5": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 114
+                  "x": 67,
+                  "y": 1.5
                 },
                 "mOBtE": {
-                  "width": "fill_container",
-                  "x": 16,
-                  "y": 125
-                },
-                "2rn6J": {
-                  "width": "fill_container"
-                },
-                "lkYcX": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "Inr2j": {
-                  "x": 71.75,
-                  "y": 11.5
-                },
-                "yEnqh": {
-                  "width": "fill_container",
-                  "x": 160.5
-                },
-                "qUhge": {
-                  "x": 51.75,
-                  "y": 14
-                },
-                "MK7P1": {
-                  "x": 71.75,
-                  "y": 11.5
+                  "x": 257,
+                  "y": 20.5
                 }
               }
             }

@@ -61,6 +61,7 @@ enum class IconToken {
     ARROW_RIGHT,
     CHEVRON_DOWN,
     CHEVRON_RIGHT,
+    MAGIC_WAND,
     EYE,
     EYE_OFF,
     DOWNLOAD,
@@ -100,45 +101,6 @@ fun AppIcon(
         modifier = Modifier.size(18.dp).then(modifier),
         colorFilter = ColorFilter.tint(tint),
     )
-}
-
-@Composable
-fun MiniBarChart(
-    values: List<Float>,
-    labels: List<String>,
-    modifier: Modifier = Modifier,
-    accentColor: Color = SpineTheme.colors.primary,
-) {
-    val max = (values.maxOrNull() ?: 1f).coerceAtLeast(1f)
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Canvas(modifier = Modifier.fillMaxWidth().height(92.dp)) {
-            val count = values.size.coerceAtLeast(1)
-            val gap = size.width * 0.04f
-            val barWidth = (size.width - gap * (count + 1)) / count
-            values.forEachIndexed { index, value ->
-                val left = gap + index * (barWidth + gap)
-                val ratio = (value / max).coerceIn(0f, 1f)
-                val barHeight = size.height * (0.2f + ratio * 0.8f)
-                drawRoundRect(
-                    color = accentColor.copy(alpha = 0.18f),
-                    topLeft = Offset(left, size.height - barHeight),
-                    size = Size(barWidth, barHeight),
-                    cornerRadius = CornerRadius(barWidth * 0.26f, barWidth * 0.26f),
-                )
-                drawRoundRect(
-                    color = accentColor,
-                    topLeft = Offset(left, size.height - barHeight * 0.72f),
-                    size = Size(barWidth, barHeight * 0.72f),
-                    cornerRadius = CornerRadius(barWidth * 0.26f, barWidth * 0.26f),
-                )
-            }
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            labels.forEach { label ->
-                Text(text = label, style = SpineTheme.typography.caption, color = SpineTheme.colors.textTertiary)
-            }
-        }
-    }
 }
 
 @Composable

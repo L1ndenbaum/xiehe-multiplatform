@@ -165,7 +165,7 @@ fun ImagesScreen(
                         actions = listOf(
                             ImageTaskAction(
                                 text = "标注分析",
-                                glyph = IconToken.EYE,
+                                glyph = IconToken.MAGIC_WAND,
                                 style = ImageTaskActionStyle.PRIMARY,
                                 onClick = {
                                     onOpenAnalysis(
