@@ -52,6 +52,7 @@ enum class IconToken {
     IMAGE,
     SCAN_SEARCH,
     SEARCH,
+    PHONE,
     EDIT,
     CALENDAR,
     CLOCK,
@@ -172,4 +173,3 @@ fun ProgressRing(
         }
     }
 }
-

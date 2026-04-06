@@ -49,6 +49,7 @@ private fun IconToken.androidDrawableName(): String {
         IconToken.IMAGE -> "icons_status_icon_image"
         IconToken.SCAN_SEARCH -> "icons_status_icon_scan_search"
         IconToken.SEARCH -> "icons_action_icon_search"
+        IconToken.PHONE -> "icons_action_icon_phone"
         IconToken.EDIT -> "icons_action_icon_edit"
         IconToken.CALENDAR -> "icons_action_icon_calendar"
         IconToken.CLOCK -> "icons_action_icon_clock"
@@ -86,5 +87,4 @@ private fun IconToken.androidDrawableName(): String {
         IconToken.MEASURE_AUX_POLYGON -> "icons_measure_toolkit_aux_polygon"
     }
 }
-
 

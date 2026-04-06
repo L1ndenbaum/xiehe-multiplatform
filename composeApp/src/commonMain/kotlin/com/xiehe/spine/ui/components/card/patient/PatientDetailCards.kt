@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.data.image.ImageCategory
 import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.patient.PatientDetail
 import com.xiehe.spine.ui.components.card.image.imageStatusPresentation
@@ -627,13 +628,12 @@ private fun compactFileName(fileName: String): String {
 }
 
 private fun compactExamType(examType: String): String {
-    return when {
-        examType.contains("正", ignoreCase = true) -> "正面"
-        examType.contains("XR", ignoreCase = true) || examType.contains("X", ignoreCase = true) -> "XR"
-        examType.contains("CT", ignoreCase = true) -> "CT"
-        examType.contains("MRI", ignoreCase = true) -> "MRI"
-        examType.contains("侧", ignoreCase = true) -> "侧位"
-        else -> "XR"
+    return when (ImageCategory.fromRaw(examType) ?: ImageCategory.FRONT) {
+        ImageCategory.FRONT -> "正位"
+        ImageCategory.SIDE -> "侧位"
+        ImageCategory.LEFT_BENDING -> "左曲"
+        ImageCategory.RIGHT_BENDING -> "右曲"
+        ImageCategory.POSTURE_PHOTO -> "体态"
     }
 }
 
