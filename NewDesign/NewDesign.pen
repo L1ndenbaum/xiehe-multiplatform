@@ -1506,6 +1506,1873 @@
               ]
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "7TjYN",
+          "name": "Component/AnnotationToolPanel",
+          "reusable": true,
+          "width": 375,
+          "fill": "#1E2233",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            12,
+            16,
+            16,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "3D52H",
+              "name": "header",
+              "width": "fill_container",
+              "fill": "#00000000",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LooVA",
+                  "name": "headerLeft",
+                  "fill": "#00000000",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "90Fns",
+                      "name": "headerIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "pen-tool",
+                      "iconFontFamily": "lucide",
+                      "fill": "#A78BFA"
+                    },
+                    {
+                      "type": "text",
+                      "id": "cAsKv",
+                      "name": "headerTitle",
+                      "fill": "#FFFFFF",
+                      "content": "标注工具",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "dKu1U",
+                  "name": "headerChevron",
+                  "width": 16,
+                  "height": 16,
+                  "iconFontName": "chevron-down",
+                  "iconFontFamily": "lucide",
+                  "fill": "#98A2B3"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Ojm3o",
+              "name": "divider",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "#2A3042"
+            },
+            {
+              "type": "frame",
+              "id": "Ip7nT",
+              "name": "sharePanel",
+              "width": "fill_container",
+              "fill": "#262B3D",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 12,
+              "cornerRadius": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "K25MZ",
+                  "name": "shareTop",
+                  "width": "fill_container",
+                  "fill": "#00000000",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "yPY7n",
+                      "name": "shareLeft",
+                      "fill": "#00000000",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "rmr4V",
+                          "name": "shareIcon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "link-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "#F5C84C"
+                        },
+                        {
+                          "type": "text",
+                          "id": "gqYOH",
+                          "name": "shareTitle",
+                          "fill": "#F8FAFC",
+                          "content": "共享点位绑定面板",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "Gx1MP",
+                      "name": "shareChevron",
+                      "width": 14,
+                      "height": 14,
+                      "iconFontName": "chevron-down",
+                      "iconFontFamily": "lucide",
+                      "fill": "#7C859A"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "c062t",
+                  "name": "shareActions",
+                  "width": "fill_container",
+                  "fill": "#00000000",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "1tTx6",
+                      "name": "unbindBtn",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#31364A",
+                      "cornerRadius": 10,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "NXe9z",
+                          "name": "unbindIcon",
+                          "width": 15,
+                          "height": 15,
+                          "iconFontName": "unlink-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "#D7DBE6"
+                        },
+                        {
+                          "type": "text",
+                          "id": "tDeUg",
+                          "name": "unbindText",
+                          "fill": "#E5E7EB",
+                          "content": "解除全部绑定",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jhBpH",
+                      "name": "bindBtn",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#31364A",
+                      "cornerRadius": 10,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "5vQ2I",
+                          "name": "bindIcon",
+                          "width": 15,
+                          "height": 15,
+                          "iconFontName": "mouse-pointer-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "#D7DBE6"
+                        },
+                        {
+                          "type": "text",
+                          "id": "0cl62",
+                          "name": "bindText",
+                          "fill": "#E5E7EB",
+                          "content": "手动绑定",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ndLHp",
+              "name": "measureSection",
+              "width": "fill_container",
+              "fill": "#00000000",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "JNDXv",
+                  "name": "measureTitleRow",
+                  "fill": "#00000000",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "zF18X",
+                      "name": "measureTitleIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "ruler",
+                      "iconFontFamily": "lucide",
+                      "fill": "#C4CAD8"
+                    },
+                    {
+                      "type": "text",
+                      "id": "euwuL",
+                      "name": "measureTitleText",
+                      "fill": "#F8FAFC",
+                      "content": "测量标注",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xv7Ij",
+                  "name": "measureGrid",
+                  "width": "fill_container",
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "GdpHR",
+                      "name": "measureRow1",
+                      "width": "fill_container",
+                      "fill": "#00000000",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "XeEhM",
+                          "name": "measureTileProto",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "oEPRb",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "circle-dot",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "iL5fc",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "G58J0",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "T1 Tilt",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "N9pxi",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "fJc0S",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "2",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "b5Y5O",
+                          "name": "measureTile2",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "yvuyq",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "compass",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "R38Cq",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "NqQ9h",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "Cobb",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "VvZ2X",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "DvjuL",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "4",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "1DzT8",
+                          "name": "measureTile3",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "G2kDV",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "circle",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "aq35Q",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "AeiJa",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "CA",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "ObdTb",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "ali0i",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "2",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "m5ASY",
+                          "name": "measureTile4",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "I0bKe",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "triangle",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Ayes9",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "fJbqs",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "Pelvic",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "Z4DJl",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "F1jqM",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "2",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eIDpv",
+                      "name": "measureRow2",
+                      "width": "fill_container",
+                      "fill": "#00000000",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "By6de",
+                          "name": "measureTile5",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "QDNXu",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "square",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "BtiLK",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "jyAm4",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "Sacral",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "KTY2V",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "gMPN8",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "4qmNJ",
+                          "name": "measureTile6",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "3FPlb",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "target",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "8YHYq",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "xLtWS",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "AVT",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "UMwvx",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "YTN3x",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "2",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "5cuuw",
+                          "name": "measureTile7",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "qOaQW",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "crosshair",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "R65Sn",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "jJSg7",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "TTS",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "8flBu",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "izn8N",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "2",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GGefS",
+                          "name": "measureTile8",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "RrrB0",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "arrow-up-down",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "58a3b",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "08Y6P",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "LLD",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "7jSGv",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "iqbO7",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "2",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JHLfc",
+                      "name": "measureRow3",
+                      "width": "fill_container",
+                      "fill": "#00000000",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LJBkt",
+                          "name": "measureTile9",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "82Zdj",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "arrow-left-right",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "zDsVB",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "qghOG",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "TS(Trunk",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "NzBSc",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "OUZKq",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "6",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "6HrdI",
+                          "name": "measureTile10",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "0pbBj",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "circle-dot",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "CyReT",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "NQzEt",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "锥体中心",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "T5Dtr",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "IUtWh",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "4",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GeosF",
+                          "name": "measureTile11",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "7tW6p",
+                              "name": "measureTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "ruler",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "9uaDL",
+                              "name": "measureTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "XSz0f",
+                                  "name": "measureTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "距离标记",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "Mq8vz",
+                                  "name": "measureTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "vQkX5",
+                                      "name": "measureTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "2",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "4Sxj6",
+              "name": "auxSection",
+              "width": "fill_container",
+              "fill": "#00000000",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wN0hb",
+                  "name": "auxTitleRow",
+                  "fill": "#00000000",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "TQ4BA",
+                      "name": "auxTitleIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "scan-search",
+                      "iconFontFamily": "lucide",
+                      "fill": "#C4CAD8"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gqRS0",
+                      "name": "auxTitleText",
+                      "fill": "#F8FAFC",
+                      "content": "辅助图形",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wZU99",
+                  "name": "auxGrid",
+                  "width": "fill_container",
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "pyeyv",
+                      "name": "auxRow1",
+                      "width": "fill_container",
+                      "fill": "#00000000",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "7laht",
+                          "name": "auxTileProto",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "JYew5",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "circle",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "2zMye",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DBJXw",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "Circle",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "hQGbZ",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "pAvIb",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "3e2iY",
+                          "name": "auxTile2",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "Iv2Ty",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "circle",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "plXv4",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CHrY7",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "Ellipse",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "JnqTt",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "clKox",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "v6Ea4",
+                          "name": "auxTile3",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "hl9Av",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "square",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "qFd7D",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "bUwrD",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "Box",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "YhURu",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "t16P2",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "n0W2e",
+                          "name": "auxTile4",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "PgXwM",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "arrow-right",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "9Xj1l",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "OuK8u",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "Arrow",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "YgKG4",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "UhxDg",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uX8se",
+                      "name": "auxRow2",
+                      "width": "fill_container",
+                      "fill": "#00000000",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Jr339",
+                          "name": "auxTile5",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "AX4yS",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "hexagon",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "HJ9Uy",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "6WgQR",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "多边形",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "kN29w",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "VL6XE",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Z6CEC",
+                          "name": "auxTile6",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "GlEpn",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "compass",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ZxN7D",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "FMHp7",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "角度标注",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "YQQzZ",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "OPdoU",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZzSTv",
+                          "name": "auxTile7",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "rro5A",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "minus",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "8bDQx",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "21PdY",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "辅助水平",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "01BqV",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "Jgoqi",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "tEgbt",
+                          "name": "auxTile8",
+                          "width": 79,
+                          "height": 72,
+                          "fill": "#2A3042",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "gap": 10,
+                          "cornerRadius": 12,
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "AF8vQ",
+                              "name": "auxTileProtoIcon",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "columns-2",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E5E7EB"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "tvdVe",
+                              "name": "auxTileProtoBottom",
+                              "fill": "#00000000",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "fyVbN",
+                                  "name": "auxTileProtoLabel",
+                                  "fill": "#C9D0DD",
+                                  "content": "辅助垂直",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "7lRry",
+                                  "name": "auxTileProtoBadge",
+                                  "height": 16,
+                                  "fill": "#49516A",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "padding": [
+                                    0,
+                                    5
+                                  ],
+                                  "cornerRadius": 999,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "SGjAW",
+                                      "name": "auxTileProtoBadgeText",
+                                      "fill": "#DDE3EE",
+                                      "content": "0",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "WbhVS",
+              "name": "distanceSection",
+              "width": "fill_container",
+              "fill": "#00000000",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "bRetf",
+                  "name": "distanceBtn",
+                  "width": "fill_container",
+                  "height": 42,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "rotation": 90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#7C3AED",
+                        "position": 0
+                      },
+                      {
+                        "color": "#A855F7",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "gap": 8,
+                  "cornerRadius": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "qEswL",
+                      "name": "distanceBtnIconWrap",
+                      "width": 20,
+                      "height": 20,
+                      "fill": "#FFFFFF26",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "cornerRadius": 6,
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "dI0J9",
+                          "name": "distanceBtnIcon",
+                          "width": 12,
+                          "height": 12,
+                          "iconFontName": "link-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "#F5F3FF"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "CxyHC",
+                      "name": "distanceBtnText",
+                      "fill": "#FFFFFF",
+                      "content": "标准距离设置",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "aGAYY",
+                  "name": "distanceLabel",
+                  "fill": "#9AA3B7",
+                  "content": "标准距离值 (mm)",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "ZPt7N",
+                  "name": "distanceInput",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "#262B3D",
+                  "padding": [
+                    0,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "fill": "#343A4F",
+                    "thickness": 1
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "eoX3v",
+                      "name": "distanceValue",
+                      "fill": "#FFFFFF",
+                      "content": "100",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gCqzv",
+                  "name": "successRow",
+                  "fill": "#00000000",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "YOENi",
+                      "name": "successIcon",
+                      "width": 12,
+                      "height": 12,
+                      "iconFontName": "check",
+                      "iconFontFamily": "lucide",
+                      "fill": "#34D399"
+                    },
+                    {
+                      "type": "text",
+                      "id": "XaWtp",
+                      "name": "successText",
+                      "fill": "#34D399",
+                      "content": "已设置:100mm",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },
