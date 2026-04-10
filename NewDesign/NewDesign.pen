@@ -3372,6 +3372,203 @@
                   ]
                 }
               ]
+            },
+            {
+              "type": "frame",
+              "id": "RxesR",
+              "name": "Component/AnnotationBottomBar",
+              "reusable": true,
+              "width": 392,
+              "height": 76,
+              "fill": "#253041",
+              "cornerRadius": 24,
+              "stroke": {
+                "thickness": 1,
+                "fill": "#475569"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0F172A22",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 20
+              },
+              "layout": "horizontal",
+              "gap": 28,
+              "padding": [
+                10,
+                20
+              ],
+              "justifyContent": "start",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "bTwIl",
+                  "name": "moveItem",
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "tY3Xl",
+                      "name": "moveIcon",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "move",
+                      "iconFontFamily": "lucide",
+                      "fill": "#CBD5E1"
+                    },
+                    {
+                      "type": "text",
+                      "id": "PAPDQ",
+                      "name": "moveText",
+                      "fill": "#CBD5E1",
+                      "content": "移动",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uLsZX",
+                  "name": "zoomItem",
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "ejHwr",
+                      "name": "zoomIcon",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "zoom-in",
+                      "iconFontFamily": "lucide",
+                      "fill": "#CBD5E1"
+                    },
+                    {
+                      "type": "text",
+                      "id": "JfJxF",
+                      "name": "zoomText",
+                      "fill": "#CBD5E1",
+                      "content": "缩放",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "MKizM",
+                  "name": "spacer",
+                  "width": 66,
+                  "height": 1,
+                  "fill": "#00000000"
+                },
+                {
+                  "type": "frame",
+                  "id": "GjVrH",
+                  "name": "undoItem",
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "S7vZt",
+                      "name": "undoIcon",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "undo-2",
+                      "iconFontFamily": "lucide",
+                      "fill": "#CBD5E1"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zx0NJ",
+                      "name": "undoText",
+                      "fill": "#CBD5E1",
+                      "content": "撤销",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iuG6n",
+                  "name": "redoItem",
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "o9kOd",
+                      "name": "redoIcon",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "redo-2",
+                      "iconFontFamily": "lucide",
+                      "fill": "#CBD5E1"
+                    },
+                    {
+                      "type": "text",
+                      "id": "q2ANm",
+                      "name": "redoText",
+                      "fill": "#CBD5E1",
+                      "content": "重做",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JGeEd",
+                  "name": "clearItem",
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "K2xD8",
+                      "name": "clearIcon",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "trash-2",
+                      "iconFontFamily": "lucide",
+                      "fill": "#F87171"
+                    },
+                    {
+                      "type": "text",
+                      "id": "E3TXa",
+                      "name": "clearText",
+                      "fill": "#F87171",
+                      "content": "清除",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -10380,7 +10577,7 @@
       "name": "Page/ImageAnnotation",
       "clip": true,
       "width": 375,
-      "height": 812,
+      "height": 1607,
       "fill": "#111827",
       "layout": "none",
       "children": [
@@ -10518,53 +10715,12 @@
         },
         {
           "type": "frame",
-          "id": "7jSva",
-          "x": 0,
-          "y": 586,
-          "name": "measure",
-          "width": 375,
-          "height": 130,
-          "fill": "#1F2937",
-          "layout": "vertical",
-          "gap": 12,
-          "padding": [
-            14,
-            16,
-            16,
-            16
-          ],
-          "children": [
-            {
-              "type": "text",
-              "id": "u0nWl",
-              "fill": "#FFFFFF",
-              "content": "测量数据",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "Pwfeo",
-              "fill": "#CBD5E1",
-              "textGrowth": "fixed-width",
-              "width": 343,
-              "content": "T1倾斜  -8.5°    斜肩  辅助标记    骨盆  0.4°",
-              "lineHeight": 1.4,
-              "fontFamily": "Inter",
-              "fontSize": 12,
-              "fontWeight": "normal"
-            }
-          ]
-        },
-        {
-          "type": "frame",
           "id": "AoV5q",
           "x": 0,
-          "y": 716,
+          "y": 1573,
           "name": "footer",
           "width": 375,
-          "height": 96,
+          "height": 34,
           "fill": "#1F2937F2",
           "stroke": {
             "thickness": {
@@ -10598,6 +10754,20 @@
               "fontWeight": "normal"
             }
           ]
+        },
+        {
+          "id": "beiGG",
+          "type": "ref",
+          "ref": "HwrC6",
+          "x": 0,
+          "y": 1424
+        },
+        {
+          "id": "cn4tk",
+          "type": "ref",
+          "ref": "7TjYN",
+          "x": 0,
+          "y": 606
         }
       ]
     },
@@ -18442,10 +18612,9 @@
                   "id": "LsUzK",
                   "name": "Component/GuideCard/Step1",
                   "reusable": true,
+                  "clip": true,
                   "width": 398,
                   "fill": "#FFFFFF",
-                  "layout": "vertical",
-                  "gap": 0,
                   "cornerRadius": 36,
                   "effect": {
                     "type": "shadow",
@@ -18457,7 +18626,7 @@
                     },
                     "blur": 38
                   },
-                  "clip": true,
+                  "layout": "vertical",
                   "children": [
                     {
                       "type": "frame",
@@ -18620,26 +18789,26 @@
                           "type": "text",
                           "id": "SOAqw",
                           "name": "title",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#0F172A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "欢迎使用脊柱影像分析系统",
+                          "lineHeight": 1.2,
                           "fontFamily": "Inter",
                           "fontSize": 28,
-                          "fontWeight": "700",
-                          "lineHeight": 1.2
+                          "fontWeight": "700"
                         },
                         {
                           "type": "text",
                           "id": "WBm5k",
                           "name": "body",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#94A3B8",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "专为脊柱科医生设计的智能影像分析平台，让我们快速了解核心功能。",
+                          "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17,
-                          "lineHeight": 1.45
+                          "fontSize": 17
                         },
                         {
                           "type": "frame",
@@ -18709,13 +18878,13 @@
                                     },
                                     "blur": 24
                                   },
+                                  "gap": 12,
                                   "padding": [
                                     0,
                                     32
                                   ],
                                   "justifyContent": "center",
                                   "alignItems": "center",
-                                  "gap": 12,
                                   "children": [
                                     {
                                       "type": "text",
@@ -18742,6 +18911,8 @@
                                 {
                                   "type": "frame",
                                   "id": "rz8Sq",
+                                  "x": 0,
+                                  "y": 0,
                                   "name": "backBtn",
                                   "enabled": false,
                                   "width": 72,
@@ -18776,10 +18947,9 @@
                   "id": "uomfp",
                   "name": "Component/GuideCard/Step2",
                   "reusable": true,
+                  "clip": true,
                   "width": 398,
                   "fill": "#FFFFFF",
-                  "layout": "vertical",
-                  "gap": 0,
                   "cornerRadius": 36,
                   "effect": {
                     "type": "shadow",
@@ -18791,7 +18961,7 @@
                     },
                     "blur": 38
                   },
-                  "clip": true,
+                  "layout": "vertical",
                   "children": [
                     {
                       "type": "frame",
@@ -18954,26 +19124,26 @@
                           "type": "text",
                           "id": "06HHt",
                           "name": "title",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#0F172A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "工作台 — 掌握全局",
+                          "lineHeight": 1.2,
                           "fontFamily": "Inter",
                           "fontSize": 28,
-                          "fontWeight": "700",
-                          "lineHeight": 1.2
+                          "fontWeight": "700"
                         },
                         {
                           "type": "text",
                           "id": "QZL4h",
                           "name": "body",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#94A3B8",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "在这里查看今日数据概览、待处理任务和近期动态，快速了解工作进展。",
+                          "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17,
-                          "lineHeight": 1.45
+                          "fontSize": 17
                         },
                         {
                           "type": "frame",
@@ -19066,13 +19236,13 @@
                                     },
                                     "blur": 24
                                   },
+                                  "gap": 12,
                                   "padding": [
                                     0,
                                     32
                                   ],
                                   "justifyContent": "center",
                                   "alignItems": "center",
-                                  "gap": 12,
                                   "children": [
                                     {
                                       "type": "text",
@@ -19103,16 +19273,25 @@
                       ]
                     }
                   ]
-                },
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "WDFjO",
+              "name": "row2",
+              "width": "fill_container",
+              "fill": "#00000000",
+              "gap": 28,
+              "children": [
                 {
                   "type": "frame",
                   "id": "CvTIK",
                   "name": "Component/GuideCard/Step3",
                   "reusable": true,
+                  "clip": true,
                   "width": 398,
                   "fill": "#FFFFFF",
-                  "layout": "vertical",
-                  "gap": 0,
                   "cornerRadius": 36,
                   "effect": {
                     "type": "shadow",
@@ -19124,7 +19303,7 @@
                     },
                     "blur": 38
                   },
-                  "clip": true,
+                  "layout": "vertical",
                   "children": [
                     {
                       "type": "frame",
@@ -19287,26 +19466,26 @@
                           "type": "text",
                           "id": "G0czE",
                           "name": "title",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#0F172A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "患者中心 — 管理患者",
+                          "lineHeight": 1.2,
                           "fontFamily": "Inter",
                           "fontSize": 28,
-                          "fontWeight": "700",
-                          "lineHeight": 1.2
+                          "fontWeight": "700"
                         },
                         {
                           "type": "text",
                           "id": "NTogt",
                           "name": "body",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#94A3B8",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "查看所有患者信息、历史影像记录，支持快速搜索和筛选。",
+                          "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17,
-                          "lineHeight": 1.45
+                          "fontSize": 17
                         },
                         {
                           "type": "frame",
@@ -19399,13 +19578,13 @@
                                     },
                                     "blur": 24
                                   },
+                                  "gap": 12,
                                   "padding": [
                                     0,
                                     32
                                   ],
                                   "justifyContent": "center",
                                   "alignItems": "center",
-                                  "gap": 12,
                                   "children": [
                                     {
                                       "type": "text",
@@ -19442,10 +19621,9 @@
                   "id": "EdeYE",
                   "name": "Component/GuideCard/Step4",
                   "reusable": true,
+                  "clip": true,
                   "width": 398,
                   "fill": "#FFFFFF",
-                  "layout": "vertical",
-                  "gap": 0,
                   "cornerRadius": 36,
                   "effect": {
                     "type": "shadow",
@@ -19457,7 +19635,7 @@
                     },
                     "blur": 38
                   },
-                  "clip": true,
+                  "layout": "vertical",
                   "children": [
                     {
                       "type": "frame",
@@ -19620,26 +19798,26 @@
                           "type": "text",
                           "id": "Oa1Ut",
                           "name": "title",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#0F172A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "影像中心 — 上传与分析",
+                          "lineHeight": 1.2,
                           "fontFamily": "Inter",
                           "fontSize": 28,
-                          "fontWeight": "700",
-                          "lineHeight": 1.2
+                          "fontWeight": "700"
                         },
                         {
                           "type": "text",
                           "id": "O3qAV",
                           "name": "body",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#94A3B8",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "上传 X 光片，按类型和状态筛选，点击「标注分析」进入智能标注工作台。",
+                          "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17,
-                          "lineHeight": 1.45
+                          "fontSize": 17
                         },
                         {
                           "type": "frame",
@@ -19732,13 +19910,13 @@
                                     },
                                     "blur": 24
                                   },
+                                  "gap": 12,
                                   "padding": [
                                     0,
                                     32
                                   ],
                                   "justifyContent": "center",
                                   "alignItems": "center",
-                                  "gap": 12,
                                   "children": [
                                     {
                                       "type": "text",
@@ -19785,10 +19963,9 @@
                   "id": "U6ufc",
                   "name": "Component/GuideCard/Step5",
                   "reusable": true,
+                  "clip": true,
                   "width": 398,
                   "fill": "#FFFFFF",
-                  "layout": "vertical",
-                  "gap": 0,
                   "cornerRadius": 36,
                   "effect": {
                     "type": "shadow",
@@ -19800,7 +19977,7 @@
                     },
                     "blur": 38
                   },
-                  "clip": true,
+                  "layout": "vertical",
                   "children": [
                     {
                       "type": "frame",
@@ -19963,26 +20140,26 @@
                           "type": "text",
                           "id": "mCacc",
                           "name": "title",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#0F172A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "待处理任务 — 快速响应",
+                          "lineHeight": 1.2,
                           "fontFamily": "Inter",
                           "fontSize": 28,
-                          "fontWeight": "700",
-                          "lineHeight": 1.2
+                          "fontWeight": "700"
                         },
                         {
                           "type": "text",
                           "id": "Zkbit",
                           "name": "body",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#94A3B8",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "工作台中的待处理任务按优先级排序，点击右侧箭头可直接进入标注页面。",
+                          "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17,
-                          "lineHeight": 1.45
+                          "fontSize": 17
                         },
                         {
                           "type": "frame",
@@ -20075,13 +20252,13 @@
                                     },
                                     "blur": 24
                                   },
+                                  "gap": 12,
                                   "padding": [
                                     0,
                                     32
                                   ],
                                   "justifyContent": "center",
                                   "alignItems": "center",
-                                  "gap": 12,
                                   "children": [
                                     {
                                       "type": "text",
@@ -20118,10 +20295,9 @@
                   "id": "aBIAb",
                   "name": "Component/GuideCard/Step6",
                   "reusable": true,
+                  "clip": true,
                   "width": 398,
                   "fill": "#FFFFFF",
-                  "layout": "vertical",
-                  "gap": 0,
                   "cornerRadius": 36,
                   "effect": {
                     "type": "shadow",
@@ -20133,7 +20309,7 @@
                     },
                     "blur": 38
                   },
-                  "clip": true,
+                  "layout": "vertical",
                   "children": [
                     {
                       "type": "frame",
@@ -20296,26 +20472,26 @@
                           "type": "text",
                           "id": "DbGz9",
                           "name": "title",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#0F172A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "一切就绪！",
+                          "lineHeight": 1.2,
                           "fontFamily": "Inter",
                           "fontSize": 28,
-                          "fontWeight": "700",
-                          "lineHeight": 1.2
+                          "fontWeight": "700"
                         },
                         {
                           "type": "text",
                           "id": "Ao770",
                           "name": "body",
-                          "width": "fill_container",
-                          "textGrowth": "fixed-width",
                           "fill": "#94A3B8",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
                           "content": "您已了解系统的核心功能。如需帮助，可随时在个人中心查看使用指南。",
+                          "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17,
-                          "lineHeight": 1.45
+                          "fontSize": 17
                         },
                         {
                           "type": "frame",
@@ -20408,13 +20584,13 @@
                                     },
                                     "blur": 24
                                   },
+                                  "gap": 12,
                                   "padding": [
                                     0,
                                     28
                                   ],
                                   "justifyContent": "center",
                                   "alignItems": "center",
-                                  "gap": 12,
                                   "children": [
                                     {
                                       "type": "text",
