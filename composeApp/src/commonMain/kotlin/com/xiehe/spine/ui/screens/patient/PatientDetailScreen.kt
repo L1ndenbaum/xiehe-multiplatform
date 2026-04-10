@@ -22,7 +22,7 @@ import com.xiehe.spine.ui.components.card.patient.PatientImageRecordsCard
 import com.xiehe.spine.ui.components.card.patient.PatientOverviewCards
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.patient.PatientDetailViewModel
 

@@ -30,12 +30,12 @@ import com.xiehe.spine.data.patient.PatientSummary
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.card.dashboard.ActivityCard
-import com.xiehe.spine.ui.components.card.dashboard.DashboardSectionTitle
-import com.xiehe.spine.ui.components.card.dashboard.DashboardStatCard
 import com.xiehe.spine.ui.components.card.dashboard.PendingTaskCard
-import com.xiehe.spine.ui.components.card.dashboard.QuickActionItem
+import com.xiehe.spine.ui.components.text.dashboard.DashboardSectionTitle
+import com.xiehe.spine.ui.components.card.dashboard.DashboardStatCard
+import com.xiehe.spine.ui.components.card.dashboard.QuickActionTile
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.dashboard.DashboardViewModel
 
@@ -145,28 +145,28 @@ fun DashboardScreen(
             }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickActionItem(
+                    QuickActionTile(
                         label = "新增患者",
                         icon = IconToken.USER_PLUS,
                         colors = patientStatGradient(colors),
                         modifier = Modifier.weight(1f),
                         onClick = onOpenPatientForm,
                     )
-                    QuickActionItem(
+                    QuickActionTile(
                         label = "上传影像",
                         icon = IconToken.UPLOAD,
                         colors = imageStatGradient(colors),
                         modifier = Modifier.weight(1f),
                         onClick = onOpenImageUpload,
                     )
-                    QuickActionItem(
+                    QuickActionTile(
                         label = "系统设置",
                         icon = IconToken.SETTINGS,
                         colors = reviewActionGradient(colors),
                         modifier = Modifier.weight(1f),
                         onClick = onOpenAppearance,
                     )
-                    QuickActionItem(
+                    QuickActionTile(
                         label = "组织管理",
                         icon = IconToken.USERS,
                         colors = messageActionGradient(colors),

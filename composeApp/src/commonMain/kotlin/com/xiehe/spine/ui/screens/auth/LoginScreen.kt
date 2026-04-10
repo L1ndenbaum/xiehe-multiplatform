@@ -45,7 +45,7 @@ import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.badge.shared.IconBadge
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.auth.LoginViewModel
 import org.jetbrains.compose.resources.painterResource

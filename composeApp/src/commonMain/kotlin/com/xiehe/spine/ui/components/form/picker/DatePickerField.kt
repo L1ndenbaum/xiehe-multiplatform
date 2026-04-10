@@ -1,6 +1,6 @@
 package com.xiehe.spine.ui.components.form.picker
 
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import androidx.compose.foundation.clickable

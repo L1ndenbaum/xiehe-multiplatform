@@ -1,7 +1,7 @@
 package com.xiehe.spine.ui.components.card.shared
 
 import com.xiehe.spine.ui.components.button.shared.Button
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

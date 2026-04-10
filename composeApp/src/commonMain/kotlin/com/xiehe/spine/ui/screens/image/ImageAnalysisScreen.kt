@@ -1,10 +1,5 @@
 package com.xiehe.spine.ui.screens.image
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +37,7 @@ import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
 import com.xiehe.spine.ui.components.analysis.image.MeasureToolPanel
 import com.xiehe.spine.ui.components.analysis.image.MeasurementResultsPanel
 import com.xiehe.spine.ui.components.form.picker.PickerDialog
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.form.file.FileSaveResult
 import com.xiehe.spine.ui.components.form.file.rememberDownloadedFileSaver
 import com.xiehe.spine.ui.components.form.file.rememberJsonFilePickerLauncher

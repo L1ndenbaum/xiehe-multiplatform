@@ -30,7 +30,7 @@ import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.form.file.rememberImageFilePickerLauncher
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay

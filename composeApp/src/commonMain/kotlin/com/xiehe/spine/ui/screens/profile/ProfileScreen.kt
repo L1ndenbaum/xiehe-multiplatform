@@ -43,7 +43,7 @@ import com.xiehe.spine.ui.components.card.profile.ProfilePersonalInfoPalette
 import com.xiehe.spine.ui.components.card.profile.ProfileSettingsPalette
 import com.xiehe.spine.ui.components.card.profile.ProfileStat
 import com.xiehe.spine.ui.components.card.profile.ProfileTag
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme

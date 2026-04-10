@@ -30,7 +30,7 @@ import com.xiehe.spine.data.organization.OrganizationRepository
 import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.motion.AppConfirmDialogHost
 import com.xiehe.spine.ui.theme.SpineTheme

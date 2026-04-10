@@ -30,7 +30,7 @@ import com.xiehe.spine.ui.components.card.image.imageStatusPresentation
 import com.xiehe.spine.ui.components.card.image.inferExamType
 import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.card.shared.Card
-import com.xiehe.spine.ui.components.feedback.shared.Text
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
 
