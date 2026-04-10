@@ -35,7 +35,7 @@ fun SpineTheme(
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.AUTO_TIME -> {
             val hour = currentHour24()
-            hour >= 20 || hour < 7
+            hour !in 7..<20
         }
 
         ThemeMode.LIGHT -> false
