@@ -1,5 +1,5 @@
 {
-  "version": "2.9",
+  "version": "2.10",
   "children": [
     {
       "type": "frame",
@@ -1322,6 +1322,186 @@
                   "fontFamily": "Inter",
                   "fontSize": 13,
                   "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "HwrC6",
+          "name": "Component/MeasureDataList",
+          "reusable": true,
+          "width": 375,
+          "fill": "#1F2937",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            14,
+            16,
+            16,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "UUSYT",
+              "name": "header",
+              "width": "fill_container",
+              "fill": "#00000000",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "nASxx",
+                  "name": "headerLeft",
+                  "fill": "#00000000",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "93L0O",
+                      "name": "headerIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "format_list_bulleted",
+                      "iconFontFamily": "Material Symbols Rounded",
+                      "weight": 500,
+                      "fill": "#A78BFA"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gKuFx",
+                      "name": "headerTitle",
+                      "fill": "#FFFFFF",
+                      "content": "测量数据",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "T3Pht",
+                  "name": "headerChevron",
+                  "width": 16,
+                  "height": 16,
+                  "iconFontName": "chevron-down",
+                  "iconFontFamily": "lucide",
+                  "fill": "#94A3B8"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "D9d6S",
+              "name": "item1",
+              "width": "fill_container",
+              "height": 36,
+              "fill": "#2B3546",
+              "cornerRadius": 10,
+              "padding": [
+                0,
+                14
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "N1vCe",
+                  "name": "item1Left",
+                  "fill": "#00000000",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "eSetO",
+                      "name": "item1Dot",
+                      "fill": "#FF6B6B",
+                      "width": 12,
+                      "height": 12
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZFo4j",
+                      "name": "item1Label",
+                      "fill": "#FFFFFF",
+                      "content": "T1倾斜",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Aqn7F",
+                  "name": "item1Value",
+                  "fill": "#F87171",
+                  "content": "-8.5°",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "kkh96",
+              "name": "item2",
+              "width": "fill_container",
+              "height": 36,
+              "fill": "#2B3546",
+              "cornerRadius": 10,
+              "padding": [
+                0,
+                14
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "SWgkb",
+                  "name": "item2Left",
+                  "fill": "#00000000",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "0T2dg",
+                      "name": "item2Dot",
+                      "fill": "#5EEAD4",
+                      "width": 12,
+                      "height": 12
+                    },
+                    {
+                      "type": "text",
+                      "id": "6mTeB",
+                      "name": "item2Label",
+                      "fill": "#FFFFFF",
+                      "content": "斜肩",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "FEisF",
+                  "name": "item2Value",
+                  "fill": "#5EEAD4",
+                  "content": "辅助标记",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 }
               ]
             }
@@ -4456,24 +4636,36 @@
                 "BjVnZ": {
                   "width": "fill_container",
                   "height": "fit_content",
-                  "y": 12
+                  "y": 12,
+                  "x": 14
+                },
+                "dYHyY": {
+                  "x": -8.5,
+                  "y": -11.5
                 },
                 "jNoEQ": {
                   "width": "fill_container",
                   "height": "fit_content"
                 },
                 "QDvel": {
-                  "width": "fill_container"
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5GOtN": {
-                  "content": "王**"
+                  "content": "王**",
+                  "y": 1.5
                 },
                 "P6mzR": {
-                  "fill": "#EEF2FF"
+                  "fill": "#EEF2FF",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "x": 42
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#6366F1"
+                  "fill": "#6366F1",
+                  "x": 2,
+                  "y": 6
                 },
                 "LTwWM": {
                   "width": "fill_container",
@@ -4497,7 +4689,19 @@
                 },
                 "mOBtE": {
                   "x": 257,
-                  "y": 20.5
+                  "y": 20.5,
+                  "width": "fit_content"
+                },
+                "lkYcX": {
+                  "x": 8,
+                  "y": 8
+                },
+                "yEnqh": {
+                  "x": 40
+                },
+                "qUhge": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             },
@@ -4514,24 +4718,36 @@
                 "BjVnZ": {
                   "width": "fill_container",
                   "height": "fit_content",
-                  "y": 12
+                  "y": 12,
+                  "x": 14
+                },
+                "dYHyY": {
+                  "x": -8.5,
+                  "y": -11.5
                 },
                 "jNoEQ": {
                   "width": "fill_container",
                   "height": "fit_content"
                 },
                 "QDvel": {
-                  "width": "fill_container"
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5GOtN": {
-                  "content": "李**"
+                  "content": "李**",
+                  "y": 1.5
                 },
                 "P6mzR": {
-                  "fill": "#FDF2F8"
+                  "fill": "#FDF2F8",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "x": 42
                 },
                 "06zTO": {
                   "content": "女",
-                  "fill": "#DB2777"
+                  "fill": "#DB2777",
+                  "x": 2,
+                  "y": 6
                 },
                 "LTwWM": {
                   "width": "fill_container",
@@ -4555,7 +4771,19 @@
                 },
                 "mOBtE": {
                   "x": 257,
-                  "y": 20.5
+                  "y": 20.5,
+                  "width": "fit_content"
+                },
+                "lkYcX": {
+                  "x": 8,
+                  "y": 8
+                },
+                "yEnqh": {
+                  "x": 40
+                },
+                "qUhge": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             },
@@ -4572,24 +4800,36 @@
                 "BjVnZ": {
                   "width": "fill_container",
                   "height": "fit_content",
-                  "y": 12
+                  "y": 12,
+                  "x": 14
+                },
+                "dYHyY": {
+                  "x": -8.5,
+                  "y": -11.5
                 },
                 "jNoEQ": {
                   "width": "fill_container",
                   "height": "fit_content"
                 },
                 "QDvel": {
-                  "width": "fill_container"
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5GOtN": {
-                  "content": "张**"
+                  "content": "张**",
+                  "y": 1.5
                 },
                 "P6mzR": {
-                  "fill": "#EEF2FF"
+                  "fill": "#EEF2FF",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "x": 42
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#6366F1"
+                  "fill": "#6366F1",
+                  "x": 2,
+                  "y": 6
                 },
                 "LTwWM": {
                   "width": "fill_container",
@@ -4613,7 +4853,19 @@
                 },
                 "mOBtE": {
                   "x": 257,
-                  "y": 20.5
+                  "y": 20.5,
+                  "width": "fit_content"
+                },
+                "lkYcX": {
+                  "x": 8,
+                  "y": 8
+                },
+                "yEnqh": {
+                  "x": 40
+                },
+                "qUhge": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             },
@@ -4630,24 +4882,36 @@
                 "BjVnZ": {
                   "width": "fill_container",
                   "height": "fit_content",
-                  "y": 12
+                  "y": 12,
+                  "x": 14
+                },
+                "dYHyY": {
+                  "x": -8.5,
+                  "y": -11.5
                 },
                 "jNoEQ": {
                   "width": "fill_container",
                   "height": "fit_content"
                 },
                 "QDvel": {
-                  "width": "fill_container"
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5GOtN": {
-                  "content": "刘**"
+                  "content": "刘**",
+                  "y": 1.5
                 },
                 "P6mzR": {
-                  "fill": "#FDF2F8"
+                  "fill": "#FDF2F8",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "x": 42
                 },
                 "06zTO": {
                   "content": "女",
-                  "fill": "#DB2777"
+                  "fill": "#DB2777",
+                  "x": 2,
+                  "y": 6
                 },
                 "LTwWM": {
                   "width": "fill_container",
@@ -4671,7 +4935,19 @@
                 },
                 "mOBtE": {
                   "x": 257,
-                  "y": 20.5
+                  "y": 20.5,
+                  "width": "fit_content"
+                },
+                "lkYcX": {
+                  "x": 8,
+                  "y": 8
+                },
+                "yEnqh": {
+                  "x": 40
+                },
+                "qUhge": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             },
@@ -4688,24 +4964,36 @@
                 "BjVnZ": {
                   "width": "fill_container",
                   "height": "fit_content",
-                  "y": 12
+                  "y": 12,
+                  "x": 14
+                },
+                "dYHyY": {
+                  "x": -8.5,
+                  "y": -11.5
                 },
                 "jNoEQ": {
                   "width": "fill_container",
                   "height": "fit_content"
                 },
                 "QDvel": {
-                  "width": "fill_container"
+                  "width": "fill_container",
+                  "height": "fit_content"
                 },
                 "5GOtN": {
-                  "content": "陈**"
+                  "content": "陈**",
+                  "y": 1.5
                 },
                 "P6mzR": {
-                  "fill": "#EEF2FF"
+                  "fill": "#EEF2FF",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "x": 42
                 },
                 "06zTO": {
                   "content": "男",
-                  "fill": "#6366F1"
+                  "fill": "#6366F1",
+                  "x": 2,
+                  "y": 6
                 },
                 "LTwWM": {
                   "width": "fill_container",
@@ -4729,7 +5017,19 @@
                 },
                 "mOBtE": {
                   "x": 257,
-                  "y": 20.5
+                  "y": 20.5,
+                  "width": "fit_content"
+                },
+                "lkYcX": {
+                  "x": 8,
+                  "y": 8
+                },
+                "yEnqh": {
+                  "x": 40
+                },
+                "qUhge": {
+                  "x": 8,
+                  "y": 8
                 }
               }
             }
