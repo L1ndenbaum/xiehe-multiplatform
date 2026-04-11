@@ -10715,14 +10715,654 @@
           "type": "ref",
           "ref": "HwrC6",
           "x": -1,
-          "y": 1488
+          "y": 1488,
+          "height": "fit_content",
+          "descendants": {
+            "UUSYT": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 16,
+              "y": 14
+            },
+            "nASxx": {
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "93L0O": {
+              "y": 3.5
+            },
+            "gKuFx": {
+              "x": 24
+            },
+            "T3Pht": {
+              "x": 327,
+              "y": 3.5
+            },
+            "D9d6S": {
+              "width": "fill_container",
+              "x": 16,
+              "y": 49
+            },
+            "N1vCe": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 14,
+              "y": 8
+            },
+            "eSetO": {
+              "y": 4
+            },
+            "ZFo4j": {
+              "x": 22
+            },
+            "Aqn7F": {
+              "x": 293,
+              "y": 9.5
+            },
+            "kkh96": {
+              "width": "fill_container",
+              "x": 16,
+              "y": 97
+            },
+            "SWgkb": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 14,
+              "y": 8
+            },
+            "0T2dg": {
+              "y": 4
+            },
+            "6mTeB": {
+              "x": 22
+            },
+            "FEisF": {
+              "x": 273,
+              "y": 8
+            }
+          }
         },
         {
           "id": "cn4tk",
           "type": "ref",
           "ref": "7TjYN",
           "x": 0,
-          "y": 670
+          "y": 670,
+          "height": "fit_content",
+          "descendants": {
+            "3D52H": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 16,
+              "y": 12
+            },
+            "LooVA": {
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "90Fns": {
+              "y": 3.5
+            },
+            "cAsKv": {
+              "x": 24
+            },
+            "dKu1U": {
+              "x": 327,
+              "y": 3.5
+            },
+            "Ojm3o": {
+              "width": "fill_container",
+              "x": 16,
+              "y": 51
+            },
+            "Ip7nT": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 16,
+              "y": 68
+            },
+            "K25MZ": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 12,
+              "y": 12
+            },
+            "yPY7n": {
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "rmr4V": {
+              "y": 2
+            },
+            "gqYOH": {
+              "x": 24
+            },
+            "Gx1MP": {
+              "x": 305,
+              "y": 3
+            },
+            "c062t": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 12,
+              "y": 44
+            },
+            "1tTx6": {
+              "width": "fill_container"
+            },
+            "NXe9z": {
+              "x": 23.25,
+              "y": 10.5
+            },
+            "tDeUg": {
+              "x": 46.25,
+              "y": 8
+            },
+            "jhBpH": {
+              "width": "fill_container",
+              "x": 165.5
+            },
+            "5vQ2I": {
+              "x": 37.25,
+              "y": 10.5
+            },
+            "0cl62": {
+              "x": 60.25,
+              "y": 8
+            },
+            "ndLHp": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 16,
+              "y": 176
+            },
+            "JNDXv": {
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "zF18X": {
+              "y": 2
+            },
+            "euwuL": {
+              "x": 24
+            },
+            "xv7Ij": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "y": 32
+            },
+            "GdpHR": {
+              "width": "fill_container",
+              "height": "fit_content"
+            },
+            "oEPRb": {
+              "x": 30.5,
+              "y": 14
+            },
+            "iL5fc": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 11.5,
+              "y": 42
+            },
+            "N9pxi": {
+              "width": "fit_content",
+              "x": 39
+            },
+            "fJc0S": {
+              "x": 5,
+              "y": 2
+            },
+            "b5Y5O": {
+              "x": 87
+            },
+            "yvuyq": {
+              "x": 30.5,
+              "y": 14
+            },
+            "R38Cq": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 13.5,
+              "y": 42
+            },
+            "VvZ2X": {
+              "width": "fit_content",
+              "x": 35
+            },
+            "DvjuL": {
+              "x": 5,
+              "y": 2
+            },
+            "1DzT8": {
+              "x": 174
+            },
+            "G2kDV": {
+              "x": 30.5,
+              "y": 14
+            },
+            "aq35Q": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 20,
+              "y": 42
+            },
+            "ObdTb": {
+              "width": "fit_content",
+              "x": 22
+            },
+            "ali0i": {
+              "x": 5,
+              "y": 2
+            },
+            "m5ASY": {
+              "x": 261
+            },
+            "I0bKe": {
+              "x": 30.5,
+              "y": 14
+            },
+            "Ayes9": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 11.5,
+              "y": 42
+            },
+            "Z4DJl": {
+              "width": "fit_content",
+              "x": 39
+            },
+            "F1jqM": {
+              "x": 5,
+              "y": 2
+            },
+            "eIDpv": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "y": 82
+            },
+            "QDNXu": {
+              "x": 30.5,
+              "y": 14
+            },
+            "BtiLK": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 11,
+              "y": 42
+            },
+            "KTY2V": {
+              "width": "fit_content",
+              "x": 40
+            },
+            "gMPN8": {
+              "x": 5,
+              "y": 2
+            },
+            "4qmNJ": {
+              "x": 87
+            },
+            "3FPlb": {
+              "x": 30.5,
+              "y": 14
+            },
+            "8YHYq": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 17,
+              "y": 42
+            },
+            "UMwvx": {
+              "width": "fit_content",
+              "x": 28
+            },
+            "YTN3x": {
+              "x": 5,
+              "y": 2
+            },
+            "5cuuw": {
+              "x": 174
+            },
+            "qOaQW": {
+              "x": 30.5,
+              "y": 14
+            },
+            "R65Sn": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 17,
+              "y": 42
+            },
+            "8flBu": {
+              "width": "fit_content",
+              "x": 28
+            },
+            "izn8N": {
+              "x": 5,
+              "y": 2
+            },
+            "GGefS": {
+              "x": 261
+            },
+            "RrrB0": {
+              "x": 30.5,
+              "y": 14
+            },
+            "58a3b": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 17.5,
+              "y": 42
+            },
+            "7jSGv": {
+              "width": "fit_content",
+              "x": 27
+            },
+            "iqbO7": {
+              "x": 5,
+              "y": 2
+            },
+            "JHLfc": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "y": 164
+            },
+            "82Zdj": {
+              "x": 30.5,
+              "y": 14
+            },
+            "zDsVB": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 2.5,
+              "y": 42
+            },
+            "NzBSc": {
+              "width": "fit_content",
+              "x": 57
+            },
+            "OUZKq": {
+              "x": 5,
+              "y": 2
+            },
+            "6HrdI": {
+              "x": 87
+            },
+            "0pbBj": {
+              "x": 30.5,
+              "y": 13.5
+            },
+            "CyReT": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 4.5,
+              "y": 41.5
+            },
+            "T5Dtr": {
+              "width": "fit_content",
+              "x": 53
+            },
+            "IUtWh": {
+              "x": 5,
+              "y": 2
+            },
+            "GeosF": {
+              "x": 174
+            },
+            "7tW6p": {
+              "x": 30.5,
+              "y": 13.5
+            },
+            "9uaDL": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 4.5,
+              "y": 41.5
+            },
+            "Mq8vz": {
+              "width": "fit_content",
+              "x": 53
+            },
+            "vQkX5": {
+              "x": 5,
+              "y": 2
+            },
+            "4Sxj6": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 16,
+              "y": 460
+            },
+            "wN0hb": {
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "TQ4BA": {
+              "y": 2
+            },
+            "gqRS0": {
+              "x": 24
+            },
+            "wZU99": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "y": 32
+            },
+            "pyeyv": {
+              "width": "fill_container",
+              "height": "fit_content"
+            },
+            "JYew5": {
+              "x": 30.5,
+              "y": 14
+            },
+            "2zMye": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 12,
+              "y": 42
+            },
+            "hQGbZ": {
+              "width": "fit_content",
+              "x": 38
+            },
+            "pAvIb": {
+              "x": 5,
+              "y": 2
+            },
+            "3e2iY": {
+              "x": 87
+            },
+            "Iv2Ty": {
+              "x": 30.5,
+              "y": 14
+            },
+            "plXv4": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 10,
+              "y": 42
+            },
+            "JnqTt": {
+              "width": "fit_content",
+              "x": 42
+            },
+            "clKox": {
+              "x": 5,
+              "y": 2
+            },
+            "v6Ea4": {
+              "x": 174
+            },
+            "hl9Av": {
+              "x": 30.5,
+              "y": 14
+            },
+            "qFd7D": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 18,
+              "y": 42
+            },
+            "YhURu": {
+              "width": "fit_content",
+              "x": 26
+            },
+            "t16P2": {
+              "x": 5,
+              "y": 2
+            },
+            "n0W2e": {
+              "x": 261
+            },
+            "PgXwM": {
+              "x": 30.5,
+              "y": 14
+            },
+            "9Xj1l": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 11.5,
+              "y": 42
+            },
+            "YgKG4": {
+              "width": "fit_content",
+              "x": 39
+            },
+            "UhxDg": {
+              "x": 5,
+              "y": 2
+            },
+            "uX8se": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "y": 82
+            },
+            "AX4yS": {
+              "x": 30.5,
+              "y": 13.5
+            },
+            "HJ9Uy": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 10.5,
+              "y": 41.5
+            },
+            "kN29w": {
+              "width": "fit_content",
+              "x": 41
+            },
+            "VL6XE": {
+              "x": 5,
+              "y": 2
+            },
+            "Z6CEC": {
+              "x": 87
+            },
+            "GlEpn": {
+              "x": 30.5,
+              "y": 13.5
+            },
+            "ZxN7D": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 4.5,
+              "y": 41.5
+            },
+            "YQQzZ": {
+              "width": "fit_content",
+              "x": 53
+            },
+            "OPdoU": {
+              "x": 5,
+              "y": 2
+            },
+            "ZzSTv": {
+              "x": 174
+            },
+            "rro5A": {
+              "x": 30.5,
+              "y": 13.5
+            },
+            "8bDQx": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 4.5,
+              "y": 41.5
+            },
+            "01BqV": {
+              "width": "fit_content",
+              "x": 53
+            },
+            "Jgoqi": {
+              "x": 5,
+              "y": 2
+            },
+            "tEgbt": {
+              "x": 261
+            },
+            "AF8vQ": {
+              "x": 30.5,
+              "y": 13.5
+            },
+            "tvdVe": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 4.5,
+              "y": 41.5
+            },
+            "7lRry": {
+              "width": "fit_content",
+              "x": 53
+            },
+            "SGjAW": {
+              "x": 5,
+              "y": 2
+            },
+            "WbhVS": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 16,
+              "y": 662
+            },
+            "bRetf": {
+              "width": "fill_container"
+            },
+            "qEswL": {
+              "x": 109,
+              "y": 11
+            },
+            "dI0J9": {
+              "x": 4,
+              "y": 4
+            },
+            "CxyHC": {
+              "x": 137,
+              "y": 9.5
+            },
+            "aGAYY": {
+              "y": 50
+            },
+            "ZPt7N": {
+              "width": "fill_container",
+              "y": 75
+            },
+            "eoX3v": {
+              "x": 14,
+              "y": 10.5
+            },
+            "gCqzv": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "y": 123
+            },
+            "YOENi": {
+              "y": 2.5
+            },
+            "XaWtp": {
+              "x": 18
+            }
+          }
         },
         {
           "id": "t2JDG",
@@ -10733,7 +11373,63 @@
           "width": 376,
           "height": 46,
           "flipX": false,
-          "flipY": false
+          "flipY": false,
+          "descendants": {
+            "bTwIl": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 20,
+              "y": 2.5
+            },
+            "PAPDQ": {
+              "x": 0,
+              "y": 24
+            },
+            "uLsZX": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 73,
+              "y": 2.5
+            },
+            "JfJxF": {
+              "x": 0,
+              "y": 24
+            },
+            "MKizM": {
+              "x": 126,
+              "y": 22.5
+            },
+            "GjVrH": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 220,
+              "y": 2.5
+            },
+            "zx0NJ": {
+              "x": 0,
+              "y": 24
+            },
+            "iuG6n": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 273,
+              "y": 2.5
+            },
+            "q2ANm": {
+              "x": 0,
+              "y": 24
+            },
+            "JGeEd": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 326,
+              "y": 2.5
+            },
+            "E3TXa": {
+              "x": 0,
+              "y": 24
+            }
+          }
         }
       ]
     },
@@ -18774,7 +19470,8 @@
                           "content": "专为脊柱科医生设计的智能影像分析平台，让我们快速了解核心功能。",
                           "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17
+                          "fontSize": 17,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -19109,7 +19806,8 @@
                           "content": "在这里查看今日数据概览、待处理任务和近期动态，快速了解工作进展。",
                           "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17
+                          "fontSize": 17,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -19451,7 +20149,8 @@
                           "content": "查看所有患者信息、历史影像记录，支持快速搜索和筛选。",
                           "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17
+                          "fontSize": 17,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -19783,7 +20482,8 @@
                           "content": "上传 X 光片，按类型和状态筛选，点击「标注分析」进入智能标注工作台。",
                           "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17
+                          "fontSize": 17,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -20125,7 +20825,8 @@
                           "content": "工作台中的待处理任务按优先级排序，点击右侧箭头可直接进入标注页面。",
                           "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17
+                          "fontSize": 17,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -20457,7 +21158,8 @@
                           "content": "您已了解系统的核心功能。如需帮助，可随时在个人中心查看使用指南。",
                           "lineHeight": 1.45,
                           "fontFamily": "Inter",
-                          "fontSize": 17
+                          "fontSize": 17,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
