@@ -258,6 +258,7 @@ fun ImageAnalysisScreen(
             AnnotationSideButtons(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
+                    .then(if (fullscreenMode) Modifier.statusBarsPadding() else Modifier)
                     .padding(top = 12.dp, end = 8.dp),
                 toolkitExpanded = activeOverlay == ImageOverlayPanel.TOOLKIT,
                 zoomExpanded = activeOverlay == ImageOverlayPanel.ZOOM,
