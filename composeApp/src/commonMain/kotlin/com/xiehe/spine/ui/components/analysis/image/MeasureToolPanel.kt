@@ -20,17 +20,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.form.input.TextField
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.AnnotationToolDefinition
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.AnnotationToolSection
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_STANDARD_DISTANCE
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
-import com.xiehe.spine.ui.viewmodel.image.AnalysisToolSection
-import com.xiehe.spine.ui.viewmodel.image.AnalysisToolDefinition
-import com.xiehe.spine.ui.viewmodel.image.TOOL_STANDARD_DISTANCE
 
 @Composable
 fun MeasureToolPanel(
-    tools: List<AnalysisToolDefinition>,
+    tools: List<AnnotationToolDefinition>,
     activeToolId: String,
     standardDistanceInput: String,
     standardDistanceLabel: String,
@@ -82,7 +82,7 @@ fun MeasureToolPanel(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            AnalysisToolSection.entries.forEach { section ->
+            AnnotationToolSection.entries.forEach { section ->
                 val sectionTools = groupedTools[section].orEmpty()
                 if (sectionTools.isEmpty()) return@forEach
                 ToolSection(
@@ -107,7 +107,7 @@ fun MeasureToolPanel(
 @Composable
 private fun ToolSection(
     title: String,
-    tools: List<AnalysisToolDefinition>,
+    tools: List<AnnotationToolDefinition>,
     activeToolId: String,
     onSelectTool: (String) -> Unit,
 ) {

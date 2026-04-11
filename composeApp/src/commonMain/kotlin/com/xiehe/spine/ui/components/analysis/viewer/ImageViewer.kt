@@ -1,16 +1,15 @@
-package com.xiehe.spine.ui.components.analysis.image
+package com.xiehe.spine.ui.components.analysis.viewer
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import com.xiehe.spine.data.measurement.MeasurementPoint
-import com.xiehe.spine.ui.components.analysis.viewer.ImageViewer
-import com.xiehe.spine.ui.viewmodel.image.ImageAnalysisMeasurement
+import com.xiehe.spine.ui.components.analysis.viewer.components.AnnotationCanvas
 
 @Composable
-fun ImageViewport(
+fun ImageViewer(
     bitmap: ImageBitmap?,
-    measurements: List<ImageAnalysisMeasurement>,
+    measurements: List<AnnotationMeasurement>,
     hiddenKeys: Set<String>,
     activeToolId: String,
     pendingPoints: List<MeasurementPoint>,
@@ -22,7 +21,7 @@ fun ImageViewport(
     onCanvasDoubleTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ImageViewer(
+    AnnotationCanvas(
         bitmap = bitmap,
         measurements = measurements,
         hiddenKeys = hiddenKeys,

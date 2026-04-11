@@ -2,7 +2,6 @@ package com.xiehe.spine.ui.viewmodel.image
 
 import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
-import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
@@ -20,6 +19,33 @@ import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.data.measurement.SaveMeasurementItem
 import com.xiehe.spine.data.measurement.SaveMeasurementsRequest
 import com.xiehe.spine.data.report.mapImageCategoryToReportExamType
+import com.xiehe.spine.ui.components.analysis.viewer.AnnotationHelperSegment
+import com.xiehe.spine.ui.components.analysis.viewer.AnnotationMeasurement
+import com.xiehe.spine.ui.components.analysis.viewer.AnnotationMeasurementKind
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.ANNOTATION_TOOL_CATALOG
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.AnnotationToolDefinition
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_ANGLE as VIEWER_TOOL_ANGLE
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_ARROW as VIEWER_TOOL_AUX_ARROW
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_BOX as VIEWER_TOOL_AUX_BOX
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_CIRCLE as VIEWER_TOOL_AUX_CIRCLE
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_ELLIPSE as VIEWER_TOOL_AUX_ELLIPSE
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_POLYGON as VIEWER_TOOL_AUX_POLYGON
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AVT as VIEWER_TOOL_AVT
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_CA as VIEWER_TOOL_CA
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_COBB as VIEWER_TOOL_COBB
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_DISTANCE as VIEWER_TOOL_DISTANCE
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_MOVE as VIEWER_TOOL_MOVE
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_PELVIC as VIEWER_TOOL_PELVIC
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_SACRAL as VIEWER_TOOL_SACRAL
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_STANDARD_DISTANCE as VIEWER_TOOL_STANDARD_DISTANCE
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_T1_TILT as VIEWER_TOOL_T1_TILT
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_TS as VIEWER_TOOL_TS
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_VERTEBRA_CENTER as VIEWER_TOOL_VERTEBRA_CENTER
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.getAnnotationTool
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.getToolsForExamType
+import com.xiehe.spine.ui.components.analysis.viewer.domain.AnnotationCalibrationContext
+import com.xiehe.spine.ui.components.analysis.viewer.domain.DEFAULT_STANDARD_DISTANCE_MM
+import com.xiehe.spine.ui.components.analysis.viewer.domain.createManualAnnotationMeasurement
 import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.abs
@@ -37,192 +63,33 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonPrimitive
 
-enum class AnalysisMeasurementKind {
-    COMPUTED,
-    DETECTED,
-}
+typealias AnalysisMeasurementKind = AnnotationMeasurementKind
+typealias ImageAnalysisMeasurement = AnnotationMeasurement
+typealias AnalysisHelperSegment = AnnotationHelperSegment
 
-enum class AnalysisToolSection(val title: String) {
-    BASIC("基础模式"),
-    MEASURE("测量标注"),
-    AUXILIARY("辅助图形"),
-}
+val TOOL_MOVE = VIEWER_TOOL_MOVE
+val TOOL_T1_TILT = VIEWER_TOOL_T1_TILT
+val TOOL_COBB = VIEWER_TOOL_COBB
+val TOOL_CA = VIEWER_TOOL_CA
+val TOOL_PELVIC = VIEWER_TOOL_PELVIC
+val TOOL_SACRAL = VIEWER_TOOL_SACRAL
+val TOOL_TS = VIEWER_TOOL_TS
+val TOOL_AVT = VIEWER_TOOL_AVT
+val TOOL_STANDARD_DISTANCE = VIEWER_TOOL_STANDARD_DISTANCE
+val TOOL_VERTEBRA_CENTER = VIEWER_TOOL_VERTEBRA_CENTER
+val TOOL_DISTANCE = VIEWER_TOOL_DISTANCE
+val TOOL_ANGLE = VIEWER_TOOL_ANGLE
+val TOOL_AUX_CIRCLE = VIEWER_TOOL_AUX_CIRCLE
+val TOOL_AUX_ELLIPSE = VIEWER_TOOL_AUX_ELLIPSE
+val TOOL_AUX_BOX = VIEWER_TOOL_AUX_BOX
+val TOOL_AUX_ARROW = VIEWER_TOOL_AUX_ARROW
+val TOOL_AUX_POLYGON = VIEWER_TOOL_AUX_POLYGON
 
-data class AnalysisToolDefinition(
-    val id: String,
-    val label: String,
-    val icon: IconToken,
-    val section: AnalysisToolSection,
-    val pointsNeeded: Int,
-    val supportsDoubleTapFinish: Boolean = false,
-)
-
-private const val DEFAULT_STANDARD_DISTANCE_MM = 100.0
-const val TOOL_MOVE = "move"
-const val TOOL_T1_TILT = "t1_tilt"
-const val TOOL_COBB = "cobb"
-const val TOOL_CA = "ca"
-const val TOOL_PELVIC = "pelvic"
-const val TOOL_SACRAL = "sacral"
-const val TOOL_TS = "ts"
-const val TOOL_AVT = "avt"
-const val TOOL_STANDARD_DISTANCE = "standard_distance"
-const val TOOL_VERTEBRA_CENTER = "vertebra_center"
-const val TOOL_DISTANCE = "distance"
-const val TOOL_ANGLE = "angle"
-const val TOOL_AUX_CIRCLE = "aux_circle"
-const val TOOL_AUX_ELLIPSE = "aux_ellipse"
-const val TOOL_AUX_BOX = "aux_box"
-const val TOOL_AUX_ARROW = "aux_arrow"
-const val TOOL_AUX_POLYGON = "aux_polygon"
-
-val AnalysisToolsCatalog = listOf(
-    AnalysisToolDefinition(
-        id = TOOL_MOVE,
-        label = "移动",
-        icon = IconToken.MEASURE_MOVE,
-        section = AnalysisToolSection.BASIC,
-        pointsNeeded = 0,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_T1_TILT,
-        label = "T1 Tilt",
-        icon = IconToken.MEASURE_T1_TILT,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_COBB,
-        label = "Cobb",
-        icon = IconToken.MEASURE_COBB,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 4,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_CA,
-        label = "CA",
-        icon = IconToken.MEASURE_CA,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_PELVIC,
-        label = "Pelvic",
-        icon = IconToken.MEASURE_PELVIC,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_SACRAL,
-        label = "Sacral",
-        icon = IconToken.MEASURE_SACRAL,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_TS,
-        label = "TS",
-        icon = IconToken.MEASURE_TS,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_AVT,
-        label = "AVT",
-        icon = IconToken.MEASURE_AVT,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_STANDARD_DISTANCE,
-        label = "标准距离",
-        icon = IconToken.MEASURE_STANDARD_DISTANCE,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_VERTEBRA_CENTER,
-        label = "椎体中心",
-        icon = IconToken.MEASURE_VERTEBRA_CENTER,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 4,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_DISTANCE,
-        label = "距离",
-        icon = IconToken.MEASURE_DISTANCE,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_ANGLE,
-        label = "角度",
-        icon = IconToken.MEASURE_ANGLE,
-        section = AnalysisToolSection.MEASURE,
-        pointsNeeded = 3,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_AUX_CIRCLE,
-        label = "Circle",
-        icon = IconToken.MEASURE_AUX_CIRCLE,
-        section = AnalysisToolSection.AUXILIARY,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_AUX_ELLIPSE,
-        label = "Ellipse",
-        icon = IconToken.MEASURE_AUX_ELLIPSE,
-        section = AnalysisToolSection.AUXILIARY,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_AUX_BOX,
-        label = "Box",
-        icon = IconToken.MEASURE_AUX_BOX,
-        section = AnalysisToolSection.AUXILIARY,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_AUX_ARROW,
-        label = "Arrow",
-        icon = IconToken.MEASURE_AUX_ARROW,
-        section = AnalysisToolSection.AUXILIARY,
-        pointsNeeded = 2,
-    ),
-    AnalysisToolDefinition(
-        id = TOOL_AUX_POLYGON,
-        label = "Polygon",
-        icon = IconToken.MEASURE_AUX_POLYGON,
-        section = AnalysisToolSection.AUXILIARY,
-        pointsNeeded = 0,
-        supportsDoubleTapFinish = true,
-    ),
-)
+val AnalysisToolsCatalog = ANNOTATION_TOOL_CATALOG
 
 private val DEFAULT_STANDARD_DISTANCE_POINTS = listOf(
     MeasurementPoint(x = 0.0, y = 0.0),
     MeasurementPoint(x = 200.0, y = 0.0),
-)
-
-data class ImageAnalysisMeasurement(
-    val key: String,
-    val type: String,
-    val value: String,
-    val points: List<MeasurementPoint>,
-    val description: String? = null,
-    val kind: AnalysisMeasurementKind = AnalysisMeasurementKind.COMPUTED,
-    val pointLabel: String? = null,
-    val confidence: Double? = null,
-    val panelVisible: Boolean = true,
-    val helperSegments: List<AnalysisHelperSegment> = emptyList(),
-    val auxiliary: Boolean = false,
-)
-
-@Serializable
-data class AnalysisHelperSegment(
-    val start: MeasurementPoint,
-    val end: MeasurementPoint,
-    val dashed: Boolean = false,
 )
 
 data class ImageAnalysisUiState(
@@ -643,10 +510,10 @@ class ImageAnalysisViewModel : BaseViewModel() {
         _state.update { it.copy(showSettingsPanel = false) }
     }
 
-    fun availableTools(): List<AnalysisToolDefinition> = AnalysisToolsCatalog
+    fun availableTools(examType: String): List<AnnotationToolDefinition> = getToolsForExamType(examType)
 
     fun selectTool(toolId: String) {
-        val tool = AnalysisToolsCatalog.firstOrNull { it.id == toolId } ?: return
+        val tool = getAnnotationTool(toolId) ?: return
         _state.update {
             it.copy(
                 activeToolId = tool.id,
@@ -677,7 +544,7 @@ class ImageAnalysisViewModel : BaseViewModel() {
 
     fun onCanvasTap(point: MeasurementPoint) {
         val snapshot = _state.value
-        val tool = AnalysisToolsCatalog.firstOrNull { it.id == snapshot.activeToolId } ?: return
+        val tool = getAnnotationTool(snapshot.activeToolId) ?: return
         if (tool.id == TOOL_MOVE) return
         if (tool.id == TOOL_AUX_POLYGON) {
             _state.update { it.copy(pendingPoints = it.pendingPoints + point) }
@@ -714,13 +581,14 @@ class ImageAnalysisViewModel : BaseViewModel() {
 
     fun onCanvasDoubleTap() {
         val snapshot = _state.value
-        if (snapshot.activeToolId != TOOL_AUX_POLYGON) return
+        val tool = getAnnotationTool(snapshot.activeToolId) ?: return
+        if (!tool.supportsDoubleTapFinish) return
         if (snapshot.pendingPoints.size < 3) {
             _state.update { it.copy(bannerMessage = "Polygon 至少需要 3 个点") }
             return
         }
         val measurement = computeManualMeasurement(
-            toolId = TOOL_AUX_POLYGON,
+            toolId = tool.id,
             points = snapshot.pendingPoints,
             state = snapshot,
         ) ?: return
@@ -1036,234 +904,17 @@ class ImageAnalysisViewModel : BaseViewModel() {
         state: ImageAnalysisUiState,
     ): ImageAnalysisMeasurement? {
         val key = nextManualMeasurementKey(toolId)
-        val calibration = CalibrationContext(
+        val calibration = AnnotationCalibrationContext(
             standardDistanceMm = state.standardDistanceMm,
             standardDistancePoints = state.standardDistancePoints,
         )
-
-        return when (toolId) {
-            TOOL_T1_TILT -> {
-                val angle = lineAngleDegrees(points[0], points[1])
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "T1 Tilt",
-                    value = formatAngle(angle, signed = true),
-                    points = points,
-                    description = "T1椎体倾斜角测量",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_COBB -> {
-                val first = lineAngleDegrees(points[0], points[1])
-                val second = lineAngleDegrees(points[2], points[3])
-                val cobb = acuteAngle(first, second)
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "Cobb",
-                    value = formatAngle(cobb, signed = false),
-                    points = points,
-                    description = "Cobb角测量",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_CA -> {
-                val angle = lineAngleDegrees(points[0], points[1])
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "CA",
-                    value = formatAngle(angle, signed = true),
-                    points = points,
-                    description = "锁骨角测量",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_PELVIC -> {
-                val angle = lineAngleDegrees(points[0], points[1])
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "Pelvic",
-                    value = formatAngle(angle, signed = true),
-                    points = points,
-                    description = "骨盆倾斜角测量",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_SACRAL -> {
-                val angle = lineAngleDegrees(points[0], points[1])
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "Sacral",
-                    value = formatAngle(angle, signed = true),
-                    points = points,
-                    description = "骶骨倾斜角测量",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_TS -> {
-                val first = points[0]
-                val second = points[1]
-                val yRef = (first.y + second.y) / 2.0
-                val left = MeasurementPoint(x = first.x, y = yRef)
-                val right = MeasurementPoint(x = second.x, y = yRef)
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "TS",
-                    value = formatDistanceValue(abs(second.x - first.x), calibration),
-                    points = listOf(left, right),
-                    description = "躯干偏移测量",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                    helperSegments = listOf(
-                        AnalysisHelperSegment(
-                            start = first,
-                            end = MeasurementPoint(x = first.x, y = yRef),
-                            dashed = true,
-                        ),
-                        AnalysisHelperSegment(
-                            start = second,
-                            end = MeasurementPoint(x = second.x, y = yRef),
-                            dashed = true,
-                        ),
-                    ),
-                )
-            }
-
-            TOOL_AVT -> {
-                val first = points[0]
-                val second = points[1]
-                val yRef = (first.y + second.y) / 2.0
-                val left = MeasurementPoint(x = first.x, y = yRef)
-                val right = MeasurementPoint(x = second.x, y = yRef)
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "AVT",
-                    value = formatDistanceValue(abs(second.x - first.x), calibration),
-                    points = listOf(left, right),
-                    description = "顶椎偏移测量",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                    helperSegments = listOf(
-                        AnalysisHelperSegment(
-                            start = first,
-                            end = MeasurementPoint(x = first.x, y = yRef),
-                            dashed = true,
-                        ),
-                        AnalysisHelperSegment(
-                            start = second,
-                            end = MeasurementPoint(x = second.x, y = yRef),
-                            dashed = true,
-                        ),
-                    ),
-                )
-            }
-
-            TOOL_STANDARD_DISTANCE -> {
-                val mm = state.standardDistanceMm ?: DEFAULT_STANDARD_DISTANCE_MM
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "标准距离",
-                    value = "${formatStandardDistanceInput(mm)}mm",
-                    points = points,
-                    description = "标准距离校准线",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                    panelVisible = false,
-                )
-            }
-
-            TOOL_VERTEBRA_CENTER -> {
-                val center = MeasurementPoint(
-                    x = points.map { it.x }.average(),
-                    y = points.map { it.y }.average(),
-                )
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "椎体中心",
-                    value = formatPointValue(center),
-                    points = listOf(center),
-                    description = "椎体中心标注",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_DISTANCE -> {
-                val distancePx = hypot(points[1].x - points[0].x, points[1].y - points[0].y)
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "距离标注",
-                    value = formatDistanceValue(distancePx, calibration),
-                    points = points,
-                    description = "距离标注",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_ANGLE -> {
-                val angle = angleAtVertex(points[0], points[1], points[2])
-                ImageAnalysisMeasurement(
-                    key = key,
-                    type = "角度标注",
-                    value = formatAngle(angle, signed = false),
-                    points = points,
-                    description = "角度标注",
-                    kind = AnalysisMeasurementKind.COMPUTED,
-                )
-            }
-
-            TOOL_AUX_CIRCLE -> ImageAnalysisMeasurement(
-                key = key,
-                type = "Circle",
-                value = "辅助图形",
-                points = points,
-                description = "辅助图形-Circle",
-                kind = AnalysisMeasurementKind.COMPUTED,
-                auxiliary = true,
-            )
-
-            TOOL_AUX_ELLIPSE -> ImageAnalysisMeasurement(
-                key = key,
-                type = "Ellipse",
-                value = "辅助图形",
-                points = points,
-                description = "辅助图形-Ellipse",
-                kind = AnalysisMeasurementKind.COMPUTED,
-                auxiliary = true,
-            )
-
-            TOOL_AUX_BOX -> ImageAnalysisMeasurement(
-                key = key,
-                type = "Box",
-                value = "辅助图形",
-                points = points,
-                description = "辅助图形-Box",
-                kind = AnalysisMeasurementKind.COMPUTED,
-                auxiliary = true,
-            )
-
-            TOOL_AUX_ARROW -> ImageAnalysisMeasurement(
-                key = key,
-                type = "Arrow",
-                value = "辅助图形",
-                points = points,
-                description = "辅助图形-Arrow",
-                kind = AnalysisMeasurementKind.COMPUTED,
-                auxiliary = true,
-            )
-
-            TOOL_AUX_POLYGON -> ImageAnalysisMeasurement(
-                key = key,
-                type = "Polygon",
-                value = "辅助图形",
-                points = points,
-                description = "辅助图形-Polygon",
-                kind = AnalysisMeasurementKind.COMPUTED,
-                auxiliary = true,
-            )
-
-            else -> null
-        }
+        return createManualAnnotationMeasurement(
+            toolId = toolId,
+            points = points,
+            measurementKey = key,
+            calibration = calibration,
+            standardDistanceMm = state.standardDistanceMm,
+        )
     }
 
     private fun nextManualMeasurementKey(toolId: String): String {
@@ -1847,6 +1498,3 @@ class ImageAnalysisViewModel : BaseViewModel() {
         val auxiliary: Boolean? = null,
     )
 }
-
-
-

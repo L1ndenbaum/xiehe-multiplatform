@@ -33,12 +33,12 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.ai.AiInferenceRepository
 import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.measurement.MeasurementRepository
+import com.xiehe.spine.ui.components.analysis.viewer.ImageViewer
 import com.xiehe.spine.ui.components.analysis.image.AnalysisBottomAction
 import com.xiehe.spine.ui.components.analysis.image.AnalysisBottomBar
 import com.xiehe.spine.ui.components.analysis.image.AnalysisReportPanel
 import com.xiehe.spine.ui.components.analysis.image.AnalysisSettingsPanel
 import com.xiehe.spine.ui.components.analysis.image.AnalysisTopBar
-import com.xiehe.spine.ui.components.analysis.image.ImageViewport
 import com.xiehe.spine.ui.components.analysis.image.MeasureToolPanel
 import com.xiehe.spine.ui.components.analysis.image.MeasurementResultsPanel
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
@@ -182,7 +182,7 @@ fun ImageAnalysisScreen(
                 .fillMaxWidth()
                 .background(SpineTheme.colors.background),
         ) {
-            ImageViewport(
+            ImageViewer(
                 bitmap = imageBitmap,
                 measurements = state.measurements,
                 hiddenKeys = state.hiddenMeasurementKeys,
@@ -208,7 +208,7 @@ fun ImageAnalysisScreen(
                 when (activeOverlay) {
                     ImageOverlayPanel.TOOLKIT -> {
                         MeasureToolPanel(
-                            tools = vm.availableTools(),
+                            tools = vm.availableTools(examType),
                             activeToolId = state.activeToolId,
                             standardDistanceInput = state.standardDistanceInput,
                             standardDistanceLabel = state.standardDistanceLabel,
