@@ -29,6 +29,12 @@ import spine.composeapp.generated.resources.icons_analysis_icon_ai_detect
 import spine.composeapp.generated.resources.icons_analysis_icon_ai_measure
 import spine.composeapp.generated.resources.icons_analysis_icon_report
 import spine.composeapp.generated.resources.icons_analysis_icon_toolkit
+import spine.composeapp.generated.resources.icons_measure_action_redo
+import spine.composeapp.generated.resources.icons_measure_action_undo
+import spine.composeapp.generated.resources.icons_measure_action_zoom
+import spine.composeapp.generated.resources.icons_measure_icon_to_fullscreen
+import spine.composeapp.generated.resources.icons_measure_icon_toggle_measure_list
+import spine.composeapp.generated.resources.icons_measure_icon_toggle_toolkit
 import spine.composeapp.generated.resources.icons_measure_toolkit_angle
 import spine.composeapp.generated.resources.icons_measure_toolkit_aux_arrow
 import spine.composeapp.generated.resources.icons_measure_toolkit_aux_box
@@ -116,7 +122,13 @@ internal fun IconToken.composeDrawable(): DrawableResource {
         IconToken.AI_MEASURE -> Res.drawable.icons_analysis_icon_ai_measure
         IconToken.REPORT -> Res.drawable.icons_analysis_icon_report
         IconToken.MEASURE_TOOLKIT -> Res.drawable.icons_analysis_icon_toolkit
+        IconToken.MEASURE_TOGGLE_TOOLKIT -> Res.drawable.icons_measure_icon_toggle_toolkit
+        IconToken.MEASURE_TOGGLE_MEASURE_LIST -> Res.drawable.icons_measure_icon_toggle_measure_list
+        IconToken.MEASURE_TO_FULLSCREEN -> Res.drawable.icons_measure_icon_to_fullscreen
         IconToken.MEASURE_MOVE -> Res.drawable.icons_measure_toolkit_move
+        IconToken.MEASURE_ZOOM -> Res.drawable.icons_measure_action_zoom
+        IconToken.MEASURE_UNDO -> Res.drawable.icons_measure_action_undo
+        IconToken.MEASURE_REDO -> Res.drawable.icons_measure_action_redo
         IconToken.MEASURE_T1_TILT -> Res.drawable.icons_measure_toolkit_t1_tilt
         IconToken.MEASURE_COBB -> Res.drawable.icons_measure_toolkit_cobb
         IconToken.MEASURE_CA -> Res.drawable.icons_measure_toolkit_ca

@@ -69,7 +69,13 @@ private fun IconToken.androidDrawableName(): String {
         IconToken.AI_MEASURE -> "icons_analysis_icon_ai_measure"
         IconToken.REPORT -> "icons_analysis_icon_report"
         IconToken.MEASURE_TOOLKIT -> "icons_analysis_icon_toolkit"
+        IconToken.MEASURE_TOGGLE_TOOLKIT -> "icons_measure_icon_toggle_toolkit"
+        IconToken.MEASURE_TOGGLE_MEASURE_LIST -> "icons_measure_icon_toggle_measure_list"
+        IconToken.MEASURE_TO_FULLSCREEN -> "icons_measure_icon_to_fullscreen"
         IconToken.MEASURE_MOVE -> "icons_measure_toolkit_move"
+        IconToken.MEASURE_ZOOM -> "icons_measure_action_zoom"
+        IconToken.MEASURE_UNDO -> "icons_measure_action_undo"
+        IconToken.MEASURE_REDO -> "icons_measure_action_redo"
         IconToken.MEASURE_T1_TILT -> "icons_measure_toolkit_t1_tilt"
         IconToken.MEASURE_COBB -> "icons_measure_toolkit_cobb"
         IconToken.MEASURE_CA -> "icons_measure_toolkit_ca"
@@ -88,4 +94,3 @@ private fun IconToken.androidDrawableName(): String {
         IconToken.MEASURE_AUX_POLYGON -> "icons_measure_toolkit_aux_polygon"
     }
 }
-

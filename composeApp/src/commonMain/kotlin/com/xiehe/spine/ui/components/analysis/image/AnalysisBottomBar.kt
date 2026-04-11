@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,70 +14,75 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 
 enum class AnalysisBottomAction {
-    AI_DETECT,
-    REPORT,
-    TOOLKIT,
-    SETTINGS,
+    MOVE,
+    ZOOM,
+    UNDO,
+    REDO,
+    CLEAR,
 }
 
 @Composable
 fun AnalysisBottomBar(
     modifier: Modifier = Modifier,
+    selectedAction: AnalysisBottomAction? = null,
+    canUndo: Boolean = true,
+    canRedo: Boolean = true,
+    canClear: Boolean = true,
     onAction: (AnalysisBottomAction) -> Unit,
 ) {
-    val barBackground = Color(0xFF111827)
-    val itemBackground = Color(0xFF1F2937)
-    val contentColor = Color(0xFFE5E7EB)
-    val primaryItemBackground = Color(0xFF7C3AED)
+    val colors = SpineTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(74.dp)
-            .background(barBackground)
-            .padding(horizontal = 10.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .height(68.dp)
+            .background(colors.surface.copy(alpha = 0.96f))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AnalysisBottomItem(
-            label = "AI检测",
-            icon = IconToken.AI_DETECT,
-            modifier = Modifier.weight(1f),
-            containerColor = primaryItemBackground,
-            contentColor = Color.White,
-            onClick = { onAction(AnalysisBottomAction.AI_DETECT) },
+            label = "移动",
+            icon = IconToken.MEASURE_MOVE,
+            selected = selectedAction == AnalysisBottomAction.MOVE,
+            enabled = true,
+            onClick = { onAction(AnalysisBottomAction.MOVE) },
         )
         AnalysisBottomItem(
-            label = "报告",
-            icon = IconToken.REPORT,
-            modifier = Modifier.weight(1f),
-            containerColor = itemBackground,
-            contentColor = contentColor,
-            onClick = { onAction(AnalysisBottomAction.REPORT) },
+            label = "缩放",
+            icon = IconToken.MEASURE_ZOOM,
+            selected = selectedAction == AnalysisBottomAction.ZOOM,
+            enabled = true,
+            onClick = { onAction(AnalysisBottomAction.ZOOM) },
         )
         AnalysisBottomItem(
-            label = "工具",
-            icon = IconToken.MEASURE_TOOLKIT,
-            modifier = Modifier.weight(1f),
-            containerColor = itemBackground,
-            contentColor = contentColor,
-            onClick = { onAction(AnalysisBottomAction.TOOLKIT) },
+            label = "撤销",
+            icon = IconToken.MEASURE_UNDO,
+            selected = false,
+            enabled = canUndo,
+            onClick = { onAction(AnalysisBottomAction.UNDO) },
         )
         AnalysisBottomItem(
-            label = "设置",
-            icon = IconToken.SETTINGS,
-            modifier = Modifier.weight(1f),
-            containerColor = itemBackground,
-            contentColor = contentColor,
-            onClick = { onAction(AnalysisBottomAction.SETTINGS) },
+            label = "重做",
+            icon = IconToken.MEASURE_REDO,
+            selected = false,
+            enabled = canRedo,
+            onClick = { onAction(AnalysisBottomAction.REDO) },
+        )
+        AnalysisBottomItem(
+            label = "清除",
+            icon = IconToken.DELETE,
+            selected = false,
+            enabled = canClear,
+            destructive = true,
+            onClick = { onAction(AnalysisBottomAction.CLEAR) },
         )
     }
 }
@@ -87,33 +91,46 @@ fun AnalysisBottomBar(
 private fun AnalysisBottomItem(
     label: String,
     icon: IconToken,
-    modifier: Modifier,
-    containerColor: Color,
-    contentColor: Color,
+    selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
+    destructive: Boolean = false,
 ) {
-    Column(
-        modifier = modifier
-            .height(54.dp)
+    val colors = SpineTheme.colors
+    val contentColor = when {
+        !enabled -> colors.textTertiary
+        destructive -> colors.error
+        selected -> colors.onPrimary
+        else -> colors.textSecondary
+    }
+    val containerColor = when {
+        !enabled -> colors.surfaceMuted
+        selected -> colors.primary
+        else -> colors.surfaceMuted.copy(alpha = 0.7f)
+    }
+
+    Box(
+        modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
             .background(containerColor)
-            .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        AppIcon(
-            glyph = icon,
-            tint = contentColor,
-            modifier = Modifier.size(16.dp),
-        )
-        Text(
-            text = label,
-            style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
-            color = contentColor,
-            modifier = Modifier.padding(top = 3.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            AppIcon(
+                glyph = icon,
+                tint = contentColor,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(
+                text = label,
+                style = SpineTheme.typography.caption.copy(fontWeight = FontWeight.SemiBold),
+                color = contentColor,
+            )
+        }
     }
 }
-
-
