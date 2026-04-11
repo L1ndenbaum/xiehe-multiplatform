@@ -200,7 +200,7 @@ fun ImageAnalysisScreen(
                 visible = activeOverlay != null,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(horizontal = 10.dp, vertical = 10.dp),
+                    .fillMaxWidth(),
                 enter = fadeIn() + slideInVertically { it / 3 },
                 exit = fadeOut() + slideOutVertically { it / 3 },
             ) {
@@ -244,8 +244,8 @@ fun ImageAnalysisScreen(
 
             AnnotationSideButtons(
                 modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 12.dp),
+                    .align(Alignment.TopEnd)
+                    .padding(top = 12.dp, end = 8.dp),
                 toolkitExpanded = activeOverlay == ImageOverlayPanel.TOOLKIT,
                 fullscreenMode = fullscreenMode,
                 measurementsExpanded = activeOverlay == ImageOverlayPanel.MEASUREMENTS,
@@ -457,10 +457,10 @@ private fun AnnotationSideButton(
     val colors = SpineTheme.colors
     Box(
         modifier = Modifier
-            .size(52.dp)
+            .size(36.dp)
             .background(
                 color = if (active) colors.primary else colors.surface,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(12.dp),
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -468,7 +468,7 @@ private fun AnnotationSideButton(
         AppIcon(
             glyph = icon,
             tint = if (active) colors.onPrimary else colors.textSecondary,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(14.dp),
         )
     }
 }

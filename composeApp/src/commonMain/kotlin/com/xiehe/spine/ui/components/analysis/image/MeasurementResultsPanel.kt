@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
@@ -51,7 +52,8 @@ fun MeasurementResultsPanel(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.backgroundElevated.copy(alpha = 0.98f), RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+            .background(colors.backgroundElevated.copy(alpha = 0.98f))
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

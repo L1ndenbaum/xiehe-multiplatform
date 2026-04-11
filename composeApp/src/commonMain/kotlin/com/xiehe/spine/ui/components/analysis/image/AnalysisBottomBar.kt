@@ -42,9 +42,9 @@ fun AnalysisBottomBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(68.dp)
+            .height(60.dp)
             .background(colors.surface.copy(alpha = 0.96f))
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -114,7 +114,7 @@ private fun AnalysisBottomItem(
             .clip(RoundedCornerShape(12.dp))
             .background(containerColor)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .padding(horizontal = 9.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row(
