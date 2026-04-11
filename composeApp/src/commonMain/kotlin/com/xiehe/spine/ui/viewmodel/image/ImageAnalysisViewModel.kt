@@ -29,11 +29,12 @@ import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_ARROW as V
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_BOX as VIEWER_TOOL_AUX_BOX
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_CIRCLE as VIEWER_TOOL_AUX_CIRCLE
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_ELLIPSE as VIEWER_TOOL_AUX_ELLIPSE
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_HORIZONTAL_LINE as VIEWER_TOOL_AUX_HORIZONTAL_LINE
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_POLYGON as VIEWER_TOOL_AUX_POLYGON
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AUX_VERTICAL_LINE as VIEWER_TOOL_AUX_VERTICAL_LINE
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_AVT as VIEWER_TOOL_AVT
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_CA as VIEWER_TOOL_CA
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_COBB as VIEWER_TOOL_COBB
-import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_DISTANCE as VIEWER_TOOL_DISTANCE
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_MOVE as VIEWER_TOOL_MOVE
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_PELVIC as VIEWER_TOOL_PELVIC
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.TOOL_SACRAL as VIEWER_TOOL_SACRAL
@@ -77,13 +78,14 @@ val TOOL_TS = VIEWER_TOOL_TS
 val TOOL_AVT = VIEWER_TOOL_AVT
 val TOOL_STANDARD_DISTANCE = VIEWER_TOOL_STANDARD_DISTANCE
 val TOOL_VERTEBRA_CENTER = VIEWER_TOOL_VERTEBRA_CENTER
-val TOOL_DISTANCE = VIEWER_TOOL_DISTANCE
 val TOOL_ANGLE = VIEWER_TOOL_ANGLE
 val TOOL_AUX_CIRCLE = VIEWER_TOOL_AUX_CIRCLE
 val TOOL_AUX_ELLIPSE = VIEWER_TOOL_AUX_ELLIPSE
 val TOOL_AUX_BOX = VIEWER_TOOL_AUX_BOX
 val TOOL_AUX_ARROW = VIEWER_TOOL_AUX_ARROW
 val TOOL_AUX_POLYGON = VIEWER_TOOL_AUX_POLYGON
+val TOOL_AUX_HORIZONTAL_LINE = VIEWER_TOOL_AUX_HORIZONTAL_LINE
+val TOOL_AUX_VERTICAL_LINE = VIEWER_TOOL_AUX_VERTICAL_LINE
 
 val AnalysisToolsCatalog = ANNOTATION_TOOL_CATALOG
 
@@ -550,9 +552,26 @@ class ImageAnalysisViewModel : BaseViewModel() {
             _state.update { it.copy(pendingPoints = it.pendingPoints + point) }
             return
         }
-        if (tool.pointsNeeded <= 0) return
-        val nextPoints = snapshot.pendingPoints + point
-        if (nextPoints.size < tool.pointsNeeded) {
+        if (tool.interactionPointsNeeded <= 0) return
+        val normalizedPoint = if (snapshot.pendingPoints.isNotEmpty()) {
+            when (tool.id) {
+                TOOL_AUX_HORIZONTAL_LINE -> MeasurementPoint(
+                    x = point.x,
+                    y = snapshot.pendingPoints.first().y,
+                )
+
+                TOOL_AUX_VERTICAL_LINE -> MeasurementPoint(
+                    x = snapshot.pendingPoints.first().x,
+                    y = point.y,
+                )
+
+                else -> point
+            }
+        } else {
+            point
+        }
+        val nextPoints = snapshot.pendingPoints + normalizedPoint
+        if (nextPoints.size < tool.interactionPointsNeeded) {
             _state.update { it.copy(pendingPoints = nextPoints) }
             return
         }

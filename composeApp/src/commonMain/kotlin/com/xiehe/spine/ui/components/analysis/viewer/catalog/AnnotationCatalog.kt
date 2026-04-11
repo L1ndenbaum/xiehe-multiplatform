@@ -3,22 +3,45 @@ package com.xiehe.spine.ui.components.analysis.viewer.catalog
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 
 const val TOOL_MOVE = "move"
-const val TOOL_T1_TILT = "t1_tilt"
+const val TOOL_STANDARD_DISTANCE = "standard_distance"
+
+const val TOOL_T1_TILT = "t1-tilt"
 const val TOOL_COBB = "cobb"
 const val TOOL_CA = "ca"
 const val TOOL_PELVIC = "pelvic"
 const val TOOL_SACRAL = "sacral"
-const val TOOL_TS = "ts"
 const val TOOL_AVT = "avt"
-const val TOOL_STANDARD_DISTANCE = "standard_distance"
-const val TOOL_VERTEBRA_CENTER = "vertebra_center"
-const val TOOL_DISTANCE = "distance"
+const val TOOL_TS = "ts"
+const val TOOL_LLD = "lld"
+const val TOOL_C7_OFFSET = "c7-offset"
+
+const val TOOL_T1_SLOPE = "t1-slope"
+const val TOOL_CL = "cl"
+const val TOOL_TK_T2_T5 = "tk-t2-t5"
+const val TOOL_TK_T5_T12 = "tk-t5-t12"
+const val TOOL_T10_L2 = "t10-l2"
+const val TOOL_LL_L1_S1 = "ll-l1-s1"
+const val TOOL_LL_L1_L4 = "ll-l1-l4"
+const val TOOL_LL_L4_S1 = "ll-l4-s1"
+const val TOOL_TPA = "tpa"
+const val TOOL_SVA = "sva"
+const val TOOL_PI = "pi"
+const val TOOL_PT = "pt"
+const val TOOL_SS = "ss"
+
+const val TOOL_LENGTH = "length"
 const val TOOL_ANGLE = "angle"
-const val TOOL_AUX_CIRCLE = "aux_circle"
-const val TOOL_AUX_ELLIPSE = "aux_ellipse"
-const val TOOL_AUX_BOX = "aux_box"
-const val TOOL_AUX_ARROW = "aux_arrow"
-const val TOOL_AUX_POLYGON = "aux_polygon"
+
+const val TOOL_AUX_CIRCLE = "circle"
+const val TOOL_AUX_ELLIPSE = "ellipse"
+const val TOOL_AUX_BOX = "rectangle"
+const val TOOL_AUX_ARROW = "arrow"
+const val TOOL_AUX_POLYGON = "polygon"
+const val TOOL_VERTEBRA_CENTER = "vertebra-center"
+const val TOOL_AUX_LENGTH = "aux-length"
+const val TOOL_AUX_ANGLE = "aux-angle"
+const val TOOL_AUX_HORIZONTAL_LINE = "aux-horizontal-line"
+const val TOOL_AUX_VERTICAL_LINE = "aux-vertical-line"
 
 enum class AnnotationToolSection(val title: String) {
     BASIC("基础模式"),
@@ -32,6 +55,7 @@ data class AnnotationToolDefinition(
     val icon: IconToken,
     val section: AnnotationToolSection,
     val pointsNeeded: Int,
+    val interactionPointsNeeded: Int = pointsNeeded,
     val supportsDoubleTapFinish: Boolean = false,
 )
 
@@ -42,6 +66,7 @@ val ANNOTATION_TOOL_CATALOG = listOf(
         icon = IconToken.MEASURE_MOVE,
         section = AnnotationToolSection.BASIC,
         pointsNeeded = 0,
+        interactionPointsNeeded = 0,
     ),
     AnnotationToolDefinition(
         id = TOOL_T1_TILT,
@@ -79,18 +104,137 @@ val ANNOTATION_TOOL_CATALOG = listOf(
         pointsNeeded = 2,
     ),
     AnnotationToolDefinition(
-        id = TOOL_TS,
-        label = "TS",
-        icon = IconToken.MEASURE_TS,
-        section = AnnotationToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnnotationToolDefinition(
         id = TOOL_AVT,
         label = "AVT",
         icon = IconToken.MEASURE_AVT,
         section = AnnotationToolSection.MEASURE,
         pointsNeeded = 2,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_TS,
+        label = "TTS",
+        icon = IconToken.MEASURE_TS,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_LLD,
+        label = "LLD",
+        icon = IconToken.MEASURE_LLD,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 2,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_C7_OFFSET,
+        label = "TS(Trunk Shift)",
+        icon = IconToken.MEASURE_C7_OFFSET,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 6,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_T1_SLOPE,
+        label = "T1 Slope",
+        icon = IconToken.MEASURE_T1_SLOPE,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 2,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_CL,
+        label = "C2-C7 CL",
+        icon = IconToken.MEASURE_CL,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_TK_T2_T5,
+        label = "TK T2-T5",
+        icon = IconToken.MEASURE_TK_T2_T5,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_TK_T5_T12,
+        label = "TK T5-T12",
+        icon = IconToken.MEASURE_TK_T5_T12,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_T10_L2,
+        label = "T10-L2",
+        icon = IconToken.MEASURE_T10_L2,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_LL_L1_S1,
+        label = "LL L1-S1",
+        icon = IconToken.MEASURE_LL_L1_S1,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_LL_L1_L4,
+        label = "LL L1-L4",
+        icon = IconToken.MEASURE_LL_L1_L4,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_LL_L4_S1,
+        label = "LL L4-S1",
+        icon = IconToken.MEASURE_LL_L4_S1,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_TPA,
+        label = "TPA",
+        icon = IconToken.MEASURE_TPA,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 7,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_SVA,
+        label = "SVA",
+        icon = IconToken.MEASURE_SVA,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 5,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_PI,
+        label = "PI",
+        icon = IconToken.MEASURE_PI,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 3,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_PT,
+        label = "PT",
+        icon = IconToken.MEASURE_PT,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 3,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_SS,
+        label = "SS",
+        icon = IconToken.MEASURE_SS,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 2,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_LENGTH,
+        label = "长度测量",
+        icon = IconToken.MEASURE_DISTANCE,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 2,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_ANGLE,
+        label = "角度测量",
+        icon = IconToken.MEASURE_ANGLE,
+        section = AnnotationToolSection.MEASURE,
+        pointsNeeded = 3,
     ),
     AnnotationToolDefinition(
         id = TOOL_STANDARD_DISTANCE,
@@ -100,61 +244,80 @@ val ANNOTATION_TOOL_CATALOG = listOf(
         pointsNeeded = 2,
     ),
     AnnotationToolDefinition(
-        id = TOOL_VERTEBRA_CENTER,
-        label = "椎体中心",
-        icon = IconToken.MEASURE_VERTEBRA_CENTER,
-        section = AnnotationToolSection.MEASURE,
-        pointsNeeded = 4,
-    ),
-    AnnotationToolDefinition(
-        id = TOOL_DISTANCE,
-        label = "距离",
-        icon = IconToken.MEASURE_DISTANCE,
-        section = AnnotationToolSection.MEASURE,
-        pointsNeeded = 2,
-    ),
-    AnnotationToolDefinition(
-        id = TOOL_ANGLE,
-        label = "角度",
-        icon = IconToken.MEASURE_ANGLE,
-        section = AnnotationToolSection.MEASURE,
-        pointsNeeded = 3,
-    ),
-    AnnotationToolDefinition(
         id = TOOL_AUX_CIRCLE,
-        label = "Circle",
+        label = "Auxiliary Circle",
         icon = IconToken.MEASURE_AUX_CIRCLE,
         section = AnnotationToolSection.AUXILIARY,
-        pointsNeeded = 2,
+        pointsNeeded = 0,
+        interactionPointsNeeded = 2,
     ),
     AnnotationToolDefinition(
         id = TOOL_AUX_ELLIPSE,
-        label = "Ellipse",
+        label = "Auxiliary Ellipse",
         icon = IconToken.MEASURE_AUX_ELLIPSE,
         section = AnnotationToolSection.AUXILIARY,
-        pointsNeeded = 2,
+        pointsNeeded = 0,
+        interactionPointsNeeded = 2,
     ),
     AnnotationToolDefinition(
         id = TOOL_AUX_BOX,
-        label = "Box",
+        label = "Auxiliary Box",
         icon = IconToken.MEASURE_AUX_BOX,
         section = AnnotationToolSection.AUXILIARY,
-        pointsNeeded = 2,
+        pointsNeeded = 0,
+        interactionPointsNeeded = 2,
     ),
     AnnotationToolDefinition(
         id = TOOL_AUX_ARROW,
         label = "Arrow",
         icon = IconToken.MEASURE_AUX_ARROW,
         section = AnnotationToolSection.AUXILIARY,
-        pointsNeeded = 2,
+        pointsNeeded = 0,
+        interactionPointsNeeded = 2,
     ),
     AnnotationToolDefinition(
         id = TOOL_AUX_POLYGON,
-        label = "Polygon",
+        label = "Polygons",
         icon = IconToken.MEASURE_AUX_POLYGON,
         section = AnnotationToolSection.AUXILIARY,
         pointsNeeded = 0,
+        interactionPointsNeeded = 0,
         supportsDoubleTapFinish = true,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_VERTEBRA_CENTER,
+        label = "锥体中心",
+        icon = IconToken.MEASURE_VERTEBRA_CENTER,
+        section = AnnotationToolSection.AUXILIARY,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_AUX_LENGTH,
+        label = "距离标注",
+        icon = IconToken.MEASURE_DISTANCE,
+        section = AnnotationToolSection.AUXILIARY,
+        pointsNeeded = 2,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_AUX_ANGLE,
+        label = "角度标注",
+        icon = IconToken.MEASURE_ANGLE,
+        section = AnnotationToolSection.AUXILIARY,
+        pointsNeeded = 4,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_AUX_HORIZONTAL_LINE,
+        label = "辅助水平线",
+        icon = IconToken.MEASURE_AUX_HORIZONTAL_LINE,
+        section = AnnotationToolSection.AUXILIARY,
+        pointsNeeded = 2,
+    ),
+    AnnotationToolDefinition(
+        id = TOOL_AUX_VERTICAL_LINE,
+        label = "辅助垂直线",
+        icon = IconToken.MEASURE_AUX_VERTICAL_LINE,
+        section = AnnotationToolSection.AUXILIARY,
+        pointsNeeded = 2,
     ),
 )
 
