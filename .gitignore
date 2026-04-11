@@ -1,5 +1,6 @@
 *.iml
 .kotlin
+.codex
 .gradle
 **/build/
 xcuserdata
@@ -22,3 +23,4 @@ Xiehe_ios
 XieHe-System
 API_README.md
 ReDesign
+viewer
