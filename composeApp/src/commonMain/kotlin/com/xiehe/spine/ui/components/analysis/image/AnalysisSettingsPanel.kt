@@ -8,16 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
-import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.text.shared.Text
-import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.theme.SpineTheme
@@ -27,24 +26,43 @@ fun AnalysisSettingsPanel(
     zoomPercent: Int,
     contrast: Int,
     brightness: Int,
-    standardDistanceInput: String,
-    isImageLocked: Boolean,
-    onClearAll: () -> Unit,
     onZoomChange: (Int) -> Unit,
     onContrastChange: (Int) -> Unit,
     onBrightnessChange: (Int) -> Unit,
-    onStandardDistanceChange: (String) -> Unit,
-    onToggleImageLock: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Button(
-            text = "清空全部测量结果",
-            onClick = onClearAll,
+    val colors = SpineTheme.colors
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+            .background(colors.backgroundElevated.copy(alpha = 0.98f))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            customContainerColor = Color(0xFFD93444),
-            customContentColor = Color.White,
-            leadingGlyph = IconToken.DELETE,
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(colors.primaryMuted, RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                AppIcon(
+                    glyph = IconToken.MEASURE_ZOOM,
+                    tint = colors.primary,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+            Text(
+                text = "影像缩放",
+                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.Bold),
+                color = colors.textPrimary,
+            )
+        }
 
         AnalyzerStepper(
             label = "缩放",
@@ -64,39 +82,6 @@ fun AnalysisSettingsPanel(
             onMinus = { onBrightnessChange(-5) },
             onPlus = { onBrightnessChange(5) },
         )
-
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = "标准距离 (mm)",
-                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
-                color = SpineTheme.colors.textPrimary,
-            )
-            TextField(
-                value = standardDistanceInput,
-                onValueChange = onStandardDistanceChange,
-                placeholder = "输入标准距离，默认100",
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "锁定图像",
-                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
-                color = SpineTheme.colors.textPrimary,
-            )
-            Button(
-                text = if (isImageLocked) "已锁定" else "未锁定",
-                onClick = onToggleImageLock,
-                customContainerColor = if (isImageLocked) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
-                customContentColor = if (isImageLocked) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary,
-                leadingGlyph = IconToken.LOCK,
-            )
-        }
     }
 }
 
@@ -149,5 +134,3 @@ private fun StepperButton(
         AppIcon(glyph = icon, tint = colors.textPrimary)
     }
 }
-
-

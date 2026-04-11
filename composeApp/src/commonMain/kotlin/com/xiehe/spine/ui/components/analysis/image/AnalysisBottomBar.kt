@@ -23,7 +23,7 @@ import com.xiehe.spine.ui.theme.SpineTheme
 
 enum class AnalysisBottomAction {
     MOVE,
-    ZOOM,
+    LOCK,
     UNDO,
     REDO,
     CLEAR,
@@ -32,7 +32,8 @@ enum class AnalysisBottomAction {
 @Composable
 fun AnalysisBottomBar(
     modifier: Modifier = Modifier,
-    selectedAction: AnalysisBottomAction? = null,
+    moveSelected: Boolean = false,
+    lockSelected: Boolean = false,
     canUndo: Boolean = true,
     canRedo: Boolean = true,
     canClear: Boolean = true,
@@ -51,16 +52,16 @@ fun AnalysisBottomBar(
         AnalysisBottomItem(
             label = "移动",
             icon = IconToken.MEASURE_MOVE,
-            selected = selectedAction == AnalysisBottomAction.MOVE,
+            selected = moveSelected,
             enabled = true,
             onClick = { onAction(AnalysisBottomAction.MOVE) },
         )
         AnalysisBottomItem(
-            label = "缩放",
-            icon = IconToken.MEASURE_ZOOM,
-            selected = selectedAction == AnalysisBottomAction.ZOOM,
+            label = "锁定",
+            icon = IconToken.LOCK,
+            selected = lockSelected,
             enabled = true,
-            onClick = { onAction(AnalysisBottomAction.ZOOM) },
+            onClick = { onAction(AnalysisBottomAction.LOCK) },
         )
         AnalysisBottomItem(
             label = "撤销",

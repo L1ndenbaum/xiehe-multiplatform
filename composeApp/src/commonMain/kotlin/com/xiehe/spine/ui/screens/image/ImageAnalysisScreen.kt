@@ -60,6 +60,7 @@ import org.jetbrains.compose.resources.decodeToImageBitmap
 
 private enum class ImageOverlayPanel {
     TOOLKIT,
+    ZOOM,
     MEASUREMENTS,
 }
 
@@ -220,6 +221,18 @@ fun ImageAnalysisScreen(
                         )
                     }
 
+                    ImageOverlayPanel.ZOOM -> {
+                        AnalysisSettingsPanel(
+                            zoomPercent = state.zoomPercent,
+                            contrast = state.contrast,
+                            brightness = state.brightness,
+                            onZoomChange = vm::adjustZoom,
+                            onContrastChange = vm::adjustContrast,
+                            onBrightnessChange = vm::adjustBrightness,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+
                     ImageOverlayPanel.MEASUREMENTS -> {
                         MeasurementResultsPanel(
                             standardDistanceLabel = state.standardDistanceLabel,
@@ -247,6 +260,7 @@ fun ImageAnalysisScreen(
                     .align(Alignment.TopEnd)
                     .padding(top = 12.dp, end = 8.dp),
                 toolkitExpanded = activeOverlay == ImageOverlayPanel.TOOLKIT,
+                zoomExpanded = activeOverlay == ImageOverlayPanel.ZOOM,
                 fullscreenMode = fullscreenMode,
                 measurementsExpanded = activeOverlay == ImageOverlayPanel.MEASUREMENTS,
                 onToolkitToggle = {
@@ -254,6 +268,13 @@ fun ImageAnalysisScreen(
                         null
                     } else {
                         ImageOverlayPanel.TOOLKIT
+                    }
+                },
+                onZoomToggle = {
+                    activeOverlay = if (activeOverlay == ImageOverlayPanel.ZOOM) {
+                        null
+                    } else {
+                        ImageOverlayPanel.ZOOM
                     }
                 },
                 onFullscreenToggle = {
@@ -318,7 +339,8 @@ fun ImageAnalysisScreen(
 
         AnalysisBottomBar(
             modifier = Modifier.navigationBarsPadding(),
-            selectedAction = if (state.activeToolId == TOOL_MOVE) AnalysisBottomAction.MOVE else null,
+            moveSelected = state.activeToolId == TOOL_MOVE,
+            lockSelected = state.isImageLocked,
             canUndo = true,
             canRedo = true,
             canClear = clearEnabled,
@@ -329,7 +351,7 @@ fun ImageAnalysisScreen(
                         vm.selectTool(TOOL_MOVE)
                     }
 
-                    AnalysisBottomAction.ZOOM -> vm.openSettingsPanel()
+                    AnalysisBottomAction.LOCK -> vm.toggleImageLocked()
                     AnalysisBottomAction.UNDO -> vm.notifyActionUnavailable("撤销功能暂未接入")
                     AnalysisBottomAction.REDO -> vm.notifyActionUnavailable("重做功能暂未接入")
                     AnalysisBottomAction.CLEAR -> vm.clearMeasurements()
@@ -386,41 +408,16 @@ fun ImageAnalysisScreen(
         },
     )
 
-    if (state.showSettingsPanel) {
-        PickerDialog(
-            title = "",
-            onDismissRequest = vm::closeSettingsPanel,
-            showActionRow = false,
-        ) { _ ->
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "影像设置",
-                    style = SpineTheme.typography.title,
-                )
-                AnalysisSettingsPanel(
-                    zoomPercent = state.zoomPercent,
-                    contrast = state.contrast,
-                    brightness = state.brightness,
-                    standardDistanceInput = state.standardDistanceInput,
-                    isImageLocked = state.isImageLocked,
-                    onClearAll = vm::clearMeasurements,
-                    onZoomChange = vm::adjustZoom,
-                    onContrastChange = vm::adjustContrast,
-                    onBrightnessChange = vm::adjustBrightness,
-                    onStandardDistanceChange = vm::updateStandardDistanceInput,
-                    onToggleImageLock = vm::toggleImageLocked,
-                )
-            }
-        }
-    }
 }
 
 @Composable
 private fun AnnotationSideButtons(
     toolkitExpanded: Boolean,
+    zoomExpanded: Boolean,
     fullscreenMode: Boolean,
     measurementsExpanded: Boolean,
     onToolkitToggle: () -> Unit,
+    onZoomToggle: () -> Unit,
     onFullscreenToggle: () -> Unit,
     onMeasurementsToggle: () -> Unit,
     modifier: Modifier = Modifier,
@@ -434,6 +431,11 @@ private fun AnnotationSideButtons(
             icon = IconToken.MEASURE_TOGGLE_TOOLKIT,
             active = toolkitExpanded,
             onClick = onToolkitToggle,
+        )
+        AnnotationSideButton(
+            icon = IconToken.MEASURE_ZOOM,
+            active = zoomExpanded,
+            onClick = onZoomToggle,
         )
         AnnotationSideButton(
             icon = IconToken.MEASURE_TO_FULLSCREEN,
