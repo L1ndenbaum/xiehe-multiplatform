@@ -13,19 +13,20 @@ import kotlin.math.atan2
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 
-class RunAiDetectUseCase {
+class RunAiDetectUseCase(
+    private val aiInferenceRepository: AiInferenceRepository,
+) {
     suspend operator fun invoke(
         fileId: Int,
         imageBytes: ByteArray,
         standardDistanceMm: Double?,
         standardDistancePoints: List<MeasurementPoint>,
-        repository: AiInferenceRepository,
     ): RunAiDetectOutcome {
         val calibration = CalibrationContext(
             standardDistanceMm = standardDistanceMm,
             standardDistancePoints = standardDistancePoints,
         )
-        return when (val result = repository.detectKeypoints(fileName = "image_$fileId.png", bytes = imageBytes)) {
+        return when (val result = aiInferenceRepository.detectKeypoints(fileName = "image_$fileId.png", bytes = imageBytes)) {
             is AppResult.Success -> RunAiDetectOutcome.Success(
                 measurements = mapDetectResponse(result.data, calibration),
             )

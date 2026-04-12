@@ -108,7 +108,10 @@ internal fun AppSessionCoordinator(
     }
 
     val activeSession = requireNotNull(session)
-    val scopedViewModels = rememberSessionScopedViewModels(activeSession.userId)
+    val scopedViewModels = rememberSessionScopedViewModels(
+        userId = activeSession.userId,
+        container = container,
+    )
 
     LaunchedEffect(activeSession.userId) {
         val previous = previousUserId

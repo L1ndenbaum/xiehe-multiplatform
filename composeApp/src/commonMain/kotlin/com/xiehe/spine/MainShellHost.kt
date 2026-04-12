@@ -154,7 +154,6 @@ internal fun MainShellHost(
                     imagesVm = scopedViewModels.imagesVm,
                     authRepository = container.authRepository,
                     patientRepository = container.patientRepository,
-                    imageRepository = container.imageFileRepository,
                     onSessionUpdated = onSessionUpdated,
                     onSessionExpired = onSessionExpired,
                     onOpenAppearance = { onRouteChange(OverlayRoute.Appearance) },

@@ -22,21 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class DashboardPendingTask(
-    val image: ImageFileSummary,
-    val patientName: String,
-    val patientCode: String,
-)
-
-data class DashboardUiState(
-    val loading: Boolean = false,
-    val data: DashboardOverview? = null,
-    val pendingItems: List<DashboardPendingTask> = emptyList(),
-    val recentMessages: List<NotificationMessage> = emptyList(),
-    val doctorDisplayName: String = "",
-    val errorMessage: String? = null,
-)
-
 class DashboardViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(DashboardUiState())
     val state: StateFlow<DashboardUiState> = _state.asStateFlow()

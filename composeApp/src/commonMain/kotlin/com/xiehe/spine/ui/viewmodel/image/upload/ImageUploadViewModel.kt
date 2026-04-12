@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ImageUploadViewModel(
-    private val loadUploadPatientsUseCase: LoadUploadPatientsUseCase = LoadUploadPatientsUseCase(),
-    private val submitImageUploadUseCase: SubmitImageUploadUseCase = SubmitImageUploadUseCase(),
+    patientRepository: PatientRepository,
+    imageRepository: ImageFileRepository,
+    private val loadUploadPatientsUseCase: LoadUploadPatientsUseCase = LoadUploadPatientsUseCase(patientRepository),
+    private val submitImageUploadUseCase: SubmitImageUploadUseCase = SubmitImageUploadUseCase(imageRepository),
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(ImageUploadUiState())
     val state: StateFlow<ImageUploadUiState> = _state.asStateFlow()
@@ -25,15 +27,15 @@ class ImageUploadViewModel(
 
     fun loadPatients(
         session: UserSession,
-        repository: PatientRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ) {
         if (_state.value.loadingPatients) return
         scope.launch {
             _state.update { it.copy(loadingPatients = true, errorMessage = null) }
-            when (val outcome = loadUploadPatientsUseCase(session, repository, onSessionUpdated)) {
+            when (val outcome = loadUploadPatientsUseCase(session)) {
                 is LoadUploadPatientsOutcome.Success -> {
+                    onSessionUpdated(outcome.session)
                     _state.update {
                         val firstPatientId = outcome.patients.firstOrNull()?.id
                         it.copy(
@@ -69,7 +71,6 @@ class ImageUploadViewModel(
 
     fun submit(
         session: UserSession,
-        repository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSuccess: () -> Unit,
         onSessionExpired: (String) -> Unit = {},
@@ -82,8 +83,15 @@ class ImageUploadViewModel(
 
         scope.launch {
             _state.update { it.copy(uploading = true, errorMessage = null, successMessage = null) }
-            when (val outcome = submitImageUploadUseCase(session, _state.value, repository, onSessionUpdated)) {
+            val current = _state.value
+            val command = SubmitImageUploadCommand(
+                patientId = requireNotNull(current.selectedPatientId),
+                examType = current.selectedExamType,
+                file = requireNotNull(current.selectedFile),
+            )
+            when (val outcome = submitImageUploadUseCase(session, command)) {
                 is SubmitImageUploadOutcome.Success -> {
+                    onSessionUpdated(outcome.session)
                     _state.update {
                         it.copy(
                             uploading = false,
@@ -92,10 +100,6 @@ class ImageUploadViewModel(
                         )
                     }
                     onSuccess()
-                }
-
-                is SubmitImageUploadOutcome.Invalid -> {
-                    _state.update { it.copy(uploading = false, errorMessage = outcome.message) }
                 }
 
                 is SubmitImageUploadOutcome.Failure -> {

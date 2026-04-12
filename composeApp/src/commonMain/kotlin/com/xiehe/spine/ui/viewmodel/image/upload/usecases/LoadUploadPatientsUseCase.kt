@@ -5,11 +5,11 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.data.patient.PatientSummary
 
-class LoadUploadPatientsUseCase {
+class LoadUploadPatientsUseCase(
+    private val patientRepository: PatientRepository,
+) {
     suspend operator fun invoke(
         session: UserSession,
-        repository: PatientRepository,
-        onSessionUpdated: (UserSession) -> Unit,
     ): LoadUploadPatientsOutcome {
         var activeSession = session
         var page = 1
@@ -18,7 +18,7 @@ class LoadUploadPatientsUseCase {
 
         while (page <= totalPages) {
             when (
-                val result = repository.loadPatients(
+                val result = patientRepository.loadPatients(
                     session = activeSession,
                     page = page,
                     pageSize = 50,
@@ -27,7 +27,6 @@ class LoadUploadPatientsUseCase {
             ) {
                 is AppResult.Success -> {
                     activeSession = result.data.first
-                    onSessionUpdated(activeSession)
                     val payload = result.data.second
                     aggregate += payload.items
                     page += 1
@@ -38,11 +37,17 @@ class LoadUploadPatientsUseCase {
             }
         }
 
-        return LoadUploadPatientsOutcome.Success(aggregate)
+        return LoadUploadPatientsOutcome.Success(
+            session = activeSession,
+            patients = aggregate,
+        )
     }
 }
 
 sealed interface LoadUploadPatientsOutcome {
-    data class Success(val patients: List<PatientSummary>) : LoadUploadPatientsOutcome
+    data class Success(
+        val session: UserSession,
+        val patients: List<PatientSummary>,
+    ) : LoadUploadPatientsOutcome
     data class Failure(val error: AppResult.Failure) : LoadUploadPatientsOutcome
 }

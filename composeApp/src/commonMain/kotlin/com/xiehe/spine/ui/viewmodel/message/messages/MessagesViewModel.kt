@@ -1,29 +1,17 @@
 package com.xiehe.spine.ui.viewmodel.message
-import com.xiehe.spine.notifySessionExpired
-import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 
+import com.xiehe.spine.notifySessionExpired
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.notification.NotificationMessage
-import com.xiehe.spine.data.notification.NotificationSettings
-import com.xiehe.spine.data.notification.NotificationStats
 import com.xiehe.spine.data.notification.NotificationRepository
+import com.xiehe.spine.ui.viewmodel.shared.BaseViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class MessagesUiState(
-    val loading: Boolean = false,
-    val actionLoading: Boolean = false,
-    val items: List<NotificationMessage> = emptyList(),
-    val stats: NotificationStats? = null,
-    val settings: NotificationSettings? = null,
-    val noticeMessage: String? = null,
-    val errorMessage: String? = null,
-)
 
 class MessagesViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(MessagesUiState())

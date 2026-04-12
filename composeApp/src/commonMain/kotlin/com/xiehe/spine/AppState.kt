@@ -3,6 +3,7 @@ package com.xiehe.spine
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import com.xiehe.spine.data.AppContainer
 import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.patient.PatientSummary
 import com.xiehe.spine.ui.viewmodel.dashboard.DashboardViewModel
@@ -48,12 +49,21 @@ internal data class DashboardBootstrapState(
     val images: List<ImageFileSummary> = emptyList(),
 )
 
-internal class SessionScopedViewModels {
+internal class SessionScopedViewModels(
+    container: AppContainer,
+) {
     val messagesVm = MessagesViewModel()
     val dashboardVm = DashboardViewModel()
-    val imagesVm = ImagesViewModel()
-    val imageAnalysisVm = ImageAnalysisViewModel()
-    val imageUploadVm = ImageUploadViewModel()
+    val imagesVm = ImagesViewModel(container.imageFileRepository)
+    val imageAnalysisVm = ImageAnalysisViewModel(
+        imageRepository = container.imageFileRepository,
+        measurementRepository = container.measurementRepository,
+        aiInferenceRepository = container.aiInferenceRepository,
+    )
+    val imageUploadVm = ImageUploadViewModel(
+        patientRepository = container.patientRepository,
+        imageRepository = container.imageFileRepository,
+    )
     val patientsVm = PatientsViewModel()
     val patientDetailVm = PatientDetailViewModel()
     val patientEditVm = PatientEditViewModel()
@@ -79,8 +89,11 @@ internal class SessionScopedViewModels {
 }
 
 @Composable
-internal fun rememberSessionScopedViewModels(userId: Int): SessionScopedViewModels {
-    val holder = remember(userId) { SessionScopedViewModels() }
+internal fun rememberSessionScopedViewModels(
+    userId: Int,
+    container: AppContainer,
+): SessionScopedViewModels {
+    val holder = remember(userId, container) { SessionScopedViewModels(container) }
     DisposableEffect(holder) {
         onDispose { holder.dispose() }
     }

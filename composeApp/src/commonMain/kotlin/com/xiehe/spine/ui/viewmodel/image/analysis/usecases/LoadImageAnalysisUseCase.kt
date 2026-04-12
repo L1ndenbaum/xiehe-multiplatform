@@ -8,13 +8,13 @@ import com.xiehe.spine.data.measurement.MeasurementPoint
 import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.ui.components.analysis.viewer.domain.DEFAULT_STANDARD_DISTANCE_MM
 
-class LoadImageAnalysisUseCase {
+class LoadImageAnalysisUseCase(
+    private val imageFileRepository: ImageFileRepository,
+    private val measurementRepository: MeasurementRepository,
+) {
     suspend operator fun invoke(
         fileId: Int,
         session: UserSession,
-        imageRepository: ImageFileRepository,
-        measurementRepository: MeasurementRepository,
-        onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ): LoadImageAnalysisOutcome {
         var activeSession = session
@@ -29,7 +29,6 @@ class LoadImageAnalysisUseCase {
         when (val measurementsResult = measurementRepository.loadMeasurements(activeSession, fileId)) {
             is AppResult.Success -> {
                 activeSession = measurementsResult.data.first
-                onSessionUpdated(activeSession)
                 val payload = measurementsResult.data.second
                 items = payload.measurements.mapIndexed { index, measurement ->
                     AnnotationPersistenceMapper.imageMeasurementToUiMeasurement(measurement, index)
@@ -46,10 +45,9 @@ class LoadImageAnalysisUseCase {
             }
         }
 
-        when (val imageResult = imageRepository.downloadImageBytes(activeSession, fileId)) {
+        when (val imageResult = imageFileRepository.downloadImageBytes(activeSession, fileId)) {
             is AppResult.Success -> {
                 activeSession = imageResult.data.first
-                onSessionUpdated(activeSession)
                 imageBytes = imageResult.data.second
             }
 
@@ -60,6 +58,7 @@ class LoadImageAnalysisUseCase {
         }
 
         return LoadImageAnalysisOutcome(
+            session = activeSession,
             fileId = fileId,
             imageBytes = imageBytes,
             measurements = items,
@@ -74,6 +73,7 @@ class LoadImageAnalysisUseCase {
 }
 
 data class LoadImageAnalysisOutcome(
+    val session: UserSession,
     val fileId: Int,
     val imageBytes: ByteArray?,
     val measurements: List<ImageAnalysisMeasurement>,

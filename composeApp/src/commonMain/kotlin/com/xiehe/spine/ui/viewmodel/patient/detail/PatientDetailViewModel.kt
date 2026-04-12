@@ -14,16 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class PatientDetailUiState(
-    val loading: Boolean = false,
-    val deleting: Boolean = false,
-    val detail: PatientDetail? = null,
-    val relatedImages: List<ImageFileSummary> = emptyList(),
-    val relatedLoading: Boolean = false,
-    val noticeMessage: String? = null,
-    val errorMessage: String? = null,
-)
-
 class PatientDetailViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(PatientDetailUiState())
     val state: StateFlow<PatientDetailUiState> = _state.asStateFlow()

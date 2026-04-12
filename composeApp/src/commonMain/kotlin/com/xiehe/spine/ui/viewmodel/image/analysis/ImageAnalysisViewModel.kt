@@ -17,10 +17,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ImageAnalysisViewModel(
-    private val loadImageAnalysisUseCase: LoadImageAnalysisUseCase = LoadImageAnalysisUseCase(),
-    private val saveMeasurementsUseCase: SaveMeasurementsUseCase = SaveMeasurementsUseCase(),
-    private val generateImageReportUseCase: GenerateImageReportUseCase = GenerateImageReportUseCase(),
-    private val runAiDetectUseCase: RunAiDetectUseCase = RunAiDetectUseCase(),
+    imageRepository: ImageFileRepository,
+    measurementRepository: MeasurementRepository,
+    aiInferenceRepository: AiInferenceRepository,
+    private val loadImageAnalysisUseCase: LoadImageAnalysisUseCase = LoadImageAnalysisUseCase(
+        imageFileRepository = imageRepository,
+        measurementRepository = measurementRepository,
+    ),
+    private val saveMeasurementsUseCase: SaveMeasurementsUseCase = SaveMeasurementsUseCase(measurementRepository),
+    private val generateImageReportUseCase: GenerateImageReportUseCase = GenerateImageReportUseCase(measurementRepository),
+    private val runAiDetectUseCase: RunAiDetectUseCase = RunAiDetectUseCase(aiInferenceRepository),
     private val importAnnotationsUseCase: ImportAnnotationsUseCase = ImportAnnotationsUseCase(),
     private val exportAnnotationsUseCase: ExportAnnotationsUseCase = ExportAnnotationsUseCase(),
 ) : BaseViewModel() {
@@ -32,8 +38,6 @@ class ImageAnalysisViewModel(
     fun load(
         fileId: Int,
         session: UserSession,
-        imageRepository: ImageFileRepository,
-        measurementRepository: MeasurementRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ) {
@@ -47,19 +51,15 @@ class ImageAnalysisViewModel(
             val outcome = loadImageAnalysisUseCase(
                 fileId = fileId,
                 session = session,
-                imageRepository = imageRepository,
-                measurementRepository = measurementRepository,
-                onSessionUpdated = onSessionUpdated,
                 onSessionExpired = onSessionExpired,
             )
+            onSessionUpdated(outcome.session)
             _state.update { ImageAnalysisStateReducer.applyLoaded(it, outcome) }
         }
     }
 
     fun refresh(
         session: UserSession,
-        imageRepository: ImageFileRepository,
-        measurementRepository: MeasurementRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ) {
@@ -68,8 +68,6 @@ class ImageAnalysisViewModel(
         load(
             fileId = fileId,
             session = session,
-            imageRepository = imageRepository,
-            measurementRepository = measurementRepository,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )
@@ -130,7 +128,6 @@ class ImageAnalysisViewModel(
         examType: String,
         patientId: Int?,
         session: UserSession,
-        repository: MeasurementRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ) {
@@ -141,12 +138,11 @@ class ImageAnalysisViewModel(
                 val outcome = generateImageReportUseCase.loadExistingReport(
                     session = session,
                     fileId = fileId,
-                    repository = repository,
-                    onSessionUpdated = onSessionUpdated,
                     onSessionExpired = onSessionExpired,
                 )
             ) {
                 is LoadExistingReportOutcome.Success -> {
+                    onSessionUpdated(outcome.session)
                     _state.update {
                         ImageAnalysisStateReducer.applyReportLoaded(
                             state = it,
@@ -177,7 +173,6 @@ class ImageAnalysisViewModel(
 
     fun generateReport(
         session: UserSession,
-        repository: MeasurementRepository,
         examType: String,
         onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
@@ -189,13 +184,12 @@ class ImageAnalysisViewModel(
                 val outcome = generateImageReportUseCase.generate(
                     session = session,
                     snapshot = snapshot,
-                    repository = repository,
                     examType = examType,
-                    onSessionUpdated = onSessionUpdated,
                     onSessionExpired = onSessionExpired,
                 )
             ) {
                 is GenerateImageReportOutcome.Success -> {
+                    onSessionUpdated(outcome.session)
                     _state.update {
                         ImageAnalysisStateReducer.applyGeneratedReport(
                             state = it,
@@ -389,7 +383,6 @@ class ImageAnalysisViewModel(
 
     fun runAiDetect(
         fileId: Int,
-        repository: AiInferenceRepository,
     ) {
         val snapshot = _state.value
         val bytes = snapshot.imageBytes
@@ -406,7 +399,6 @@ class ImageAnalysisViewModel(
                     imageBytes = bytes,
                     standardDistanceMm = snapshot.standardDistanceMm,
                     standardDistancePoints = snapshot.standardDistancePoints,
-                    repository = repository,
                 )
             ) {
                 is RunAiDetectOutcome.Success -> {
@@ -422,9 +414,8 @@ class ImageAnalysisViewModel(
 
     fun runAiMeasure(
         fileId: Int,
-        repository: AiInferenceRepository,
     ) {
-        runAiDetect(fileId = fileId, repository = repository)
+        runAiDetect(fileId = fileId)
     }
 
     fun clearMeasurements() {
@@ -440,7 +431,6 @@ class ImageAnalysisViewModel(
 
     fun saveMeasurements(
         session: UserSession,
-        repository: MeasurementRepository,
         examType: String,
         patientId: Int?,
         onSessionUpdated: (UserSession) -> Unit,
@@ -455,14 +445,13 @@ class ImageAnalysisViewModel(
                 val outcome = saveMeasurementsUseCase(
                     snapshot = snapshot,
                     session = session,
-                    repository = repository,
                     examType = examType,
                     patientId = patientId,
-                    onSessionUpdated = onSessionUpdated,
                     onSessionExpired = onSessionExpired,
                 )
             ) {
                 is SaveMeasurementsOutcome.Success -> {
+                    onSessionUpdated(outcome.session)
                     _state.update {
                         ImageAnalysisStateReducer.applySaveSuccess(
                             state = it,

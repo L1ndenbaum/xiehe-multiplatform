@@ -30,9 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ai.AiInferenceRepository
-import com.xiehe.spine.data.image.ImageFileRepository
-import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.ui.components.analysis.viewer.ImageViewer
 import com.xiehe.spine.ui.components.analysis.image.AnalysisBottomAction
 import com.xiehe.spine.ui.components.analysis.image.AnalysisBottomBar
@@ -71,9 +68,6 @@ fun ImageAnalysisScreen(
     examType: String,
     vm: ImageAnalysisViewModel,
     session: UserSession,
-    imageRepository: ImageFileRepository,
-    measurementRepository: MeasurementRepository,
-    aiRepository: AiInferenceRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onBack: () -> Unit,
     onSessionExpired: (String) -> Unit = {},
@@ -96,8 +90,6 @@ fun ImageAnalysisScreen(
         vm.load(
             fileId = fileId,
             session = session,
-            imageRepository = imageRepository,
-            measurementRepository = measurementRepository,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )
@@ -143,7 +135,6 @@ fun ImageAnalysisScreen(
                 onSave = {
                     vm.saveMeasurements(
                         session = session,
-                        repository = measurementRepository,
                         examType = examType,
                         patientId = patientId,
                         onSessionUpdated = onSessionUpdated,
@@ -400,7 +391,6 @@ fun ImageAnalysisScreen(
             scope.launch {
                 vm.generateReport(
                     session = session,
-                    repository = measurementRepository,
                     examType = examType,
                     onSessionUpdated = onSessionUpdated,
                     onSessionExpired = onSessionExpired,

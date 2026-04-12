@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ImagesViewModel(
-    private val refreshImagesUseCase: RefreshImagesUseCase = RefreshImagesUseCase(),
-    private val syncImageReviewSummaryUseCase: SyncImageReviewSummaryUseCase = SyncImageReviewSummaryUseCase(),
+    imageFileRepository: ImageFileRepository,
+    private val refreshImagesUseCase: RefreshImagesUseCase = RefreshImagesUseCase(imageFileRepository),
+    private val syncImageReviewSummaryUseCase: SyncImageReviewSummaryUseCase = SyncImageReviewSummaryUseCase(imageFileRepository),
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(ImagesUiState())
     val state: StateFlow<ImagesUiState> = _state.asStateFlow()
@@ -41,7 +42,6 @@ class ImagesViewModel(
 
     fun refreshIfNeeded(
         session: UserSession,
-        repository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
         force: Boolean = false,
         onSessionExpired: (String) -> Unit = {},
@@ -53,19 +53,19 @@ class ImagesViewModel(
             val last = snapshot.lastLoadedAtEpochSeconds ?: 0L
             if ((now - last) < 20L) return
         }
-        refresh(session, repository, onSessionUpdated, onSessionExpired)
+        refresh(session, onSessionUpdated, onSessionExpired)
     }
 
     fun refresh(
         session: UserSession,
-        repository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
             _state.update { it.copy(loading = true, errorMessage = null) }
-            when (val outcome = refreshImagesUseCase(session, repository, onSessionUpdated)) {
+            when (val outcome = refreshImagesUseCase(session)) {
                 is RefreshImagesOutcome.Success -> {
+                    onSessionUpdated(outcome.session)
                     _state.update { current ->
                         current.copy(
                             loading = false,
@@ -94,13 +94,13 @@ class ImagesViewModel(
 
     fun syncReviewSummary(
         session: UserSession,
-        repository: ImageFileRepository,
         onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ) {
         scope.launch {
-            when (val outcome = syncImageReviewSummaryUseCase(session, repository, onSessionUpdated)) {
+            when (val outcome = syncImageReviewSummaryUseCase(session)) {
                 is SyncImageReviewSummaryOutcome.Success -> {
+                    onSessionUpdated(outcome.session)
                     _state.update {
                         it.copy(
                             summaryTotalCount = outcome.totalCount,

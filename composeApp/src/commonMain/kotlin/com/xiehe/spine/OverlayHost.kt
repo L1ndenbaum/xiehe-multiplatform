@@ -313,9 +313,6 @@ private fun ImageOverlayContent(
                     examType = route.examType,
                     vm = scopedViewModels.imageAnalysisVm,
                     session = session,
-                    imageRepository = container.imageFileRepository,
-                    measurementRepository = container.measurementRepository,
-                    aiRepository = container.aiInferenceRepository,
                     onSessionUpdated = onSessionUpdated,
                     onBack = { onRouteChange(null) },
                     onSessionExpired = onSessionExpired,
@@ -338,8 +335,6 @@ private fun ImageOverlayContent(
                     ImageUploadScreen(
                         vm = scopedViewModels.imageUploadVm,
                         session = session,
-                        patientRepository = container.patientRepository,
-                        imageRepository = container.imageFileRepository,
                         onSessionUpdated = onSessionUpdated,
                         onSessionExpired = onSessionExpired,
                         onUploadSuccess = {
@@ -347,7 +342,6 @@ private fun ImageOverlayContent(
                             onTabSelected(2)
                             scopedViewModels.imagesVm.refresh(
                                 session = session,
-                                repository = container.imageFileRepository,
                                 onSessionUpdated = onSessionUpdated,
                                 onSessionExpired = onSessionExpired,
                             )

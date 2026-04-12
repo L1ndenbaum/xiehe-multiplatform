@@ -8,18 +8,18 @@ import com.xiehe.spine.data.image.ImageFileSummary
 import com.xiehe.spine.data.image.ImageWorkflowStatus
 import com.xiehe.spine.data.image.normalizeImageStatus
 
-class RefreshImagesUseCase {
+class RefreshImagesUseCase(
+    private val imageFileRepository: ImageFileRepository,
+) {
     suspend operator fun invoke(
         session: UserSession,
-        repository: ImageFileRepository,
-        onSessionUpdated: (UserSession) -> Unit,
     ): RefreshImagesOutcome {
-        return when (val result = repository.loadImageFiles(session)) {
+        return when (val result = imageFileRepository.loadImageFiles(session)) {
             is AppResult.Success -> {
                 val updatedSession = result.data.first
-                onSessionUpdated(updatedSession)
                 val items = result.data.second.items
                 RefreshImagesOutcome.Success(
+                    session = updatedSession,
                     items = items,
                     filteredItems = ImageFilterPolicy.apply(ImagesUiState(items = items)),
                     summaryTotalCount = items.size,
@@ -37,6 +37,7 @@ class RefreshImagesUseCase {
 
 sealed interface RefreshImagesOutcome {
     data class Success(
+        val session: UserSession,
         val items: List<ImageFileSummary>,
         val filteredItems: List<ImageFileSummary>,
         val summaryTotalCount: Int,

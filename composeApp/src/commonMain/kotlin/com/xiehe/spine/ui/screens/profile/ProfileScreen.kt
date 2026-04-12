@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.data.auth.AuthRepository
-import com.xiehe.spine.data.image.ImageFileRepository
 import com.xiehe.spine.data.image.ImageWorkflowStatus
 import com.xiehe.spine.data.image.normalizeImageStatus
 import com.xiehe.spine.data.patient.PatientRepository
@@ -59,7 +58,6 @@ fun ProfileScreen(
     imagesVm: ImagesViewModel,
     authRepository: AuthRepository,
     patientRepository: PatientRepository,
-    imageRepository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onSessionExpired: (String) -> Unit = {},
     onOpenAppearance: () -> Unit,
@@ -88,7 +86,6 @@ fun ProfileScreen(
         )
         imagesVm.syncReviewSummary(
             session = session,
-            repository = imageRepository,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )

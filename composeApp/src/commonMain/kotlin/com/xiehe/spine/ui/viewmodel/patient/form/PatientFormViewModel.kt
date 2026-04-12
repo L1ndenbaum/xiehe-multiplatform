@@ -12,24 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class PatientFormUiState(
-    val patientId: String = generatedPatientId(),
-    val name: String = "",
-    val gender: String = "male",
-    val birthDate: String = "",
-    val phonePrefix: String = "+86",
-    val phoneLocalNumber: String = "",
-    val email: String = "",
-    val idCard: String = "",
-    val address: String = "",
-    val emergencyContactName: String = "",
-    val emergencyContactPhone: String = "",
-    val loading: Boolean = false,
-    val errorMessage: String? = null,
-)
-
-class PatientFormViewModel : BaseViewModel() {
-    private val _state = MutableStateFlow(PatientFormUiState())
+class PatientFormViewModel(
+    private val patientIdGenerator: PatientIdGenerator = PatientIdGenerator(),
+) : BaseViewModel() {
+    private val _state = MutableStateFlow(
+        PatientFormUiState(patientId = patientIdGenerator()),
+    )
     val state: StateFlow<PatientFormUiState> = _state.asStateFlow()
 
     fun updateName(value: String) = _state.update { it.copy(name = value) }
@@ -94,7 +82,7 @@ class PatientFormViewModel : BaseViewModel() {
             when (val result = repository.createPatient(session, request)) {
                 is AppResult.Success -> {
                     onSessionUpdated(result.data.first)
-                    _state.value = PatientFormUiState()
+                    _state.value = PatientFormUiState(patientId = patientIdGenerator())
                     onSuccess()
                 }
 

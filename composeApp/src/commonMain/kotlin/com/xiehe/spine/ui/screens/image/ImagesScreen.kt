@@ -89,7 +89,11 @@ fun ImagesScreen(
     val saver = rememberDownloadedFileSaver()
 
     LaunchedEffect(session.accessToken) {
-        vm.refreshIfNeeded(session, repository, onSessionUpdated, onSessionExpired = onSessionExpired)
+        vm.refreshIfNeeded(
+            session = session,
+            onSessionUpdated = onSessionUpdated,
+            onSessionExpired = onSessionExpired,
+        )
     }
 
     Box(
@@ -314,7 +318,6 @@ fun ImagesScreen(
                                 onSessionUpdated(activeSession)
                                 vm.refresh(
                                     session = activeSession,
-                                    repository = repository,
                                     onSessionUpdated = onSessionUpdated,
                                     onSessionExpired = onSessionExpired,
                                 )

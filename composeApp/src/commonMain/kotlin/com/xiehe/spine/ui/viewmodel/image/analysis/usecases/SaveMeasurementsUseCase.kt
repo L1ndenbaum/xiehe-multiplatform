@@ -8,14 +8,14 @@ import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.data.measurement.SaveMeasurementsRequest
 import kotlin.time.Instant
 
-class SaveMeasurementsUseCase {
+class SaveMeasurementsUseCase(
+    private val measurementRepository: MeasurementRepository,
+) {
     suspend operator fun invoke(
         snapshot: ImageAnalysisUiState,
         session: UserSession,
-        repository: MeasurementRepository,
         examType: String,
         patientId: Int?,
-        onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ): SaveMeasurementsOutcome {
         val fileId = snapshot.fileId ?: return SaveMeasurementsOutcome.Invalid("当前影像不存在")
@@ -44,10 +44,13 @@ class SaveMeasurementsUseCase {
             savedAt = savedAt,
         )
 
-        return when (val result = repository.saveMeasurements(session, fileId, saveRequest)) {
+        return when (val result = measurementRepository.saveMeasurements(session, fileId, saveRequest)) {
             is AppResult.Success -> {
-                onSessionUpdated(result.data.first)
-                SaveMeasurementsOutcome.Success(reportText = reportText, savedAt = savedAt)
+                SaveMeasurementsOutcome.Success(
+                    session = result.data.first,
+                    reportText = reportText,
+                    savedAt = savedAt,
+                )
             }
 
             is AppResult.Failure -> {
@@ -63,6 +66,7 @@ class SaveMeasurementsUseCase {
 
 sealed interface SaveMeasurementsOutcome {
     data class Success(
+        val session: UserSession,
         val reportText: String,
         val savedAt: String,
     ) : SaveMeasurementsOutcome

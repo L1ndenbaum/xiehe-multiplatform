@@ -9,18 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class RegisterUiState(
-    val username: String = "",
-    val fullName: String = "",
-    val email: String = "",
-    val phone: String = "+86",
-    val password: String = "",
-    val confirmPassword: String = "",
-    val loading: Boolean = false,
-    val errorMessage: String? = null,
-    val successMessage: String? = null,
-)
-
 class RegisterViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(RegisterUiState())
     val state: StateFlow<RegisterUiState> = _state.asStateFlow()

@@ -24,8 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.image.ImageFileRepository
-import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.ui.components.button.shared.Button
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.icon.shared.IconToken
@@ -47,8 +45,6 @@ private enum class ImageUploadPicker {
 fun ImageUploadScreen(
     vm: ImageUploadViewModel,
     session: UserSession,
-    patientRepository: PatientRepository,
-    imageRepository: ImageFileRepository,
     onSessionUpdated: (UserSession) -> Unit,
     onUploadSuccess: () -> Unit,
     onSessionExpired: (String) -> Unit = {},
@@ -72,7 +68,6 @@ fun ImageUploadScreen(
     LaunchedEffect(session.accessToken) {
         vm.loadPatients(
             session = session,
-            repository = patientRepository,
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )
@@ -138,7 +133,6 @@ fun ImageUploadScreen(
                 onClick = {
                     vm.submit(
                         session = session,
-                        repository = imageRepository,
                         onSessionUpdated = onSessionUpdated,
                         onSuccess = onUploadSuccess,
                         onSessionExpired = onSessionExpired,

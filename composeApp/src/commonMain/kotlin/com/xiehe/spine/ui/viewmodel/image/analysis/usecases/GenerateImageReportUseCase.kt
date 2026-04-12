@@ -7,19 +7,19 @@ import com.xiehe.spine.data.measurement.GenerateReportRequest
 import com.xiehe.spine.data.measurement.MeasurementRepository
 import com.xiehe.spine.data.report.mapImageCategoryToReportExamType
 
-class GenerateImageReportUseCase {
+class GenerateImageReportUseCase(
+    private val measurementRepository: MeasurementRepository,
+) {
     suspend fun loadExistingReport(
         session: UserSession,
         fileId: Int,
-        repository: MeasurementRepository,
-        onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ): LoadExistingReportOutcome {
-        return when (val result = repository.loadMeasurements(session, fileId)) {
+        return when (val result = measurementRepository.loadMeasurements(session, fileId)) {
             is AppResult.Success -> {
-                onSessionUpdated(result.data.first)
                 val payload = result.data.second
                 LoadExistingReportOutcome.Success(
+                    session = result.data.first,
                     reportText = payload.reportText.orEmpty(),
                     reportSavedAt = payload.savedAt.orEmpty(),
                 )
@@ -38,9 +38,7 @@ class GenerateImageReportUseCase {
     suspend fun generate(
         session: UserSession,
         snapshot: ImageAnalysisUiState,
-        repository: MeasurementRepository,
         examType: String,
-        onSessionUpdated: (UserSession) -> Unit,
         onSessionExpired: (String) -> Unit = {},
     ): GenerateImageReportOutcome {
         val fileId = snapshot.fileId ?: return GenerateImageReportOutcome.Invalid("当前影像不存在")
@@ -56,11 +54,11 @@ class GenerateImageReportUseCase {
             imageId = fileId.toString(),
             measurements = reportItems,
         )
-        return when (val result = repository.generateReport(session, request)) {
+        return when (val result = measurementRepository.generateReport(session, request)) {
             is AppResult.Success -> {
-                onSessionUpdated(result.data.first)
                 val payload = result.data.second
                 GenerateImageReportOutcome.Success(
+                    session = result.data.first,
                     report = payload.report,
                     generatedAt = payload.generatedAt.orEmpty(),
                 )
@@ -79,6 +77,7 @@ class GenerateImageReportUseCase {
 
 sealed interface LoadExistingReportOutcome {
     data class Success(
+        val session: UserSession,
         val reportText: String,
         val reportSavedAt: String,
     ) : LoadExistingReportOutcome
@@ -89,6 +88,7 @@ sealed interface LoadExistingReportOutcome {
 
 sealed interface GenerateImageReportOutcome {
     data class Success(
+        val session: UserSession,
         val report: String,
         val generatedAt: String,
     ) : GenerateImageReportOutcome

@@ -16,27 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class OrganizationTab {
-    MEMBERS,
-    INVITES,
-}
-
-data class OrganizationUiState(
-    val loading: Boolean = false,
-    val actionLoading: Boolean = false,
-    val activeTab: OrganizationTab = OrganizationTab.MEMBERS,
-    val search: String = "",
-    val teams: List<OrganizationTeamSummary> = emptyList(),
-    val teamRoleLabels: Map<Int, String> = emptyMap(),
-    val selectedTeamId: Int? = null,
-    val members: List<OrganizationMember> = emptyList(),
-    val filteredMembers: List<OrganizationMember> = emptyList(),
-    val invitations: List<OrganizationInvitation> = emptyList(),
-    val filteredInvitations: List<OrganizationInvitation> = emptyList(),
-    val noticeMessage: String? = null,
-    val errorMessage: String? = null,
-)
-
 class OrganizationViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(OrganizationUiState())
     val state: StateFlow<OrganizationUiState> = _state.asStateFlow()

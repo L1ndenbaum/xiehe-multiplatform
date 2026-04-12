@@ -13,23 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class PatientEditUiState(
-    val loading: Boolean = false,
-    val submitting: Boolean = false,
-    val name: String = "",
-    val gender: String = "male",
-    val birthDate: String = "",
-    val phonePrefix: String = "+86",
-    val phoneLocalNumber: String = "",
-    val email: String = "",
-    val idCard: String = "",
-    val address: String = "",
-    val emergencyContactName: String = "",
-    val emergencyContactPhone: String = "",
-    val errorMessage: String? = null,
-    val successMessage: String? = null,
-)
-
 class PatientEditViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(PatientEditUiState())
     val state: StateFlow<PatientEditUiState> = _state.asStateFlow()
