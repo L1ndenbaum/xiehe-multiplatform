@@ -2,14 +2,12 @@ package com.xiehe.spine.data.patient
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ApiClient
-import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.AuthenticatedApiClient
 import com.xiehe.spine.data.cache.ImageCacheRepository
 import io.ktor.http.encodeURLParameter
 
 class PatientRepository(
-    private val apiClient: ApiClient,
-    private val authRepository: AuthRepository,
+    private val authenticatedApiClient: AuthenticatedApiClient,
     private val imageCacheRepository: ImageCacheRepository,
 ) {
     suspend fun loadAllPatients(session: UserSession): AppResult<Pair<UserSession, List<PatientSummary>>> {
@@ -78,8 +76,8 @@ class PatientRepository(
                 append(status.encodeURLParameter())
             }
         }
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = path, accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(path = path, accessToken = accessToken)
         }
     }
 
@@ -87,8 +85,8 @@ class PatientRepository(
         session: UserSession,
         patientId: Int,
     ): AppResult<Pair<UserSession, PatientDetail>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = "/patients/$patientId", accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(path = "/patients/$patientId", accessToken = accessToken)
         }
     }
 
@@ -97,11 +95,11 @@ class PatientRepository(
         request: CreatePatientRequest,
     ): AppResult<Pair<UserSession, PatientDetail>> {
         return when (
-            val result = withRefresh(session) { activeSession ->
-                apiClient.post<PatientDetail, CreatePatientRequest>(
+            val result = authenticatedApiClient.call(session) { accessToken ->
+                authenticatedApiClient.apiClient.post<PatientDetail, CreatePatientRequest>(
                     path = "/patients/",
                     body = request,
-                    accessToken = activeSession.accessToken,
+                    accessToken = accessToken,
                 )
             }
         ) {
@@ -124,11 +122,11 @@ class PatientRepository(
         request: UpdatePatientRequest,
     ): AppResult<Pair<UserSession, PatientDetail>> {
         return when (
-            val result = withRefresh(session) { activeSession ->
-                apiClient.put<PatientDetail, UpdatePatientRequest>(
+            val result = authenticatedApiClient.call(session) { accessToken ->
+                authenticatedApiClient.apiClient.put<PatientDetail, UpdatePatientRequest>(
                     path = "/patients/$patientId",
                     body = request,
-                    accessToken = activeSession.accessToken,
+                    accessToken = accessToken,
                 )
             }
         ) {
@@ -150,10 +148,10 @@ class PatientRepository(
         patientId: Int,
     ): AppResult<Pair<UserSession, String>> {
         return when (
-            val result = withRefresh(session) { activeSession ->
-                apiClient.deleteForMessage(
+            val result = authenticatedApiClient.call(session) { accessToken ->
+                authenticatedApiClient.apiClient.deleteForMessage(
                     path = "/patients/$patientId",
-                    accessToken = activeSession.accessToken,
+                    accessToken = accessToken,
                 )
             }
         ) {
@@ -166,31 +164,6 @@ class PatientRepository(
             }
 
             is AppResult.Failure -> result
-        }
-    }
-
-    private suspend inline fun <reified T> withRefresh(
-        session: UserSession,
-        crossinline action: suspend (UserSession) -> AppResult<T>,
-    ): AppResult<Pair<UserSession, T>> {
-        return when (val first = action(session)) {
-            is AppResult.Success -> AppResult.Success(session to first.data)
-            is AppResult.Failure -> {
-                if (!first.isUnauthorized) {
-                    first
-                } else {
-                    when (val refreshed = authRepository.refreshToken(session)) {
-                        is AppResult.Success -> {
-                            when (val second = action(refreshed.data)) {
-                                is AppResult.Success -> AppResult.Success(refreshed.data to second.data)
-                                is AppResult.Failure -> second
-                            }
-                        }
-
-                        is AppResult.Failure -> refreshed
-                    }
-                }
-            }
         }
     }
 }

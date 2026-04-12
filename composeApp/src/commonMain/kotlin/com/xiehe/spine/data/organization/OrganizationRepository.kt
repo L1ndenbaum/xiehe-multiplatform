@@ -2,18 +2,19 @@ package com.xiehe.spine.data.organization
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ApiClient
-import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.AuthenticatedApiClient
 
 class OrganizationRepository(
-    private val apiClient: ApiClient,
-    private val authRepository: AuthRepository,
+    private val authenticatedApiClient: AuthenticatedApiClient,
 ) {
     suspend fun loadMyTeams(
         session: UserSession,
     ): AppResult<Pair<UserSession, OrganizationTeamListData>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = "/permissions/teams/my", accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(
+                path = "/permissions/teams/my",
+                accessToken = accessToken,
+            )
         }
     }
 
@@ -21,10 +22,10 @@ class OrganizationRepository(
         session: UserSession,
         teamId: Int,
     ): AppResult<Pair<UserSession, OrganizationTeamMembersData>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.get(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(
                 path = "/permissions/teams/$teamId/members",
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -32,10 +33,10 @@ class OrganizationRepository(
     suspend fun loadMyInvitations(
         session: UserSession,
     ): AppResult<Pair<UserSession, OrganizationInvitationListData>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.get(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(
                 path = "/permissions/invitations/my",
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -45,11 +46,11 @@ class OrganizationRepository(
         invitationId: Int,
         accept: Boolean,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.postForMessage(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.postForMessage(
                 path = "/permissions/invitations/$invitationId/respond",
                 body = OrganizationInvitationRespondRequest(accept = accept),
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -61,15 +62,15 @@ class OrganizationRepository(
         role: String,
         message: String?,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.postForMessage(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.postForMessage(
                 path = "/permissions/teams/$teamId/invite",
                 body = OrganizationInviteRequest(
                     email = email,
                     role = role,
                     message = message,
                 ),
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -82,8 +83,8 @@ class OrganizationRepository(
         department: String?,
         maxMembers: Int?,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.postForMessage(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.postForMessage(
                 path = "/permissions/teams",
                 body = OrganizationCreateTeamRequest(
                     name = name,
@@ -92,7 +93,7 @@ class OrganizationRepository(
                     department = department,
                     maxMembers = maxMembers,
                 ),
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -103,11 +104,11 @@ class OrganizationRepository(
         userId: Int,
         role: String,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.patchForMessage(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.patchForMessage(
                 path = "/permissions/teams/$teamId/members/$userId/role",
                 body = OrganizationMemberRoleUpdateRequest(role = role),
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -117,36 +118,11 @@ class OrganizationRepository(
         teamId: Int,
         userId: Int,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.deleteForMessage(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.deleteForMessage(
                 path = "/permissions/teams/$teamId/members/$userId",
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
-        }
-    }
-
-    private suspend inline fun <reified T> withRefresh(
-        session: UserSession,
-        crossinline action: suspend (UserSession) -> AppResult<T>,
-    ): AppResult<Pair<UserSession, T>> {
-        return when (val first = action(session)) {
-            is AppResult.Success -> AppResult.Success(session to first.data)
-            is AppResult.Failure -> {
-                if (!first.isUnauthorized) {
-                    first
-                } else {
-                    when (val refreshed = authRepository.refreshToken(session)) {
-                        is AppResult.Success -> {
-                            when (val second = action(refreshed.data)) {
-                                is AppResult.Success -> AppResult.Success(refreshed.data to second.data)
-                                is AppResult.Failure -> second
-                            }
-                        }
-
-                        is AppResult.Failure -> refreshed
-                    }
-                }
-            }
         }
     }
 }

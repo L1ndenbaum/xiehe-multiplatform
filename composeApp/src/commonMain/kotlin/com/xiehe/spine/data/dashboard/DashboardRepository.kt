@@ -2,38 +2,17 @@ package com.xiehe.spine.data.dashboard
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ApiClient
-import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.AuthenticatedApiClient
 
 class DashboardRepository(
-    private val apiClient: ApiClient,
-    private val authRepository: AuthRepository,
+    private val authenticatedApiClient: AuthenticatedApiClient,
 ) {
     suspend fun loadOverview(session: UserSession): AppResult<Pair<UserSession, DashboardOverview>> {
-        val direct = apiClient.get<DashboardOverview>(
-            path = "/dashboard/overview",
-            accessToken = session.accessToken,
-        )
-        if (direct is AppResult.Success) {
-            return AppResult.Success(session to direct.data)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(
+                path = "/dashboard/overview",
+                accessToken = accessToken,
+            )
         }
-        if (direct is AppResult.Failure && direct.isUnauthorized) {
-            return when (val refreshed = authRepository.refreshToken(session)) {
-                is AppResult.Success -> {
-                    when (
-                        val retried = apiClient.get<DashboardOverview>(
-                            path = "/dashboard/overview",
-                            accessToken = refreshed.data.accessToken,
-                        )
-                    ) {
-                        is AppResult.Success -> AppResult.Success(refreshed.data to retried.data)
-                        is AppResult.Failure -> retried
-                    }
-                }
-
-                is AppResult.Failure -> refreshed
-            }
-        }
-        return direct as AppResult.Failure
     }
 }

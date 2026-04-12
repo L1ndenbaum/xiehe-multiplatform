@@ -4,6 +4,7 @@ import com.xiehe.spine.currentEpochSeconds
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.SessionStore
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.AuthenticatedApiClient
 import com.xiehe.spine.data.ApiClient
 import com.xiehe.spine.data.HealthData
 import kotlin.io.encoding.Base64
@@ -15,6 +16,8 @@ import kotlinx.serialization.json.jsonPrimitive
 class AuthRepository(
     private val apiClient: ApiClient,
     private val sessionStore: SessionStore,
+    private val sessionRefresher: SessionRefresher,
+    private val authenticatedApiClient: AuthenticatedApiClient,
 ) {
     private val refreshLeewaySeconds = 180L
 
@@ -75,33 +78,7 @@ class AuthRepository(
     }
 
     suspend fun refreshToken(session: UserSession): AppResult<UserSession> {
-        return when (
-            val result = apiClient.post<RefreshData, RefreshRequest>(
-                path = "/auth/refresh",
-                body = RefreshRequest(refreshToken = session.refreshToken),
-            )
-        ) {
-            is AppResult.Success -> {
-                val payload = result.data.tokens
-                val next = session.copy(
-                    accessToken = payload.accessToken,
-                    refreshToken = payload.refreshToken,
-                    accessTokenExpiresAtEpochSeconds = resolveAccessTokenExpiry(
-                        accessToken = payload.accessToken,
-                        expiresIn = payload.expiresIn,
-                    ),
-                )
-                sessionStore.save(next)
-                AppResult.Success(next)
-            }
-
-            is AppResult.Failure -> {
-                if (result.isUnauthorized) {
-                    sessionStore.clear()
-                }
-                result
-            }
-        }
+        return sessionRefresher.refresh(session)
     }
 
     suspend fun register(
@@ -152,8 +129,8 @@ class AuthRepository(
     suspend fun getCurrentUser(
         session: UserSession,
     ): AppResult<Pair<UserSession, CurrentUserProfile>> {
-        return withRefresh(session) { active ->
-            apiClient.get<CurrentUserProfile>(path = "/auth/me", accessToken = active.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            apiClient.get<CurrentUserProfile>(path = "/auth/me", accessToken = accessToken)
         }.mapSessionAndSave { base, profile ->
             profileToSession(base, profile)
         }
@@ -163,11 +140,11 @@ class AuthRepository(
         session: UserSession,
         request: UpdateCurrentUserRequest,
     ): AppResult<Pair<UserSession, CurrentUserProfile>> {
-        return withRefresh(session) { active ->
+        return authenticatedApiClient.call(session) { accessToken ->
             apiClient.put<CurrentUserProfile, UpdateCurrentUserRequest>(
                 path = "/auth/me",
                 body = request,
-                accessToken = active.accessToken,
+                accessToken = accessToken,
             )
         }.mapSessionAndSave { base, profile ->
             profileToSession(base, profile)
@@ -202,7 +179,7 @@ class AuthRepository(
         newPassword: String,
         confirmPassword: String,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { active ->
+        return authenticatedApiClient.call(session) { accessToken ->
             apiClient.postForMessage(
                 path = "/auth/password/change",
                 body = PasswordChangeRequest(
@@ -210,7 +187,7 @@ class AuthRepository(
                     newPassword = newPassword,
                     confirmPassword = confirmPassword,
                 ),
-                accessToken = active.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -221,7 +198,7 @@ class AuthRepository(
         return if (remainingSeconds > refreshLeewaySeconds) {
             AppResult.Success(session)
         } else {
-            refreshToken(session)
+            sessionRefresher.refresh(session)
         }
     }
 
@@ -230,41 +207,16 @@ class AuthRepository(
     }
 
     suspend fun logout(session: UserSession): AppResult<String> {
-        val result = withRefresh(session) { active ->
+        val result = authenticatedApiClient.call(session) { accessToken ->
             apiClient.postForMessage(
                 path = "/auth/logout",
-                accessToken = active.accessToken,
+                accessToken = accessToken,
             )
         }
         sessionStore.clear()
         return when (result) {
             is AppResult.Success -> AppResult.Success(result.data.second)
             is AppResult.Failure -> result
-        }
-    }
-
-    private suspend inline fun <reified T> withRefresh(
-        session: UserSession,
-        crossinline action: suspend (UserSession) -> AppResult<T>,
-    ): AppResult<Pair<UserSession, T>> {
-        return when (val first = action(session)) {
-            is AppResult.Success -> AppResult.Success(session to first.data)
-            is AppResult.Failure -> {
-                if (!first.isUnauthorized) {
-                    first
-                } else {
-                    when (val refreshed = refreshToken(session)) {
-                        is AppResult.Success -> {
-                            when (val second = action(refreshed.data)) {
-                                is AppResult.Success -> AppResult.Success(refreshed.data to second.data)
-                                is AppResult.Failure -> second
-                            }
-                        }
-
-                        is AppResult.Failure -> refreshed
-                    }
-                }
-            }
         }
     }
 
@@ -298,29 +250,31 @@ class AuthRepository(
         )
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
-    private fun resolveAccessTokenExpiry(
-        accessToken: String,
-        expiresIn: Int?,
-    ): Long? {
-        if (expiresIn != null && expiresIn > 0) {
-            return currentEpochSeconds() + expiresIn.toLong()
-        }
-        val payload = accessToken.split('.').getOrNull(1) ?: return null
-        val padded = payload
-            .replace('-', '+')
-            .replace('_', '/')
-            .let {
-                val padLen = (4 - (it.length % 4)) % 4
-                it + "=".repeat(padLen)
+    companion object {
+        @OptIn(ExperimentalEncodingApi::class)
+        internal fun resolveAccessTokenExpiry(
+            accessToken: String,
+            expiresIn: Int?,
+        ): Long? {
+            if (expiresIn != null && expiresIn > 0) {
+                return currentEpochSeconds() + expiresIn.toLong()
             }
-        val decodedJson = runCatching { Base64.decode(padded).decodeToString() }.getOrNull() ?: return null
-        return runCatching {
-            Json.parseToJsonElement(decodedJson)
-                .jsonObject["exp"]
-                ?.jsonPrimitive
-                ?.content
-                ?.toLong()
-        }.getOrNull()
+            val payload = accessToken.split('.').getOrNull(1) ?: return null
+            val padded = payload
+                .replace('-', '+')
+                .replace('_', '/')
+                .let {
+                    val padLen = (4 - (it.length % 4)) % 4
+                    it + "=".repeat(padLen)
+                }
+            val decodedJson = runCatching { Base64.decode(padded).decodeToString() }.getOrNull() ?: return null
+            return runCatching {
+                Json.parseToJsonElement(decodedJson)
+                    .jsonObject["exp"]
+                    ?.jsonPrimitive
+                    ?.content
+                    ?.toLong()
+            }.getOrNull()
+        }
     }
 }

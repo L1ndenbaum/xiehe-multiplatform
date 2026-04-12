@@ -2,11 +2,11 @@ package com.xiehe.spine.data.image
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.AuthenticatedApiClient
 import com.xiehe.spine.data.ApiClient
 import com.xiehe.spine.data.ApiEnvelope
 import com.xiehe.spine.data.ApiErrorEnvelope
 import com.xiehe.spine.data.patient.PatientDetail
-import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.cache.ImageCacheRepository
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -26,7 +26,7 @@ import kotlin.collections.orEmpty
 
 class ImageFileRepository(
     private val apiClient: ApiClient,
-    private val authRepository: AuthRepository,
+    private val authenticatedApiClient: AuthenticatedApiClient,
     private val cacheRepository: ImageCacheRepository,
 ) {
     private val fileLocks = mutableMapOf<Int, Mutex>()
@@ -39,8 +39,8 @@ class ImageFileRepository(
 
     suspend fun loadImageFiles(session: UserSession): AppResult<Pair<UserSession, ImageFilePageData>> {
         return when (
-            val result = withRefresh(session) { activeSession ->
-                apiClient.get<ImageFilePageData>(path = "/image-files", accessToken = activeSession.accessToken)
+            val result = authenticatedApiClient.call(session) { accessToken ->
+                apiClient.get<ImageFilePageData>(path = "/image-files", accessToken = accessToken)
             }
         ) {
             is AppResult.Success -> {
@@ -109,8 +109,8 @@ class ImageFileRepository(
         while (page <= totalPages) {
             val path = "/image-files?page=$page&page_size=50"
             when (
-                val result = withRefresh(activeSession) { candidate ->
-                    apiClient.get<ImageFilePageData>(path = path, accessToken = candidate.accessToken)
+                val result = authenticatedApiClient.call(activeSession) { accessToken ->
+                    apiClient.get<ImageFilePageData>(path = path, accessToken = accessToken)
                 }
             ) {
                 is AppResult.Success -> {
@@ -180,8 +180,8 @@ class ImageFileRepository(
         while (page <= totalPages) {
             val path = "/image-files/patient/$patientId?page=$page&page_size=50"
             when (
-                val result = withRefresh(activeSession) { candidate ->
-                    apiClient.get<ImageFilePageData>(path = path, accessToken = candidate.accessToken)
+                val result = authenticatedApiClient.call(activeSession) { accessToken ->
+                    apiClient.get<ImageFilePageData>(path = path, accessToken = accessToken)
                 }
             ) {
                 is AppResult.Success -> {
@@ -203,10 +203,10 @@ class ImageFileRepository(
         session: UserSession,
         fileId: Int,
     ): AppResult<Pair<UserSession, ImageFileSummary>> {
-        return withRefresh(session) { activeSession ->
+        return authenticatedApiClient.call(session) { accessToken ->
             apiClient.get(
                 path = "/image-files/$fileId",
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -214,10 +214,10 @@ class ImageFileRepository(
     suspend fun getImageStatsSummary(
         session: UserSession,
     ): AppResult<Pair<UserSession, ImageStatsSummary>> {
-        return withRefresh(session) { activeSession ->
+        return authenticatedApiClient.call(session) { accessToken ->
             apiClient.get(
                 path = "/image-files/stats/summary",
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -242,11 +242,11 @@ class ImageFileRepository(
             }
 
             when (
-                val network = withRefresh(session) { activeSession ->
+                val network = authenticatedApiClient.call(session) { accessToken ->
                     val requestUrl = "${apiClient.baseUrl}/image-files/$fileId/download"
                     try {
                         val bytes = apiClient.httpClient.get(requestUrl) {
-                            header(HttpHeaders.Authorization, "Bearer ${activeSession.accessToken}")
+                            header(HttpHeaders.Authorization, "Bearer $accessToken")
                         }.body<ByteArray>()
                         AppResult.Success(bytes)
                     } catch (e: ClientRequestException) {
@@ -305,11 +305,11 @@ class ImageFileRepository(
         description: String? = null,
     ): AppResult<Pair<UserSession, UploadSingleImageData>> {
         val safeDescription = description?.trim().orEmpty().ifBlank { examType.trim() }
-        return withRefresh(session) { activeSession ->
+        return authenticatedApiClient.call(session) { accessToken ->
             val requestUrl = "${apiClient.baseUrl}/upload/single"
             try {
                 val envelope = apiClient.httpClient.post(requestUrl) {
-                    header(HttpHeaders.Authorization, "Bearer ${activeSession.accessToken}")
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
                     setBody(
                         MultiPartFormDataContent(
                             formData {
@@ -365,10 +365,10 @@ class ImageFileRepository(
         imageId: Int,
     ): AppResult<Pair<UserSession, String>> {
         return when (
-            val result = withRefresh(session) { activeSession ->
+            val result = authenticatedApiClient.call(session) { accessToken ->
                 apiClient.deleteForMessage(
                     path = "/image-files/$imageId",
-                    accessToken = activeSession.accessToken,
+                    accessToken = accessToken,
                 )
             }
         ) {
@@ -388,11 +388,11 @@ class ImageFileRepository(
         fileId: Int,
         annotation: String,
     ): AppResult<Pair<UserSession, ImageFileSummary>> {
-        return withRefresh(session) { activeSession ->
+        return authenticatedApiClient.call(session) { accessToken ->
             apiClient.patch<ImageFileSummary, UpdateAnnotationRequest>(
                 path = "/image-files/$fileId/annotation",
                 body = UpdateAnnotationRequest(annotation = annotation),
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             )
         }
     }
@@ -425,10 +425,10 @@ class ImageFileRepository(
         var activeSession = session
         val resolved = linkedMapOf<Int, String>()
         patientIds.forEach { patientId ->
-            val result = withRefresh(activeSession) { candidate ->
+            val result = authenticatedApiClient.call(activeSession) { accessToken ->
                 apiClient.get<PatientDetail>(
                     path = "/patients/$patientId",
-                    accessToken = candidate.accessToken,
+                    accessToken = accessToken,
                 )
             }
             if (result is AppResult.Success) {
@@ -478,28 +478,4 @@ class ImageFileRepository(
         }
     }
 
-    private suspend inline fun <reified T> withRefresh(
-        session: UserSession,
-        crossinline action: suspend (UserSession) -> AppResult<T>,
-    ): AppResult<Pair<UserSession, T>> {
-        return when (val first = action(session)) {
-            is AppResult.Success -> AppResult.Success(session to first.data)
-            is AppResult.Failure -> {
-                if (!first.isUnauthorized) {
-                    first
-                } else {
-                    when (val refreshed = authRepository.refreshToken(session)) {
-                        is AppResult.Success -> {
-                            when (val second = action(refreshed.data)) {
-                                is AppResult.Success -> AppResult.Success(refreshed.data to second.data)
-                                is AppResult.Failure -> second
-                            }
-                        }
-
-                        is AppResult.Failure -> refreshed
-                    }
-                }
-            }
-        }
-    }
 }

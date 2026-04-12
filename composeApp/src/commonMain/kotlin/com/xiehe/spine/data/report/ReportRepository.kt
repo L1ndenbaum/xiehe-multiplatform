@@ -2,12 +2,10 @@ package com.xiehe.spine.data.report
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ApiClient
-import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.AuthenticatedApiClient
 
 class ReportRepository(
-    private val apiClient: ApiClient,
-    private val authRepository: AuthRepository,
+    private val authenticatedApiClient: AuthenticatedApiClient,
 ) {
     suspend fun loadReports(
         session: UserSession,
@@ -33,8 +31,8 @@ class ReportRepository(
                 append(params.joinToString("&"))
             }
         }
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = path, accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(path = path, accessToken = accessToken)
         }
     }
 
@@ -42,8 +40,8 @@ class ReportRepository(
         session: UserSession,
         reportId: Int,
     ): AppResult<Pair<UserSession, ReportDetail>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = "/reports/$reportId", accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(path = "/reports/$reportId", accessToken = accessToken)
         }
     }
 
@@ -51,8 +49,8 @@ class ReportRepository(
         session: UserSession,
         request: ReportCreateRequest,
     ): AppResult<Pair<UserSession, ReportDetail>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.post(path = "/reports/", body = request, accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.post(path = "/reports/", body = request, accessToken = accessToken)
         }
     }
 
@@ -61,8 +59,12 @@ class ReportRepository(
         reportId: Int,
         request: ReportUpdateRequest,
     ): AppResult<Pair<UserSession, ReportDetail>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.put(path = "/reports/$reportId", body = request, accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.put(
+                path = "/reports/$reportId",
+                body = request,
+                accessToken = accessToken,
+            )
         }
     }
 
@@ -70,33 +72,11 @@ class ReportRepository(
         session: UserSession,
         reportId: Int,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.deleteForMessage(path = "/reports/$reportId", accessToken = activeSession.accessToken)
-        }
-    }
-
-    private suspend inline fun <reified T> withRefresh(
-        session: UserSession,
-        crossinline action: suspend (UserSession) -> AppResult<T>,
-    ): AppResult<Pair<UserSession, T>> {
-        return when (val first = action(session)) {
-            is AppResult.Success -> AppResult.Success(session to first.data)
-            is AppResult.Failure -> {
-                if (!first.isUnauthorized) {
-                    first
-                } else {
-                    when (val refreshed = authRepository.refreshToken(session)) {
-                        is AppResult.Success -> {
-                            when (val second = action(refreshed.data)) {
-                                is AppResult.Success -> AppResult.Success(refreshed.data to second.data)
-                                is AppResult.Failure -> second
-                            }
-                        }
-
-                        is AppResult.Failure -> refreshed
-                    }
-                }
-            }
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.deleteForMessage(
+                path = "/reports/$reportId",
+                accessToken = accessToken,
+            )
         }
     }
 }

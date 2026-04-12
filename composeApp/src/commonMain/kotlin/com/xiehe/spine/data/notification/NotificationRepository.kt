@@ -2,12 +2,10 @@ package com.xiehe.spine.data.notification
 
 import com.xiehe.spine.core.model.AppResult
 import com.xiehe.spine.core.store.UserSession
-import com.xiehe.spine.data.ApiClient
-import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.AuthenticatedApiClient
 
 class NotificationRepository(
-    private val apiClient: ApiClient,
-    private val authRepository: AuthRepository,
+    private val authenticatedApiClient: AuthenticatedApiClient,
 ) {
     suspend fun loadMessages(
         session: UserSession,
@@ -30,24 +28,30 @@ class NotificationRepository(
                 append(it)
             }
         }
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = path, accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(path = path, accessToken = accessToken)
         }
     }
 
     suspend fun loadStats(
         session: UserSession,
     ): AppResult<Pair<UserSession, NotificationStats>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = "/notifications/messages/stats", accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(
+                path = "/notifications/messages/stats",
+                accessToken = accessToken,
+            )
         }
     }
 
     suspend fun getSettings(
         session: UserSession,
     ): AppResult<Pair<UserSession, NotificationSettings>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.get(path = "/notifications/settings", accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.get(
+                path = "/notifications/settings",
+                accessToken = accessToken,
+            )
         }
     }
 
@@ -55,8 +59,12 @@ class NotificationRepository(
         session: UserSession,
         request: NotificationSettingsUpdateRequest,
     ): AppResult<Pair<UserSession, NotificationSettings>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.put(path = "/notifications/settings", body = request, accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.put(
+                path = "/notifications/settings",
+                body = request,
+                accessToken = accessToken,
+            )
         }
     }
 
@@ -64,11 +72,11 @@ class NotificationRepository(
         session: UserSession,
         messageId: Int,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.put<MarkMessageReadData, Map<String, String>>(
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.put<MarkMessageReadData, Map<String, String>>(
                 path = "/notifications/messages/$messageId/read",
                 body = emptyMap(),
-                accessToken = activeSession.accessToken,
+                accessToken = accessToken,
             ).let { result ->
                 when (result) {
                     is AppResult.Success -> AppResult.Success("消息已标记为已读")
@@ -82,8 +90,11 @@ class NotificationRepository(
         session: UserSession,
         messageId: Int,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.deleteForMessage(path = "/notifications/messages/$messageId", accessToken = activeSession.accessToken)
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.deleteForMessage(
+                path = "/notifications/messages/$messageId",
+                accessToken = accessToken,
+            )
         }
     }
 
@@ -91,33 +102,12 @@ class NotificationRepository(
         session: UserSession,
         request: NotificationMessageCreateRequest,
     ): AppResult<Pair<UserSession, String>> {
-        return withRefresh(session) { activeSession ->
-            apiClient.postForMessage(path = "/notifications/messages", body = request, accessToken = activeSession.accessToken)
-        }
-    }
-
-    private suspend inline fun <reified T> withRefresh(
-        session: UserSession,
-        crossinline action: suspend (UserSession) -> AppResult<T>,
-    ): AppResult<Pair<UserSession, T>> {
-        return when (val first = action(session)) {
-            is AppResult.Success -> AppResult.Success(session to first.data)
-            is AppResult.Failure -> {
-                if (!first.isUnauthorized) {
-                    first
-                } else {
-                    when (val refreshed = authRepository.refreshToken(session)) {
-                        is AppResult.Success -> {
-                            when (val second = action(refreshed.data)) {
-                                is AppResult.Success -> AppResult.Success(refreshed.data to second.data)
-                                is AppResult.Failure -> second
-                            }
-                        }
-
-                        is AppResult.Failure -> refreshed
-                    }
-                }
-            }
+        return authenticatedApiClient.call(session) { accessToken ->
+            authenticatedApiClient.apiClient.postForMessage(
+                path = "/notifications/messages",
+                body = request,
+                accessToken = accessToken,
+            )
         }
     }
 }

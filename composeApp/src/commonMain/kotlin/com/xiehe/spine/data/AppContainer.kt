@@ -6,6 +6,7 @@ import com.xiehe.spine.core.store.SessionStore
 import com.xiehe.spine.core.store.ThemePreferenceRepository
 import com.xiehe.spine.data.ai.AiInferenceRepository
 import com.xiehe.spine.data.auth.AuthRepository
+import com.xiehe.spine.data.auth.SessionRefresher
 import com.xiehe.spine.data.cache.ImageBinaryStore
 import com.xiehe.spine.data.cache.ImageCacheRepository
 import com.xiehe.spine.data.cache.InMemoryImageBinaryStore
@@ -62,7 +63,21 @@ class AppContainer private constructor(
                 enableDiagnostics = enableNetworkDiagnostics,
             )
             val sessionStore = SessionStore(store = store, json = json)
-            val authRepository = AuthRepository(apiClient = instrumentedApiClient, sessionStore = sessionStore)
+            val sessionRefresher = SessionRefresher(
+                apiClient = instrumentedApiClient,
+                sessionStore = sessionStore,
+            )
+            val authenticatedApiClient = AuthenticatedApiClient(
+                apiClient = instrumentedApiClient,
+                sessionStore = sessionStore,
+                sessionRefresher = sessionRefresher,
+            )
+            val authRepository = AuthRepository(
+                apiClient = instrumentedApiClient,
+                sessionStore = sessionStore,
+                sessionRefresher = sessionRefresher,
+                authenticatedApiClient = authenticatedApiClient,
+            )
             val imageCacheRepository = ImageCacheRepository(
                 store = store,
                 json = json,
@@ -71,35 +86,29 @@ class AppContainer private constructor(
             return AppContainer(
                 authRepository = authRepository,
                 dashboardRepository = DashboardRepository(
-                    apiClient = instrumentedApiClient,
-                    authRepository = authRepository
+                    authenticatedApiClient = authenticatedApiClient,
                 ),
                 patientRepository = PatientRepository(
-                    apiClient = instrumentedApiClient,
-                    authRepository = authRepository,
+                    authenticatedApiClient = authenticatedApiClient,
                     imageCacheRepository = imageCacheRepository,
                 ),
                 imageFileRepository = ImageFileRepository(
                     apiClient = instrumentedApiClient,
-                    authRepository = authRepository,
+                    authenticatedApiClient = authenticatedApiClient,
                     cacheRepository = imageCacheRepository,
                 ),
                 imageCacheRepository = imageCacheRepository,
                 notificationRepository = NotificationRepository(
-                    apiClient = instrumentedApiClient,
-                    authRepository = authRepository
+                    authenticatedApiClient = authenticatedApiClient,
                 ),
                 organizationRepository = OrganizationRepository(
-                    apiClient = instrumentedApiClient,
-                    authRepository = authRepository,
+                    authenticatedApiClient = authenticatedApiClient,
                 ),
                 measurementRepository = MeasurementRepository(
-                    apiClient = instrumentedApiClient,
-                    authRepository = authRepository
+                    authenticatedApiClient = authenticatedApiClient,
                 ),
                 reportRepository = ReportRepository(
-                    apiClient = instrumentedApiClient,
-                    authRepository = authRepository,
+                    authenticatedApiClient = authenticatedApiClient,
                 ),
                 aiInferenceRepository = AiInferenceRepository(httpClient = sharedHttpClient),
                 themeRepository = ThemePreferenceRepository(store = store),
