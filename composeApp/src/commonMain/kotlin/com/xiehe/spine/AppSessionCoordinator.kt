@@ -18,6 +18,7 @@ import com.xiehe.spine.core.store.UserSession
 import com.xiehe.spine.data.AppContainer
 import com.xiehe.spine.ui.components.feedback.shared.FloatingToast
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.components.overlay.WelcomeInstructionOverlay
 import com.xiehe.spine.ui.viewmodel.auth.LoginViewModel
 import com.xiehe.spine.ui.viewmodel.auth.RegisterViewModel
 import com.xiehe.spine.ui.viewmodel.profile.AppearanceViewModel
@@ -45,6 +46,7 @@ internal fun AppSessionCoordinator(
     var sessionExpiredMessage by remember { mutableStateOf<String?>(null) }
     var handlingSessionExpiry by remember { mutableStateOf(false) }
     var previousUserId by remember { mutableStateOf(session?.userId) }
+    var welcomeInstructionVisible by remember { mutableStateOf(false) }
 
     val onTabSelected: (Int) -> Unit = remember {
         { tab ->
@@ -79,6 +81,7 @@ internal fun AppSessionCoordinator(
         route = null
         renderedOverlayRoute = null
         overlayVisible = false
+        welcomeInstructionVisible = false
         selectedTab = 0
         authRoute = AuthRoute.LOGIN
         dashboardBootstrap = DashboardBootstrapState()
@@ -100,6 +103,7 @@ internal fun AppSessionCoordinator(
                 route = null
                 renderedOverlayRoute = null
                 overlayVisible = false
+                welcomeInstructionVisible = false
                 authRoute = AuthRoute.LOGIN
                 dashboardBootstrap = DashboardBootstrapState()
             },
@@ -119,6 +123,7 @@ internal fun AppSessionCoordinator(
             container.imageFileRepository.clearMemoryCacheForUser(previous)
         }
         previousUserId = activeSession.userId
+        welcomeInstructionVisible = container.welcomeInstructionRepository.shouldShow()
     }
 
     PlatformBackHandler(enabled = renderedOverlayRoute != null) {
@@ -249,6 +254,16 @@ internal fun AppSessionCoordinator(
                     if (route == null) {
                         renderedOverlayRoute = null
                     }
+                },
+            )
+        }
+
+        if (currentRoute == null) {
+            WelcomeInstructionOverlay(
+                visible = welcomeInstructionVisible,
+                onFinish = {
+                    container.welcomeInstructionRepository.markCompleted()
+                    welcomeInstructionVisible = false
                 },
             )
         }

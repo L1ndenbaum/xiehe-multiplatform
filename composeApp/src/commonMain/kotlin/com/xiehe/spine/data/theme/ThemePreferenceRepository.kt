@@ -1,5 +1,6 @@
-package com.xiehe.spine.core.store
+package com.xiehe.spine.data.theme
 
+import com.xiehe.spine.core.store.KeyValueStore
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.ThemeMode
 import com.xiehe.spine.ui.theme.ThemePreference

@@ -2,8 +2,8 @@ package com.xiehe.spine
 
 import com.xiehe.spine.core.store.InMemoryKeyValueStore
 import com.xiehe.spine.core.store.SessionStore
-import com.xiehe.spine.core.store.ThemePreferenceRepository
 import com.xiehe.spine.core.store.UserSession
+import com.xiehe.spine.data.theme.ThemePreferenceRepository
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.ThemeMode
 import kotlinx.serialization.json.Json

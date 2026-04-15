@@ -1,6 +1,6 @@
 package com.xiehe.spine.ui.viewmodel.profile
 
-import com.xiehe.spine.core.store.ThemePreferenceRepository
+import com.xiehe.spine.data.theme.ThemePreferenceRepository
 import com.xiehe.spine.ui.theme.AppThemeBrandColor
 import com.xiehe.spine.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.StateFlow

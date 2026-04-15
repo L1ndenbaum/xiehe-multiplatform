@@ -3,7 +3,6 @@ package com.xiehe.spine.data
 import com.xiehe.spine.core.store.InMemoryKeyValueStore
 import com.xiehe.spine.core.store.KeyValueStore
 import com.xiehe.spine.core.store.SessionStore
-import com.xiehe.spine.core.store.ThemePreferenceRepository
 import com.xiehe.spine.data.ai.AiInferenceRepository
 import com.xiehe.spine.data.auth.AuthRepository
 import com.xiehe.spine.data.auth.SessionRefresher
@@ -17,6 +16,8 @@ import com.xiehe.spine.data.notification.NotificationRepository
 import com.xiehe.spine.data.organization.OrganizationRepository
 import com.xiehe.spine.data.patient.PatientRepository
 import com.xiehe.spine.data.report.ReportRepository
+import com.xiehe.spine.data.theme.ThemePreferenceRepository
+import com.xiehe.spine.data.welcomeInstruction.WelcomeInstructionRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -39,6 +40,7 @@ class AppContainer private constructor(
     val reportRepository: ReportRepository,
     val aiInferenceRepository: AiInferenceRepository,
     val themeRepository: ThemePreferenceRepository,
+    val welcomeInstructionRepository: WelcomeInstructionRepository,
 ) {
     companion object {
         fun create(
@@ -112,6 +114,7 @@ class AppContainer private constructor(
                 ),
                 aiInferenceRepository = AiInferenceRepository(httpClient = sharedHttpClient),
                 themeRepository = ThemePreferenceRepository(store = store),
+                welcomeInstructionRepository = WelcomeInstructionRepository(store = store),
             )
         }
 
