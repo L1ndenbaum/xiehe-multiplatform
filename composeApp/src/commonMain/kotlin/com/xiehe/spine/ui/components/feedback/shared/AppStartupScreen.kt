@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.motion.AppMotion
 import com.xiehe.spine.ui.theme.SpineTheme
+import com.xiehe.spine.ui.components.text.shared.Text
 
 @Composable
 fun AppStartupScreen(
