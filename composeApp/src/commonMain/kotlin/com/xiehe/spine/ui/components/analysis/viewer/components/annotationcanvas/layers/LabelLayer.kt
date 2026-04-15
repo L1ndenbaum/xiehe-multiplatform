@@ -1,16 +1,13 @@
 package com.xiehe.spine.ui.components.analysis.viewer.components.annotationcanvas.layers
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xiehe.spine.data.measurement.MeasurementPoint
 import com.xiehe.spine.ui.components.analysis.viewer.AnnotationMeasurement
@@ -58,26 +55,22 @@ fun LabelLayer(
             }
 
             if (shouldShowMetricTag(measurement)) {
+                val text = formatMeasurementTag(measurement)
                 val baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy)
                 val tagPosition = calculateSmartTagPosition(baseAnchor, occupiedLabelPositions)
                 occupiedLabelPositions += tagPosition
-                Text(
-                    text = formatMeasurementTag(measurement),
-                    style = SpineTheme.typography.caption.copy(fontSize = 7.sp),
+                val fontSize = 11f
+                val estimatedHalfWidth = (text.length * fontSize * 0.28f).roundToInt()
+                val estimatedHalfHeight = (fontSize * 0.7f).roundToInt()
+                val textOffset = IntOffset(
+                    x = tagPosition.x.roundToInt() - estimatedHalfWidth,
+                    y = tagPosition.y.roundToInt() - estimatedHalfHeight,
+                )
+                OutlinedMeasurementTag(
+                    text = text,
+                    fontSize = fontSize,
                     color = resolveAnnotationColor(measurement, toolColors),
-                    modifier = Modifier
-                        .offset {
-                            IntOffset(
-                                x = (tagPosition.x + 4f).roundToInt(),
-                                y = (tagPosition.y - 12f).roundToInt(),
-                            )
-                        }
-                        .background(
-                            color = toolColors.labelBackground,
-                            shape = RoundedCornerShape(5.dp),
-                        )
-                        .padding(horizontal = 5.dp, vertical = 2.dp),
-                    maxLines = 1,
+                    offset = textOffset,
                 )
             }
         }
@@ -99,4 +92,46 @@ fun LabelLayer(
             )
         }
     }
+}
+
+@Composable
+private fun OutlinedMeasurementTag(
+    text: String,
+    fontSize: Float,
+    color: Color,
+    offset: IntOffset,
+) {
+    val outlineOffsets = listOf(
+        IntOffset(-1, -1),
+        IntOffset(-1, 0),
+        IntOffset(-1, 1),
+        IntOffset(0, -1),
+        IntOffset(0, 1),
+        IntOffset(1, -1),
+        IntOffset(1, 0),
+        IntOffset(1, 1),
+    )
+
+    outlineOffsets.forEach { outlineOffset ->
+        Text(
+            text = text,
+            style = SpineTheme.typography.caption.copy(fontSize = fontSize.sp),
+            color = Color.Black,
+            modifier = Modifier.offset {
+                IntOffset(
+                    x = offset.x + outlineOffset.x,
+                    y = offset.y + outlineOffset.y,
+                )
+            },
+            maxLines = 1,
+        )
+    }
+
+    Text(
+        text = text,
+        style = SpineTheme.typography.caption.copy(fontSize = fontSize.sp),
+        color = color,
+        modifier = Modifier.offset { offset },
+        maxLines = 1,
+    )
 }

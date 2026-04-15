@@ -4,6 +4,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import com.xiehe.spine.ui.components.analysis.viewer.AnnotationMeasurement
 import com.xiehe.spine.ui.components.analysis.viewer.AnnotationMeasurementKind
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.AnnotationTagAnchorStyle
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.AnnotationToolColorKey
+import com.xiehe.spine.ui.components.analysis.viewer.catalog.getAnnotationToolByMeasurementType
 import com.xiehe.spine.ui.theme.SpineAnnotationToolColors
 import kotlin.math.hypot
 
@@ -83,7 +86,8 @@ fun resolveAnnotationColor(
         return colors.detectedPoint
     }
 
-    return colors.colorForType(measurement.type)
+    val tool = getAnnotationToolByMeasurementType(measurement.type)
+    return tool?.let { colors.resolveColor(it.colorKey) } ?: colors.length
 }
 
 fun valueColorFor(
@@ -99,7 +103,8 @@ fun shouldShowMetricTag(measurement: AnnotationMeasurement): Boolean {
     return measurement.points.size >= 2 || measurement.type == "椎体中心"
 }
 
-fun formatMeasurementTag(measurement: AnnotationMeasurement): String = "${measurement.type}:${measurement.value}"
+fun formatMeasurementTag(measurement: AnnotationMeasurement): String =
+    "${measurement.type}: ${formatDisplayValue(measurement.value)}"
 
 fun resolveMeasurementTagAnchor(
     measurement: AnnotationMeasurement,
@@ -109,39 +114,16 @@ fun resolveMeasurementTagAnchor(
     val points = measurement.points.map { Offset((it.x * sx).toFloat(), (it.y * sy).toFloat()) }
     if (points.isEmpty()) return Offset.Zero
 
-    return when (resolveAnnotationRenderType(measurement.type)) {
-        AnnotationRenderType.LINE_WITH_HORIZONTAL_ARC,
-        AnnotationRenderType.SINGLE_LINE_WITH_HORIZONTAL,
-        AnnotationRenderType.SACRAL_WITH_PERPENDICULAR,
-        AnnotationRenderType.SS,
-        AnnotationRenderType.SIMPLE_LINE,
-        AnnotationRenderType.SINGLE_HORIZONTAL_LINE,
-        AnnotationRenderType.SINGLE_VERTICAL_LINE,
-        -> midpoint(points.first(), points.last()).copy(
+    val tool = getAnnotationToolByMeasurementType(measurement.type)
+    return when (tool?.tagAnchorStyle) {
+        AnnotationTagAnchorStyle.MIDPOINT_ABOVE -> midpoint(points.first(), points.last()).copy(
             y = minOf(points.first().y, points.last().y) - 20f,
         )
 
-        AnnotationRenderType.TWO_DASHED_LINES -> average(points).copy(y = points.minOf { it.y } - 24f)
-
-        AnnotationRenderType.VERTICAL_GUIDE_LINES,
-        AnnotationRenderType.TTS,
-        AnnotationRenderType.C7_OFFSET,
-        AnnotationRenderType.SVA,
-        -> average(points).copy(y = points.minOf { it.y } - 18f)
-
-        AnnotationRenderType.PI,
-        AnnotationRenderType.PT,
-        AnnotationRenderType.TPA,
-        AnnotationRenderType.THREE_POINT_ANGLE,
-        AnnotationRenderType.CIRCLE,
-        AnnotationRenderType.ELLIPSE,
-        AnnotationRenderType.BOX,
-        AnnotationRenderType.ARROW,
-        AnnotationRenderType.POLYGON,
-        AnnotationRenderType.VERTEBRA_CENTER,
-        -> average(points)
-
-        AnnotationRenderType.HORIZONTAL_GUIDE_LINES -> average(points).copy(y = points.minOf { it.y } - 18f)
+        AnnotationTagAnchorStyle.AVERAGE_ABOVE -> average(points).copy(y = points.minOf { it.y } - 18f)
+        AnnotationTagAnchorStyle.AVERAGE_ABOVE_COMPACT -> average(points).copy(y = points.minOf { it.y } - 24f)
+        AnnotationTagAnchorStyle.CENTER -> average(points)
+        null -> average(points)
     }
 }
 
@@ -178,46 +160,50 @@ fun calculateSmartTagPosition(
         ?: (basePosition + Offset(0f, -verticalOffset * 2.5f))
 }
 
-private fun SpineAnnotationToolColors.colorForType(type: String): Color = when (type) {
-    "T1 Tilt" -> t1Tilt
-    "Cobb" -> cobb
-    "CA" -> ca
-    "Pelvic" -> pelvic
-    "Sacral" -> sacral
-    "AVT" -> avt
-    "TTS" -> ts
-    "LLD" -> lld
-    "TS(Trunk Shift)" -> c7Offset
-    "T1 Slope" -> t1Slope
-    "C2-C7 CL" -> cl
-    "TK T2-T5" -> tkT2T5
-    "TK T5-T12" -> tkT5T12
-    "T10-L2" -> t10L2
-    "LL L1-S1" -> llL1S1
-    "LL L1-L4" -> llL1L4
-    "LL L4-S1" -> llL4S1
-    "TPA" -> tpa
-    "SVA" -> sva
-    "PI" -> pi
-    "PT" -> pt
-    "SS" -> ss
-    "距离标注",
-    "长度测量",
-    -> auxiliaryLength
+private fun SpineAnnotationToolColors.resolveColor(colorKey: AnnotationToolColorKey): Color = when (colorKey) {
+    AnnotationToolColorKey.NONE -> length
+    AnnotationToolColorKey.T1_TILT -> t1Tilt
+    AnnotationToolColorKey.COBB -> cobb
+    AnnotationToolColorKey.CA -> ca
+    AnnotationToolColorKey.PELVIC -> pelvic
+    AnnotationToolColorKey.SACRAL -> sacral
+    AnnotationToolColorKey.AVT -> avt
+    AnnotationToolColorKey.TS -> ts
+    AnnotationToolColorKey.LLD -> lld
+    AnnotationToolColorKey.C7_OFFSET -> c7Offset
+    AnnotationToolColorKey.T1_SLOPE -> t1Slope
+    AnnotationToolColorKey.CL -> cl
+    AnnotationToolColorKey.TK_T2_T5 -> tkT2T5
+    AnnotationToolColorKey.TK_T5_T12 -> tkT5T12
+    AnnotationToolColorKey.T10_L2 -> t10L2
+    AnnotationToolColorKey.LL_L1_S1 -> llL1S1
+    AnnotationToolColorKey.LL_L1_L4 -> llL1L4
+    AnnotationToolColorKey.LL_L4_S1 -> llL4S1
+    AnnotationToolColorKey.TPA -> tpa
+    AnnotationToolColorKey.SVA -> sva
+    AnnotationToolColorKey.PI -> pi
+    AnnotationToolColorKey.PT -> pt
+    AnnotationToolColorKey.SS -> ss
+    AnnotationToolColorKey.LENGTH -> length
+    AnnotationToolColorKey.ANGLE -> angle
+    AnnotationToolColorKey.AUXILIARY_CIRCLE -> auxiliaryCircle
+    AnnotationToolColorKey.AUXILIARY_ELLIPSE -> auxiliaryEllipse
+    AnnotationToolColorKey.AUXILIARY_BOX -> auxiliaryBox
+    AnnotationToolColorKey.AUXILIARY_ARROW -> auxiliaryArrow
+    AnnotationToolColorKey.AUXILIARY_POLYGON -> auxiliaryPolygon
+    AnnotationToolColorKey.VERTEBRA_CENTER -> vertebraCenter
+    AnnotationToolColorKey.AUXILIARY_LENGTH -> auxiliaryLength
+    AnnotationToolColorKey.AUXILIARY_ANGLE -> auxiliaryAngle
+    AnnotationToolColorKey.AUXILIARY_HORIZONTAL_LINE -> auxiliaryHorizontalLine
+    AnnotationToolColorKey.AUXILIARY_VERTICAL_LINE -> auxiliaryVerticalLine
+}
 
-    "角度标注",
-    "角度测量",
-    -> auxiliaryAngle
-
-    "辅助水平线" -> auxiliaryHorizontalLine
-    "辅助垂直线" -> auxiliaryVerticalLine
-    "Auxiliary Circle" -> auxiliaryCircle
-    "Auxiliary Ellipse" -> auxiliaryEllipse
-    "Auxiliary Box" -> auxiliaryBox
-    "Arrow" -> auxiliaryArrow
-    "Polygons" -> auxiliaryPolygon
-    "椎体中心" -> vertebraCenter
-    else -> length
+private fun formatDisplayValue(value: String): String {
+    val match = Regex("^(-?\\d+\\.?\\d*)\\s*(.*)$").matchEntire(value) ?: return value
+    val numericValue = match.groupValues[1].toDoubleOrNull() ?: return value
+    val unit = match.groupValues[2]
+    val displayValue = kotlin.math.round(kotlin.math.abs(numericValue)).toInt()
+    return "$displayValue$unit"
 }
 
 private fun midpoint(first: Offset, second: Offset): Offset = Offset(
