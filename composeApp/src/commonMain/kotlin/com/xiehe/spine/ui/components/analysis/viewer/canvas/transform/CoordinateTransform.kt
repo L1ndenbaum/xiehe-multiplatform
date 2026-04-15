@@ -28,10 +28,13 @@ fun screenToImagePoint(
     containerHeightPx: Float,
     panOffset: Offset,
     totalScale: Float,
+    baseImageWidthPx: Float,
+    baseImageHeightPx: Float,
 ): MeasurementPoint? {
-    val imageWidthPx = containerWidthPx
-    val fitScale = imageWidthPx / bitmap.width.toFloat()
-    val imageHeightPx = bitmap.height * fitScale
+    if (baseImageWidthPx <= 0f || baseImageHeightPx <= 0f) return null
+
+    val imageWidthPx = baseImageWidthPx
+    val imageHeightPx = baseImageHeightPx
     val centerX = containerWidthPx / 2f
     val centerY = containerHeightPx / 2f
     val topLeftX = centerX - imageWidthPx / 2f

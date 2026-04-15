@@ -44,6 +44,48 @@ data class SpineExamCategoryColors(
 )
 
 @Immutable
+data class SpineAnnotationToolColors(
+    val t1Tilt: Color,
+    val cobb: Color,
+    val ca: Color,
+    val pelvic: Color,
+    val sacral: Color,
+    val avt: Color,
+    val ts: Color,
+    val lld: Color,
+    val c7Offset: Color,
+    val t1Slope: Color,
+    val cl: Color,
+    val tkT2T5: Color,
+    val tkT5T12: Color,
+    val t10L2: Color,
+    val llL1S1: Color,
+    val llL1L4: Color,
+    val llL4S1: Color,
+    val tpa: Color,
+    val sva: Color,
+    val pi: Color,
+    val pt: Color,
+    val ss: Color,
+    val length: Color,
+    val angle: Color,
+    val auxiliaryCircle: Color,
+    val auxiliaryEllipse: Color,
+    val auxiliaryBox: Color,
+    val auxiliaryArrow: Color,
+    val auxiliaryPolygon: Color,
+    val vertebraCenter: Color,
+    val auxiliaryLength: Color,
+    val auxiliaryAngle: Color,
+    val auxiliaryHorizontalLine: Color,
+    val auxiliaryVerticalLine: Color,
+    val detectedPoint: Color,
+    val helperGuide: Color,
+    val draft: Color,
+    val labelBackground: Color,
+)
+
+@Immutable
 data class SpineAppColors(
     val isDark: Boolean,
     val primary: Color,
@@ -65,6 +107,7 @@ data class SpineAppColors(
     val info: Color,
     val tabInactive: Color,
     val examCategories: SpineExamCategoryColors,
+    val annotationTools: SpineAnnotationToolColors,
 )
 
 fun SpineExamCategoryColors.resolve(examType: String): SpineExamCategoryStyle = when (examType.trim()) {

@@ -2,6 +2,47 @@ package com.xiehe.spine.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+private val annotationToolPalette = SpineAnnotationToolColors(
+    t1Tilt = Color(0xFF8B5CF6),
+    cobb = Color(0xFFF59E0B),
+    ca = Color(0xFF10B981),
+    pelvic = Color(0xFFEC4899),
+    sacral = Color(0xFFF43F5E),
+    avt = Color(0xFF059669),
+    ts = Color(0xFF84CC16),
+    lld = Color(0xFFF97316),
+    c7Offset = Color(0xFF06B6D4),
+    t1Slope = Color(0xFFA855F7),
+    cl = Color(0xFF0EA5E9),
+    tkT2T5 = Color(0xFF7C3AED),
+    tkT5T12 = Color(0xFF9333EA),
+    t10L2 = Color(0xFFA855F7),
+    llL1S1 = Color(0xFFEA580C),
+    llL1L4 = Color(0xFFF97316),
+    llL4S1 = Color(0xFFFB923C),
+    tpa = Color(0xFFEC4899),
+    sva = Color(0xFF65A30D),
+    pi = Color(0xFFEF4444),
+    pt = Color(0xFFF97316),
+    ss = Color(0xFFF59E0B),
+    length = Color(0xFF6366F1),
+    angle = Color(0xFF8B5CF6),
+    auxiliaryCircle = Color(0xFF10B981),
+    auxiliaryEllipse = Color(0xFF14B8A6),
+    auxiliaryBox = Color(0xFF06B6D4),
+    auxiliaryArrow = Color(0xFFF59E0B),
+    auxiliaryPolygon = Color(0xFFA855F7),
+    vertebraCenter = Color(0xFF10B981),
+    auxiliaryLength = Color(0xFF3B82F6),
+    auxiliaryAngle = Color(0xFF8B5CF6),
+    auxiliaryHorizontalLine = Color(0xFF00FF00),
+    auxiliaryVerticalLine = Color(0xFF00FF00),
+    detectedPoint = Color(0xFF22C55E),
+    helperGuide = Color(0xFF00FF00),
+    draft = Color(0xFFEF4444),
+    labelBackground = Color(0xCC0B1220),
+)
+
 internal fun lightPalette(brand: AppThemeBrandColor): SpineAppColors {
     val primary = when (brand) {
         AppThemeBrandColor.PURPLE -> Color(0xFF7C3AED)
@@ -72,6 +113,7 @@ internal fun lightPalette(brand: AppThemeBrandColor): SpineAppColors {
         info = Color(0xFF0EA5E9),
         tabInactive = Color(0xFF94A3B8),
         examCategories = examCategories,
+        annotationTools = annotationToolPalette,
     )
 }
 
@@ -145,6 +187,7 @@ internal fun darkPalette(brand: AppThemeBrandColor): SpineAppColors {
         info = Color(0xFF38BDF8),
         tabInactive = Color(0xFF94A3B8),
         examCategories = examCategories,
+        annotationTools = annotationToolPalette,
     )
 }
 

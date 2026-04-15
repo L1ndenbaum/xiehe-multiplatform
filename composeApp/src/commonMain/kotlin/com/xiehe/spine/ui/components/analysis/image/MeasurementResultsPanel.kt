@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.components.analysis.viewer.domain.valueColorFor
 import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.image.ImageAnalysisMeasurement
@@ -127,7 +128,7 @@ fun MeasurementResultsPanel(
                     value = item.value,
                     hidden = hiddenKeys.contains(item.key),
                     showValue = true,
-                    valueColor = AnalysisMeasurementPalette.valueColorFor(item),
+                    valueColor = valueColorFor(item, colors.annotationTools),
                     onToggle = { onToggleItemVisibility(item.key) },
                     onDelete = { onDeleteItem(item.key) },
                 )
@@ -151,7 +152,7 @@ fun MeasurementResultsPanel(
                     value = item.value,
                     hidden = hiddenKeys.contains(item.key),
                     showValue = false,
-                    valueColor = colors.info,
+                    valueColor = colors.annotationTools.detectedPoint,
                     onToggle = { onToggleItemVisibility(item.key) },
                     onDelete = { onDeleteItem(item.key) },
                 )
