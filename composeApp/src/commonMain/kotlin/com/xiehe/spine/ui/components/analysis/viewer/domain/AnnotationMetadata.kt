@@ -97,14 +97,35 @@ fun valueColorFor(
 
 fun shouldShowMetricTag(measurement: AnnotationMeasurement): Boolean {
     if (measurement.kind != AnnotationMeasurementKind.COMPUTED) return false
-    if (measurement.auxiliary) return false
+    if (measurement.auxiliary && measurement.type !in setOf("辅助水平线", "辅助垂直线")) return false
     if (measurement.type == "标准距离") return false
     if (measurement.value == "--") return false
     return measurement.points.size >= 2 || measurement.type == "椎体中心"
 }
 
+fun shouldShowAuxiliaryShapeTag(measurement: AnnotationMeasurement): Boolean {
+    if (!measurement.auxiliary) return false
+    return resolveAnnotationRenderType(measurement.type) in setOf(
+        AnnotationRenderType.CIRCLE,
+        AnnotationRenderType.ELLIPSE,
+        AnnotationRenderType.BOX,
+        AnnotationRenderType.ARROW,
+        AnnotationRenderType.POLYGON,
+    )
+}
+
 fun formatMeasurementTag(measurement: AnnotationMeasurement): String =
     "${measurement.type}: ${formatDisplayValue(measurement.value)}"
+
+fun formatAuxiliaryTag(measurement: AnnotationMeasurement): String {
+    val generatedPrefix = "辅助图形-"
+    val custom = measurement.description?.trim()
+    if (!custom.isNullOrEmpty() && !custom.startsWith(generatedPrefix)) {
+        return custom
+    }
+
+    return getAnnotationToolByMeasurementType(measurement.type)?.label ?: measurement.type
+}
 
 fun resolveMeasurementTagAnchor(
     measurement: AnnotationMeasurement,

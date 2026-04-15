@@ -5,14 +5,12 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import com.xiehe.spine.ui.components.analysis.viewer.components.annotationcanvas.renderers.shared.average
 import com.xiehe.spine.ui.components.analysis.viewer.components.annotationcanvas.renderers.shared.drawQuadrilateral
 import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.cos
 import kotlin.math.hypot
-import kotlin.math.sin
 
 internal fun DrawScope.drawCircleShape(points: List<Offset>, color: Color) {
     if (points.size < 2) return
@@ -45,20 +43,41 @@ internal fun DrawScope.drawBoxShape(points: List<Offset>, color: Color) {
 
 internal fun DrawScope.drawArrowShape(points: List<Offset>, color: Color) {
     if (points.size < 2) return
-    drawLine(color = color, start = points[0], end = points[1], strokeWidth = 2.6f)
-    val angle = atan2(points[1].y - points[0].y, points[1].x - points[0].x)
-    val arrowLength = 12f
-    val wing = 0.48f
+    val dx = points[1].x - points[0].x
+    val dy = points[1].y - points[0].y
+    val length = hypot(dx, dy)
+    if (length <= 0f) return
+
+    val ux = dx / length
+    val uy = dy / length
+    val nx = -uy
+    val ny = ux
+    val arrowLength = 14f
+    val arrowWidth = 7f
+    val baseCenter = Offset(
+        x = points[1].x - ux * arrowLength,
+        y = points[1].y - uy * arrowLength,
+    )
     val p1 = Offset(
-        x = points[1].x - arrowLength * cos(angle - wing),
-        y = points[1].y - arrowLength * sin(angle - wing),
+        x = baseCenter.x + nx * arrowWidth,
+        y = baseCenter.y + ny * arrowWidth,
     )
     val p2 = Offset(
-        x = points[1].x - arrowLength * cos(angle + wing),
-        y = points[1].y - arrowLength * sin(angle + wing),
+        x = baseCenter.x - nx * arrowWidth,
+        y = baseCenter.y - ny * arrowWidth,
     )
-    drawLine(color = color, start = points[1], end = p1, strokeWidth = 2.6f)
-    drawLine(color = color, start = points[1], end = p2, strokeWidth = 2.6f)
+
+    drawLine(color = color, start = points[0], end = baseCenter, strokeWidth = 2.6f)
+    drawPath(
+        path = Path().apply {
+            moveTo(points[1].x, points[1].y)
+            lineTo(p1.x, p1.y)
+            lineTo(p2.x, p2.y)
+            close()
+        },
+        color = color,
+        style = Fill,
+    )
 }
 
 internal fun DrawScope.drawPolygonShape(points: List<Offset>, color: Color) {

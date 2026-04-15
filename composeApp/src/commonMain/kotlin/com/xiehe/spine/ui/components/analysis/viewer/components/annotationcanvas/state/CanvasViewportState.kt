@@ -1,7 +1,5 @@
 package com.xiehe.spine.ui.components.analysis.viewer.components.annotationcanvas.state
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -37,7 +35,7 @@ data class AnnotationCanvasViewportState(
 @Composable
 fun rememberAnnotationCanvasViewportState(
     bitmap: ImageBitmap?,
-    zoomPercent: Int,
+    zoomPercent: Float,
     contrast: Int,
     brightness: Int,
     isImageLocked: Boolean,
@@ -47,12 +45,7 @@ fun rememberAnnotationCanvasViewportState(
 ): AnnotationCanvasViewportState = key(bitmap) {
     var gestureScale by remember { mutableFloatStateOf(1f) }
     var panOffset by remember { mutableStateOf(Offset.Zero) }
-    val rawScale = (zoomPercent / 100f) * gestureScale
-    val renderedScale by animateFloatAsState(
-        targetValue = maxOf(1f, rawScale),
-        animationSpec = tween(durationMillis = 220),
-        label = "annotation_canvas_rendered_scale",
-    )
+    val renderedScale = maxOf(1f, (zoomPercent / 100f) * gestureScale)
     val density = LocalDensity.current
     val imageSize = remember(bitmap, maxWidthPx, containerHeightPx, density.density) {
         bitmap?.let {

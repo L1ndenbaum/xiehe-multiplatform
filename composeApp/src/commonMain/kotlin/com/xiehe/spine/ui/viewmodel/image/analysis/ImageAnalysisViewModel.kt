@@ -347,8 +347,12 @@ class ImageAnalysisViewModel(
             }
     }
 
-    fun adjustZoom(delta: Int) {
-        _state.update { it.copy(zoomPercent = (it.zoomPercent + delta).coerceIn(40, 400)) }
+    fun adjustZoom(delta: Float) {
+        _state.update { it.copy(zoomPercent = (it.zoomPercent + delta).coerceIn(40f, 400f)) }
+    }
+
+    fun setZoomPercent(value: Float) {
+        _state.update { it.copy(zoomPercent = value.coerceIn(40f, 400f)) }
     }
 
     fun adjustContrast(delta: Int) {

@@ -13,9 +13,11 @@ import com.xiehe.spine.data.measurement.MeasurementPoint
 import com.xiehe.spine.ui.components.analysis.viewer.AnnotationMeasurement
 import com.xiehe.spine.ui.components.analysis.viewer.AnnotationMeasurementKind
 import com.xiehe.spine.ui.components.analysis.viewer.domain.calculateSmartTagPosition
+import com.xiehe.spine.ui.components.analysis.viewer.domain.formatAuxiliaryTag
 import com.xiehe.spine.ui.components.analysis.viewer.domain.formatMeasurementTag
 import com.xiehe.spine.ui.components.analysis.viewer.domain.resolveAnnotationColor
 import com.xiehe.spine.ui.components.analysis.viewer.domain.resolveMeasurementTagAnchor
+import com.xiehe.spine.ui.components.analysis.viewer.domain.shouldShowAuxiliaryShapeTag
 import com.xiehe.spine.ui.components.analysis.viewer.domain.shouldShowMetricTag
 import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
@@ -55,22 +57,20 @@ fun LabelLayer(
             }
 
             if (shouldShowMetricTag(measurement)) {
-                val text = formatMeasurementTag(measurement)
-                val baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy)
-                val tagPosition = calculateSmartTagPosition(baseAnchor, occupiedLabelPositions)
-                occupiedLabelPositions += tagPosition
-                val fontSize = 11f
-                val estimatedHalfWidth = (text.length * fontSize * 0.28f).roundToInt()
-                val estimatedHalfHeight = (fontSize * 0.7f).roundToInt()
-                val textOffset = IntOffset(
-                    x = tagPosition.x.roundToInt() - estimatedHalfWidth,
-                    y = tagPosition.y.roundToInt() - estimatedHalfHeight,
-                )
-                OutlinedMeasurementTag(
-                    text = text,
-                    fontSize = fontSize,
+                RenderOutlinedTag(
+                    text = formatMeasurementTag(measurement),
+                    baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy),
+                    occupiedLabelPositions = occupiedLabelPositions,
                     color = resolveAnnotationColor(measurement, toolColors),
-                    offset = textOffset,
+                )
+            }
+
+            if (shouldShowAuxiliaryShapeTag(measurement)) {
+                RenderOutlinedTag(
+                    text = formatAuxiliaryTag(measurement),
+                    baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy),
+                    occupiedLabelPositions = occupiedLabelPositions,
+                    color = resolveAnnotationColor(measurement, toolColors),
                 )
             }
         }
@@ -92,6 +92,31 @@ fun LabelLayer(
             )
         }
     }
+}
+
+@Composable
+private fun RenderOutlinedTag(
+    text: String,
+    baseAnchor: Offset,
+    occupiedLabelPositions: MutableList<Offset>,
+    color: Color,
+) {
+    val tagPosition = calculateSmartTagPosition(baseAnchor, occupiedLabelPositions)
+    occupiedLabelPositions += tagPosition
+    val fontSize = 11f
+    val estimatedHalfWidth = (text.length * fontSize * 0.28f).roundToInt()
+    val estimatedHalfHeight = (fontSize * 0.7f).roundToInt()
+    val textOffset = IntOffset(
+        x = tagPosition.x.roundToInt() - estimatedHalfWidth,
+        y = tagPosition.y.roundToInt() - estimatedHalfHeight,
+    )
+
+    OutlinedMeasurementTag(
+        text = text,
+        fontSize = fontSize,
+        color = color,
+        offset = textOffset,
+    )
 }
 
 @Composable

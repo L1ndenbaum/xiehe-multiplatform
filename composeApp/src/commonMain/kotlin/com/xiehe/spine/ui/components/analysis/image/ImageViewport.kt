@@ -15,7 +15,7 @@ fun ImageViewport(
     activeToolId: String,
     pendingPoints: List<MeasurementPoint>,
     isImageLocked: Boolean,
-    zoomPercent: Int,
+    zoomPercent: Float,
     contrast: Int,
     brightness: Int,
     onCanvasTap: (MeasurementPoint) -> Unit,

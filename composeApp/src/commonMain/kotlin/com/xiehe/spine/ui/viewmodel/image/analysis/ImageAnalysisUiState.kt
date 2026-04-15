@@ -86,7 +86,7 @@ data class ImageAnalysisUiState(
     val activeToolId: String = TOOL_MOVE,
     val pendingPoints: List<MeasurementPoint> = emptyList(),
     val isImageLocked: Boolean = false,
-    val zoomPercent: Int = 100,
+    val zoomPercent: Float = 100f,
     val contrast: Int = 0,
     val brightness: Int = 0,
     val errorMessage: String? = null,
@@ -102,4 +102,9 @@ fun buildStandardDistanceLabel(valueMm: Double): String {
 fun formatStandardDistanceInput(valueMm: Double): String {
     val rounded = ((valueMm * 10.0).roundToInt() / 10.0)
     return if (rounded % 1.0 == 0.0) rounded.toInt().toString() else rounded.toString()
+}
+
+fun formatZoomPercent(value: Float): String {
+    val rounded = ((value * 10f).roundToInt() / 10f)
+    return if (rounded % 1f == 0f) "${rounded.toInt()}%" else "${rounded}%"
 }

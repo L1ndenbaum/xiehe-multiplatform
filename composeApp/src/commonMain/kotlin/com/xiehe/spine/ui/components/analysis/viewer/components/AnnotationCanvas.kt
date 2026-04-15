@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -35,7 +37,7 @@ fun AnnotationCanvas(
     activeToolId: String,
     pendingPoints: List<MeasurementPoint>,
     isImageLocked: Boolean,
-    zoomPercent: Int,
+    zoomPercent: Float,
     contrast: Int,
     brightness: Int,
     onCanvasTap: (MeasurementPoint) -> Unit,
@@ -66,27 +68,33 @@ fun AnnotationCanvas(
             containerHeightPx = containerHeightPx,
             maxWidthPx = maxWidthPx,
         )
+        val currentMapScreenToImagePoint by rememberUpdatedState(viewportState.mapScreenToImagePoint)
+        val currentOnTransformGesture by rememberUpdatedState(viewportState.onTransformGesture)
+        val currentOnCanvasTap by rememberUpdatedState(onCanvasTap)
+        val currentOnCanvasDoubleTap by rememberUpdatedState(onCanvasDoubleTap)
+        val moveToolActive = remember(activeToolId) { isMoveTool(activeToolId) }
+        val doubleTapFinishEnabled = remember(activeToolId) { supportsDoubleTapFinish(activeToolId) }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(bitmap, activeToolId, viewportState.renderedScale, viewportState.panOffset) {
+                .pointerInput(bitmap, activeToolId) {
                     detectTapGestures(
                         onTap = { offset ->
-                            if (bitmap == null || isMoveTool(activeToolId)) return@detectTapGestures
-                            val point = viewportState.mapScreenToImagePoint(offset) ?: return@detectTapGestures
-                            onCanvasTap(point)
+                            if (bitmap == null || moveToolActive) return@detectTapGestures
+                            val point = currentMapScreenToImagePoint(offset) ?: return@detectTapGestures
+                            currentOnCanvasTap(point)
                         },
                         onDoubleTap = {
-                            if (supportsDoubleTapFinish(activeToolId)) {
-                                onCanvasDoubleTap()
+                            if (doubleTapFinishEnabled) {
+                                currentOnCanvasDoubleTap()
                             }
                         },
                     )
                 }
-                .pointerInput(bitmap, isImageLocked, viewportState.renderedScale, viewportState.panOffset) {
+                .pointerInput(bitmap, isImageLocked) {
                     detectTransformGestures { _, pan, zoom, _ ->
-                        viewportState.onTransformGesture(pan, zoom)
+                        currentOnTransformGesture(pan, zoom)
                     }
                 },
             contentAlignment = Alignment.Center,

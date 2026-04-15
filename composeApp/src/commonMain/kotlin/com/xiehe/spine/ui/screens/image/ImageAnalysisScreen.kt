@@ -218,6 +218,7 @@ fun ImageAnalysisScreen(
                             contrast = state.contrast,
                             brightness = state.brightness,
                             onZoomChange = vm::adjustZoom,
+                            onZoomSet = vm::setZoomPercent,
                             onContrastChange = vm::adjustContrast,
                             onBrightnessChange = vm::adjustBrightness,
                             modifier = Modifier.fillMaxWidth(),
