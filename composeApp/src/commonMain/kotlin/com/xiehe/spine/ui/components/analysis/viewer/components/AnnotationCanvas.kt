@@ -143,6 +143,7 @@ fun AnnotationCanvas(
                     pendingPoints = pendingPoints,
                     sx = sx,
                     sy = sy,
+                    imageScale = viewportState.renderedScale,
                 )
             }
         }

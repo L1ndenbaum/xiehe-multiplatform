@@ -9,6 +9,9 @@ import com.xiehe.spine.ui.components.analysis.viewer.catalog.AnnotationToolColor
 import com.xiehe.spine.ui.components.analysis.viewer.catalog.getAnnotationToolByMeasurementType
 import com.xiehe.spine.ui.theme.SpineAnnotationToolColors
 import kotlin.math.hypot
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 internal enum class AnnotationRenderType {
     LINE_WITH_HORIZONTAL_ARC,
@@ -131,32 +134,42 @@ fun resolveMeasurementTagAnchor(
     measurement: AnnotationMeasurement,
     sx: Float,
     sy: Float,
+    imageScale: Float,
 ): Offset {
     val points = measurement.points.map { Offset((it.x * sx).toFloat(), (it.y * sy).toFloat()) }
     if (points.isEmpty()) return Offset.Zero
 
-    val tool = getAnnotationToolByMeasurementType(measurement.type)
-    return when (tool?.tagAnchorStyle) {
-        AnnotationTagAnchorStyle.MIDPOINT_ABOVE -> midpoint(points.first(), points.last()).copy(
-            y = minOf(points.first().y, points.last().y) - 20f,
-        )
+    val safeScale = imageScale.coerceAtLeast(0.1f)
+    return resolveCatalogTagAnchor(
+        type = measurement.type,
+        points = points,
+        imageScale = safeScale,
+    ) ?: run {
+        val tool = getAnnotationToolByMeasurementType(measurement.type)
+        when (tool?.tagAnchorStyle) {
+            AnnotationTagAnchorStyle.MIDPOINT_ABOVE -> midpoint(points.first(), points.last()).copy(
+                y = minOf(points.first().y, points.last().y) - 20f,
+            )
 
-        AnnotationTagAnchorStyle.AVERAGE_ABOVE -> average(points).copy(y = points.minOf { it.y } - 18f)
-        AnnotationTagAnchorStyle.AVERAGE_ABOVE_COMPACT -> average(points).copy(y = points.minOf { it.y } - 24f)
-        AnnotationTagAnchorStyle.CENTER -> average(points)
-        null -> average(points)
+            AnnotationTagAnchorStyle.AVERAGE_ABOVE -> average(points).copy(y = points.minOf { it.y } - 18f)
+            AnnotationTagAnchorStyle.AVERAGE_ABOVE_COMPACT -> average(points).copy(y = points.minOf { it.y } - 24f)
+            AnnotationTagAnchorStyle.CENTER -> average(points)
+            null -> average(points)
+        }
     }
 }
 
 fun calculateSmartTagPosition(
     basePosition: Offset,
     occupiedPositions: List<Offset>,
+    imageScale: Float,
 ): Offset {
     if (occupiedPositions.isEmpty()) return basePosition
 
-    val verticalOffset = 18f
-    val horizontalOffset = 28f
-    val overlapThreshold = 54f
+    val safeScale = imageScale.coerceAtLeast(0.1f)
+    val verticalOffset = 40f / safeScale
+    val horizontalOffset = 50f / safeScale
+    val overlapThreshold = 90f / safeScale
 
     fun overlaps(candidate: Offset): Boolean = occupiedPositions.any { occupied ->
         hypot(candidate.x - occupied.x, candidate.y - occupied.y) < overlapThreshold
@@ -165,14 +178,13 @@ fun calculateSmartTagPosition(
     if (!overlaps(basePosition)) return basePosition
 
     val candidates = listOf(
-        basePosition + Offset(horizontalOffset, 0f),
-        basePosition + Offset(horizontalOffset, -verticalOffset),
-        basePosition + Offset(horizontalOffset, verticalOffset),
         basePosition + Offset(0f, -verticalOffset),
         basePosition + Offset(0f, verticalOffset),
         basePosition + Offset(-horizontalOffset, 0f),
         basePosition + Offset(-horizontalOffset, -verticalOffset),
         basePosition + Offset(-horizontalOffset, verticalOffset),
+        basePosition + Offset(horizontalOffset, -verticalOffset),
+        basePosition + Offset(horizontalOffset, verticalOffset),
         basePosition + Offset(0f, -verticalOffset * 2),
         basePosition + Offset(0f, verticalOffset * 2),
     )
@@ -180,6 +192,205 @@ fun calculateSmartTagPosition(
     return candidates.firstOrNull { candidate -> !overlaps(candidate) }
         ?: (basePosition + Offset(0f, -verticalOffset * 2.5f))
 }
+
+private fun resolveCatalogTagAnchor(
+    type: String,
+    points: List<Offset>,
+    imageScale: Float,
+): Offset? {
+    return when (type) {
+        "T1 Tilt" -> midpoint(points[0], points[1]).copy(
+            y = midpoint(points[0], points[1]).y - 20f,
+        )
+
+        "CA" -> midpoint(points[0], points[1]).copy(
+            y = midpoint(points[0], points[1]).y - 20f,
+        )
+
+        "Pelvic",
+        "Sacral",
+        "SS",
+        "长度测量",
+        "距离标注",
+        -> {
+            val rightPoint = if (points[0].x > points[1].x) points[0] else points[1]
+            Offset(
+                x = rightPoint.x + LABEL_OFFSET_RIGHT / imageScale,
+                y = rightPoint.y - LABEL_OFFSET_TOP / imageScale,
+            )
+        }
+
+        "AVT" -> Offset(
+            x = (points[0].x + points[1].x) / 2f,
+            y = minOf(points[0].y, points[1].y) - 20f / imageScale,
+        )
+
+        "TTS" -> {
+            val trunkMidY = (points[0].y + points[1].y) / 2f
+            val sacralMidY = (points[2].y + points[3].y) / 2f
+            Offset(
+                x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
+                y = minOf(trunkMidY, sacralMidY) - LABEL_OFFSET_TOP / imageScale,
+            )
+        }
+
+        "LLD" -> Offset(
+            x = max(points[0].x, points[1].x) + 20f / imageScale,
+            y = (points[0].y + points[1].y) / 2f,
+        )
+
+        "TS(Trunk Shift)" -> {
+            val centerY = points.take(4).averageOf { it.y }
+            val refY = (points[4].y + points[5].y) / 2f
+            Offset(
+                x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
+                y = minOf(centerY, refY) - LABEL_OFFSET_TOP / imageScale,
+            )
+        }
+
+        "T1 Slope" -> Offset(
+            x = (points[0].x + points[1].x) / 2f,
+            y = minOf(points[0].y, points[1].y) - 30f / imageScale,
+        )
+
+        "Cobb",
+        "角度标注",
+        -> Offset(
+            x = points.maxOf { it.x } + LABEL_OFFSET_COMPLEX_RIGHT / imageScale,
+            y = points.minOf { it.y } - LABEL_OFFSET_TOP / imageScale,
+        )
+
+        "C2-C7 CL",
+        "TK T2-T5",
+        "TK T5-T12",
+        "T10-L2",
+        "LL L1-S1",
+        "LL L1-L4",
+        "LL L4-S1",
+        -> Offset(
+            x = points.averageOf { it.x },
+            y = points.minOf { it.y } - LABEL_OFFSET_TOP / imageScale,
+        )
+
+        "TPA" -> {
+            val centerPoint = average(points.take(4))
+            val midY = (points[5].y + points[6].y) / 2f
+            Offset(
+                x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
+                y = minOf(centerPoint.y, points[4].y, midY) - LABEL_OFFSET_TOP / imageScale,
+            )
+        }
+
+        "SVA" -> Offset(
+            x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
+            y = points.take(4).minOf { it.y } - LABEL_OFFSET_TOP / imageScale,
+        )
+
+        "PI" -> {
+            val geometry = pelvicGeometry(points) ?: return points.firstOrNull()
+            val femoral = geometry.femoralHeadCenter ?: return points.firstOrNull()
+            Offset(
+                x = maxOf(femoral.x, geometry.sacralMidpoint.x, points.maxOf { it.x }) + LABEL_OFFSET_RIGHT / imageScale,
+                y = minOf(femoral.y, geometry.sacralMidpoint.y) - LABEL_OFFSET_TOP / imageScale,
+            )
+        }
+
+        "PT" -> {
+            val geometry = pelvicGeometry(points) ?: return points.firstOrNull()
+            val femoral = geometry.femoralHeadCenter ?: return points.firstOrNull()
+            Offset(
+                x = maxOf(femoral.x, geometry.sacralMidpoint.x, points.maxOf { it.x }) + LABEL_OFFSET_RIGHT / imageScale,
+                y = maxOf(femoral.y, geometry.sacralMidpoint.y) + LABEL_OFFSET_BOTTOM / imageScale,
+            )
+        }
+
+        "角度测量" -> Offset(
+            x = points[1].x + LABEL_OFFSET_RIGHT / imageScale,
+            y = points[1].y - LABEL_OFFSET_TOP / imageScale,
+        )
+
+        "辅助水平线" -> Offset(
+            x = (points[0].x + points[1].x) / 2f,
+            y = points[0].y - 16f / imageScale,
+        )
+
+        "辅助垂直线" -> Offset(
+            x = points[0].x + 16f / imageScale,
+            y = (points[0].y + points[1].y) / 2f,
+        )
+
+        "Auxiliary Circle" -> {
+            val center = points[0]
+            if (points.size >= 2) {
+                val radius = distance(points[1], center)
+                Offset(
+                    x = center.x,
+                    y = center.y + max(radius / 2f, 30f / imageScale),
+                )
+            } else {
+                center
+            }
+        }
+
+        "Auxiliary Ellipse" -> {
+            val center = points[0]
+            if (points.size >= 2) {
+                val radiusY = kotlin.math.abs(points[1].y - center.y)
+                Offset(
+                    x = center.x,
+                    y = center.y + max(radiusY / 2f, 30f / imageScale),
+                )
+            } else {
+                center
+            }
+        }
+
+        "Auxiliary Box" -> Offset(
+            x = (points[0].x + points[1].x) / 2f,
+            y = minOf(points[0].y, points[1].y) - 20f / imageScale,
+        )
+
+        "Arrow",
+        "Polygons",
+        -> points.firstOrNull()
+
+        "椎体中心" -> average(points.take(4)).copy(
+            y = average(points.take(4)).y - 20f / imageScale,
+        )
+
+        else -> null
+    }
+}
+
+private data class PelvicGeometry(
+    val femoralHeadCenter: Offset?,
+    val sacralMidpoint: Offset,
+)
+
+private fun pelvicGeometry(points: List<Offset>): PelvicGeometry? {
+    if (points.size < 2) return null
+    val femoralHeadCenter = if (points.size >= 3) points[0] else null
+    val sacralLeft = if (points.size >= 3) points[1] else points[0]
+    val sacralRight = if (points.size >= 3) points[2] else points[1]
+    return PelvicGeometry(
+        femoralHeadCenter = femoralHeadCenter,
+        sacralMidpoint = midpoint(sacralLeft, sacralRight),
+    )
+}
+
+private fun distance(first: Offset, second: Offset): Float {
+    return sqrt((first.x - second.x).pow(2) + (first.y - second.y).pow(2))
+}
+
+private fun List<Offset>.averageOf(selector: (Offset) -> Float): Float {
+    if (isEmpty()) return 0f
+    return sumOf { selector(it).toDouble() }.toFloat() / size
+}
+
+private const val LABEL_OFFSET_RIGHT = 50f
+private const val LABEL_OFFSET_TOP = 40f
+private const val LABEL_OFFSET_BOTTOM = 40f
+private const val LABEL_OFFSET_COMPLEX_RIGHT = 60f
 
 private fun SpineAnnotationToolColors.resolveColor(colorKey: AnnotationToolColorKey): Color = when (colorKey) {
     AnnotationToolColorKey.NONE -> length

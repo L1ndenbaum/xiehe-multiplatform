@@ -29,6 +29,7 @@ fun LabelLayer(
     pendingPoints: List<MeasurementPoint>,
     sx: Float,
     sy: Float,
+    imageScale: Float,
     modifier: Modifier = Modifier,
 ) {
     val colors = SpineTheme.colors
@@ -59,18 +60,20 @@ fun LabelLayer(
             if (shouldShowMetricTag(measurement)) {
                 RenderOutlinedTag(
                     text = formatMeasurementTag(measurement),
-                    baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy),
+                    baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy, imageScale),
                     occupiedLabelPositions = occupiedLabelPositions,
                     color = resolveAnnotationColor(measurement, toolColors),
+                    imageScale = imageScale,
                 )
             }
 
             if (shouldShowAuxiliaryShapeTag(measurement)) {
                 RenderOutlinedTag(
                     text = formatAuxiliaryTag(measurement),
-                    baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy),
+                    baseAnchor = resolveMeasurementTagAnchor(measurement, sx, sy, imageScale),
                     occupiedLabelPositions = occupiedLabelPositions,
                     color = resolveAnnotationColor(measurement, toolColors),
+                    imageScale = imageScale,
                 )
             }
         }
@@ -100,8 +103,9 @@ private fun RenderOutlinedTag(
     baseAnchor: Offset,
     occupiedLabelPositions: MutableList<Offset>,
     color: Color,
+    imageScale: Float,
 ) {
-    val tagPosition = calculateSmartTagPosition(baseAnchor, occupiedLabelPositions)
+    val tagPosition = calculateSmartTagPosition(baseAnchor, occupiedLabelPositions, imageScale)
     occupiedLabelPositions += tagPosition
     val fontSize = 11f
     val estimatedHalfWidth = (text.length * fontSize * 0.28f).roundToInt()
