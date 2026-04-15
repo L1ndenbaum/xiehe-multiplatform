@@ -270,7 +270,11 @@ class ImageAnalysisViewModel(
             _state.update { it.copy(pendingPoints = it.pendingPoints + point) }
             return
         }
-        if (tool.interactionPointsNeeded <= 0) return
+        val effectivePointsNeeded = ManualMeasurementComposer.effectiveInteractionPoints(
+            tool = tool,
+            measurements = snapshot.measurements,
+        )
+        if (effectivePointsNeeded <= 0) return
 
         val normalizedPoint = CanvasPointNormalizer.normalize(
             toolId = tool.id,
@@ -278,19 +282,20 @@ class ImageAnalysisViewModel(
             point = point,
         )
         val nextPoints = snapshot.pendingPoints + normalizedPoint
-        if (nextPoints.size < tool.interactionPointsNeeded) {
+        if (nextPoints.size < effectivePointsNeeded) {
             _state.update { it.copy(pendingPoints = nextPoints) }
             return
         }
 
-        val measurement = ManualMeasurementBuilder.build(
-            toolId = tool.id,
-            points = nextPoints,
-            measurementKey = nextManualMeasurementKey(tool.id),
+        val batch = ManualMeasurementComposer.buildBatch(
+            tool = tool,
+            userPoints = nextPoints,
+            measurements = snapshot.measurements,
             standardDistanceMm = snapshot.standardDistanceMm,
             standardDistancePoints = snapshot.standardDistancePoints,
+            nextMeasurementKey = ::nextManualMeasurementKey,
         )
-        if (measurement == null) {
+        if (batch == null) {
             _state.update {
                 it.copy(
                     pendingPoints = emptyList(),
@@ -300,7 +305,14 @@ class ImageAnalysisViewModel(
             return
         }
 
-        _state.update { ImageAnalysisStateReducer.applyMeasurementAdded(it, measurement, tool.id, nextPoints) }
+        _state.update {
+            ImageAnalysisStateReducer.applyMeasurementsAdded(
+                state = it,
+                measurements = batch.addedMeasurements,
+                toolId = tool.id,
+                points = batch.finalPoints,
+            )
+        }
     }
 
     fun onCanvasDoubleTap() {

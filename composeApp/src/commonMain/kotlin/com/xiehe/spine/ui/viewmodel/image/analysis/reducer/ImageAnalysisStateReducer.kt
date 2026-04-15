@@ -207,18 +207,27 @@ object ImageAnalysisStateReducer {
         )
     }
 
-    fun applyMeasurementAdded(
+    fun applyMeasurementsAdded(
         state: ImageAnalysisUiState,
-        measurement: ImageAnalysisMeasurement,
+        measurements: List<ImageAnalysisMeasurement>,
         toolId: String,
         points: List<MeasurementPoint>,
     ): ImageAnalysisUiState {
+        if (measurements.isEmpty()) return state.copy(pendingPoints = emptyList())
+        val primaryMeasurement = measurements.first()
+        val autoCompleted = measurements.drop(1)
+        val bannerMessage = if (autoCompleted.isEmpty()) {
+            "已新增 ${primaryMeasurement.type} 测量"
+        } else {
+            "已新增 ${primaryMeasurement.type} 测量，并自动补全 ${autoCompleted.joinToString("、") { it.type }}"
+        }
+
         return state.copy(
             pendingPoints = emptyList(),
-            measurements = state.measurements + measurement,
-            hiddenMeasurementKeys = state.hiddenMeasurementKeys - measurement.key,
+            measurements = state.measurements + measurements,
+            hiddenMeasurementKeys = state.hiddenMeasurementKeys - measurements.map { it.key }.toSet(),
             standardDistancePoints = if (toolId == TOOL_STANDARD_DISTANCE) points else state.standardDistancePoints,
-            bannerMessage = "已新增 ${measurement.type} 测量",
+            bannerMessage = bannerMessage,
         )
     }
 
