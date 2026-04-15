@@ -107,12 +107,12 @@ private fun RenderOutlinedTag(
 ) {
     val tagPosition = calculateSmartTagPosition(baseAnchor, occupiedLabelPositions, imageScale)
     occupiedLabelPositions += tagPosition
-    val fontSize = 11f
+    val fontSize = MEASUREMENT_TAG_FONT_SIZE
     val estimatedHalfWidth = (text.length * fontSize * 0.28f).roundToInt()
-    val estimatedHalfHeight = (fontSize * 0.7f).roundToInt()
+    val estimatedTopOffset = fontSize.roundToInt()
     val textOffset = IntOffset(
         x = tagPosition.x.roundToInt() - estimatedHalfWidth,
-        y = tagPosition.y.roundToInt() - estimatedHalfHeight,
+        y = tagPosition.y.roundToInt() - estimatedTopOffset,
     )
 
     OutlinedMeasurementTag(
@@ -164,3 +164,5 @@ private fun OutlinedMeasurementTag(
         maxLines = 1,
     )
 }
+
+private const val MEASUREMENT_TAG_FONT_SIZE = 5.5f

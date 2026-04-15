@@ -76,6 +76,27 @@ class AnnotationMetadataTest {
     }
 
     @Test
+    fun tkT2T5TagAnchor_matchesWebCatalogPosition() {
+        val anchor = resolveMeasurementTagAnchor(
+            measurement = measurement(
+                type = "TK T2-T5",
+                points = listOf(
+                    MeasurementPoint(10.0, 50.0),
+                    MeasurementPoint(30.0, 60.0),
+                    MeasurementPoint(40.0, 110.0),
+                    MeasurementPoint(60.0, 100.0),
+                ),
+            ),
+            sx = 1f,
+            sy = 1f,
+            imageScale = 2f,
+        )
+
+        assertEquals(35f, anchor.x)
+        assertEquals(30f, anchor.y)
+    }
+
+    @Test
     fun smartTagPosition_usesScaleAwareOffsets() {
         val adjusted = calculateSmartTagPosition(
             basePosition = Offset(100f, 100f),
