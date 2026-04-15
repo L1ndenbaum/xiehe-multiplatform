@@ -53,6 +53,7 @@ fun AnnotationCanvas(
             .background(colors.backgroundElevated),
     ) {
         val maxWidthPx = constraints.maxWidth
+        val maxHeightPx = constraints.maxHeight
         val containerWidthPx = constraints.maxWidth.toFloat()
         val containerHeightPx = constraints.maxHeight.toFloat()
         val visibleMeasurements = remember(measurements, hiddenKeys) {
@@ -67,6 +68,7 @@ fun AnnotationCanvas(
             containerWidthPx = containerWidthPx,
             containerHeightPx = containerHeightPx,
             maxWidthPx = maxWidthPx,
+            maxHeightPx = maxHeightPx,
         )
         val currentMapScreenToImagePoint by rememberUpdatedState(viewportState.mapScreenToImagePoint)
         val currentOnTransformGesture by rememberUpdatedState(viewportState.onTransformGesture)

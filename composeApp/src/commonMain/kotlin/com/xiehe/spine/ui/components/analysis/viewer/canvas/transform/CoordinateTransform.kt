@@ -1,7 +1,6 @@
 package com.xiehe.spine.ui.components.analysis.viewer.canvas.transform
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import com.xiehe.spine.data.measurement.MeasurementPoint
@@ -10,9 +9,12 @@ fun computeFitSize(
     bitmapWidth: Int,
     bitmapHeight: Int,
     maxWidth: Int,
+    maxHeight: Int,
     density: Density,
 ): DpSize {
-    val scale = maxWidth / bitmapWidth.toFloat()
+    val widthScale = maxWidth / bitmapWidth.toFloat()
+    val heightScale = maxHeight / bitmapHeight.toFloat()
+    val scale = minOf(widthScale, heightScale)
     return with(density) {
         DpSize(
             width = (bitmapWidth * scale).toDp(),
@@ -23,7 +25,8 @@ fun computeFitSize(
 
 fun screenToImagePoint(
     tapOffset: Offset,
-    bitmap: ImageBitmap,
+    imageWidth: Int,
+    imageHeight: Int,
     containerWidthPx: Float,
     containerHeightPx: Float,
     panOffset: Offset,
@@ -51,8 +54,8 @@ fun screenToImagePoint(
     }
 
     return MeasurementPoint(
-        x = (unscaledX / imageWidthPx * bitmap.width.toFloat()).toDouble(),
-        y = (unscaledY / imageHeightPx * bitmap.height.toFloat()).toDouble(),
+        x = (unscaledX / imageWidthPx * imageWidth.toFloat()).toDouble(),
+        y = (unscaledY / imageHeightPx * imageHeight.toFloat()).toDouble(),
     )
 }
 

@@ -42,17 +42,19 @@ fun rememberAnnotationCanvasViewportState(
     containerWidthPx: Float,
     containerHeightPx: Float,
     maxWidthPx: Int,
+    maxHeightPx: Int,
 ): AnnotationCanvasViewportState = key(bitmap) {
     var gestureScale by remember { mutableFloatStateOf(1f) }
     var panOffset by remember { mutableStateOf(Offset.Zero) }
     val renderedScale = maxOf(1f, (zoomPercent / 100f) * gestureScale)
     val density = LocalDensity.current
-    val imageSize = remember(bitmap, maxWidthPx, containerHeightPx, density.density) {
+    val imageSize = remember(bitmap, maxWidthPx, maxHeightPx, density.density) {
         bitmap?.let {
             computeFitSize(
                 bitmapWidth = it.width,
                 bitmapHeight = it.height,
                 maxWidth = maxWidthPx,
+                maxHeight = maxHeightPx,
                 density = density,
             )
         }
@@ -89,7 +91,8 @@ fun rememberAnnotationCanvasViewportState(
             val image = bitmap ?: return null
             return screenToImagePoint(
                 tapOffset = tapOffset,
-                bitmap = image,
+                imageWidth = image.width,
+                imageHeight = image.height,
                 containerWidthPx = containerWidthPx,
                 containerHeightPx = containerHeightPx,
                 panOffset = panOffset,
