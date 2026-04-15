@@ -31,7 +31,7 @@ import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.viewmodel.image.formatZoomPercent
 import kotlin.math.roundToInt
 
-private const val MIN_ZOOM_PERCENT = 40f
+private const val MIN_ZOOM_PERCENT = 100f
 private const val MAX_ZOOM_PERCENT = 400f
 
 @Composable
