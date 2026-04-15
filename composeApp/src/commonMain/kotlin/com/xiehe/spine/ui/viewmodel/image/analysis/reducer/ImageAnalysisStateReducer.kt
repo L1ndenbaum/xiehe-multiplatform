@@ -54,6 +54,21 @@ object ImageAnalysisStateReducer {
         )
     }
 
+    fun releaseRetainedImageState(state: ImageAnalysisUiState): ImageAnalysisUiState {
+        return resetForRefresh(state).copy(
+            loading = false,
+            saving = false,
+            aiRunning = false,
+            aiRunningLabel = null,
+            reportText = "",
+            reportExamType = "",
+            reportImageId = "",
+            reportPatientId = "",
+            bannerMessage = null,
+            errorMessage = null,
+        )
+    }
+
     fun applyLoaded(
         state: ImageAnalysisUiState,
         outcome: LoadImageAnalysisOutcome,

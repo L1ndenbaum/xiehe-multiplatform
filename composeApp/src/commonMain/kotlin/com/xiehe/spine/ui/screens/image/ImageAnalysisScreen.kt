@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -75,6 +76,7 @@ fun ImageAnalysisScreen(
     val state by vm.state.collectAsState()
     val scope = rememberCoroutineScope()
     var showReportGenerateConfirm by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
     var activeOverlay by remember { mutableStateOf<ImageOverlayPanel?>(null) }
     var fullscreenMode by remember { mutableStateOf(false) }
     val downloadedFileSaver = rememberDownloadedFileSaver()
@@ -93,6 +95,12 @@ fun ImageAnalysisScreen(
             onSessionUpdated = onSessionUpdated,
             onSessionExpired = onSessionExpired,
         )
+    }
+
+    DisposableEffect(fileId) {
+        onDispose {
+            vm.releaseImageState(fileId)
+        }
     }
 
     LaunchedEffect(state.bannerMessage) {
@@ -347,7 +355,7 @@ fun ImageAnalysisScreen(
                     AnalysisBottomAction.LOCK -> vm.toggleImageLocked()
                     AnalysisBottomAction.UNDO -> vm.notifyActionUnavailable("撤销功能暂未接入")
                     AnalysisBottomAction.REDO -> vm.notifyActionUnavailable("重做功能暂未接入")
-                    AnalysisBottomAction.CLEAR -> vm.clearMeasurements()
+                    AnalysisBottomAction.CLEAR -> showClearConfirm = true
                 }
             },
         )
@@ -375,6 +383,23 @@ fun ImageAnalysisScreen(
             )
         }
     }
+
+    AppConfirmDialogHost(
+        visible = showClearConfirm,
+        title = "清除标注",
+        message = "确定清除所有标注项吗?",
+        confirmText = "清除",
+        cancelText = "取消",
+        confirmButtonColor = SpineTheme.colors.error,
+        cancelButtonColor = SpineTheme.colors.textSecondary,
+        confirmTextColor = SpineTheme.colors.onPrimary,
+        cancelTextColor = SpineTheme.colors.onPrimary,
+        onDismissRequest = { showClearConfirm = false },
+        onConfirm = {
+            showClearConfirm = false
+            vm.clearMeasurements()
+        },
+    )
 
     AppConfirmDialogHost(
         visible = showReportGenerateConfirm,

@@ -433,6 +433,16 @@ class ImageAnalysisViewModel(
         }
     }
 
+    fun releaseImageState(fileId: Int) {
+        _state.update { current ->
+            if (current.fileId != fileId) {
+                current
+            } else {
+                ImageAnalysisStateReducer.releaseRetainedImageState(current)
+            }
+        }
+    }
+
     fun saveMeasurements(
         session: UserSession,
         examType: String,
