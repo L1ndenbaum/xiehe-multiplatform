@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,7 +27,6 @@ import com.xiehe.spine.ui.components.form.picker.DatePickerField
 import com.xiehe.spine.ui.components.form.picker.OptionPickerOverlay
 import com.xiehe.spine.ui.components.icon.shared.IconToken
 import com.xiehe.spine.ui.components.feedback.shared.LoadingOverlay
-import com.xiehe.spine.ui.components.form.picker.PickerDialog
 import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.form.input.TextField
 import com.xiehe.spine.ui.theme.SpineTheme
@@ -80,13 +77,13 @@ fun PatientFormScreen(
                 value = state.name,
                 onValueChange = vm::updateName,
                 placeholder = "请输入患者姓名",
-                leadingGlyph = IconToken.PROFILE,
+                leadingGlyph = IconToken.USER_ROUND,
             )
 
             PickerField(
                 text = genderOptions.firstOrNull { it.value == state.gender }?.label ?: "请选择患者性别",
                 onClick = { picker = PatientFormPicker.GENDER },
-                leadingGlyph = IconToken.PROFILE,
+                leadingGlyph = IconToken.USER,
             )
 
             DatePickerField(
@@ -110,15 +107,15 @@ fun PatientFormScreen(
                 PickerField(
                     text = state.phonePrefix,
                     onClick = { picker = PatientFormPicker.PHONE_PREFIX },
-                    leadingGlyph = IconToken.MESSAGE,
-                    modifier = Modifier.weight(0.36f),
+                    leadingGlyph = IconToken.PHONE,
+                    modifier = Modifier.weight(0.45f),
                 )
                 TextField(
                     value = state.phoneLocalNumber,
                     onValueChange = vm::updatePhoneLocalNumber,
                     placeholder = if (state.phonePrefix == "+86") "请输入11位手机号" else "请输入号码",
-                    leadingGlyph = IconToken.MESSAGE,
-                    modifier = Modifier.weight(0.64f),
+                    leadingGlyph = IconToken.PHONE,
+                    modifier = Modifier.weight(0.55f),
                 )
             }
 
@@ -132,7 +129,7 @@ fun PatientFormScreen(
                 value = state.address,
                 onValueChange = vm::updateAddress,
                 placeholder = "请输入家庭地址(可选)",
-                leadingGlyph = IconToken.SETTINGS,
+                leadingGlyph = IconToken.EDIT,
             )
 
             state.errorMessage?.let {
@@ -177,37 +174,13 @@ fun PatientFormScreen(
         }
 
         PatientFormPicker.PHONE_PREFIX -> {
-            PickerDialog(
-                title = "",
-                onDismissRequest = { picker = null },
-                showActionRow = false,
-            ) { dismiss ->
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "请选择电话区号", style = SpineTheme.typography.title)
-                    phonePrefixOptions.forEach { option ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color = if (state.phonePrefix == option) SpineTheme.colors.primary else SpineTheme.colors.surfaceMuted,
-                                    shape = RoundedCornerShape(SpineTheme.radius.md),
-                                )
-                                .clickable {
-                                    vm.updatePhonePrefix(option)
-                                    dismiss()
-                                }
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(option, color = if (state.phonePrefix == option) SpineTheme.colors.onPrimary else SpineTheme.colors.textPrimary)
-                            if (state.phonePrefix == option) {
-                                Text("✓", color = SpineTheme.colors.onPrimary)
-                            }
-                        }
-                    }
-                }
-            }
+            OptionPickerOverlay(
+                title = "请选择电话区号",
+                options = phonePrefixOptions,
+                selected = state.phonePrefix,
+                onDismiss = { picker = null },
+                onSelect = vm::updatePhonePrefix,
+            )
         }
 
         null -> Unit
@@ -228,7 +201,7 @@ private fun PickerField(
         modifier = modifier.clickable(onClick = onClick),
         readOnly = true,
         leadingGlyph = leadingGlyph,
-        trailingGlyph = IconToken.CHEVRON_DOWN,
+        trailingText = "选择",
         onTrailingClick = onClick,
     )
 }

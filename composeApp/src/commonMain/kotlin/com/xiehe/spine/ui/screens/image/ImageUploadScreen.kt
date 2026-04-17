@@ -95,7 +95,7 @@ fun ImageUploadScreen(
 
             PickerField(
                 text = state.selectedExamType.label,
-                leadingGlyph = IconToken.IMAGE,
+                leadingGlyph = IconToken.IMAGES,
                 onClick = { picker = ImageUploadPicker.EXAM_TYPE },
             )
 
@@ -105,9 +105,7 @@ fun ImageUploadScreen(
                 placeholder = "请选择影像文件",
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
-                leadingGlyph = IconToken.IMAGE,
-                trailingGlyph = IconToken.ADD,
-                onTrailingClick = { imagePicker.launch() },
+                leadingGlyph = IconToken.UPLOAD,
             )
 
             Row(
@@ -140,7 +138,7 @@ fun ImageUploadScreen(
                 },
                 enabled = !state.uploading,
                 modifier = Modifier.fillMaxWidth(),
-                leadingGlyph = IconToken.IMAGE,
+                leadingGlyph = IconToken.UPLOAD,
             )
         }
 
@@ -212,7 +210,7 @@ private fun PickerField(
             .clickable(onClick = onClick),
         readOnly = true,
         leadingGlyph = leadingGlyph,
-        trailingGlyph = IconToken.CHEVRON_DOWN,
+        trailingText = "选择",
         onTrailingClick = onClick,
     )
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
@@ -37,17 +38,19 @@ fun TextField(
     readOnly: Boolean = false,
     leadingGlyph: IconToken? = null,
     trailingGlyph: IconToken? = null,
+    trailingText: String? = null,
     onTrailingClick: (() -> Unit)? = null,
 ) {
     val colors = SpineTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None
     val shape = RoundedCornerShape(SpineTheme.radius.lg)
+    val fieldBackground = colors.surfaceMuted.copy(alpha = 0.62f)
 
     Row(
         modifier = modifier
             .clip(shape)
-            .background(colors.surfaceMuted.copy(alpha = 0.62f))
+            .background(fieldBackground)
             .border(1.dp, colors.borderSubtle, shape)
             .padding(horizontal = SpineTheme.spacing.base, vertical = SpineTheme.spacing.base),
         verticalAlignment = Alignment.CenterVertically,
@@ -58,7 +61,7 @@ fun TextField(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(RoundedCornerShape(SpineTheme.radius.sm))
-                    .background(colors.surface),
+                    .background(fieldBackground),
                 contentAlignment = Alignment.Center,
             ) {
                 AppIcon(
@@ -87,12 +90,34 @@ fun TextField(
                 readOnly = readOnly,
             )
         }
-        if (trailingGlyph != null) {
+        if (trailingText != null) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(SpineTheme.radius.full))
+                    .background(colors.primaryMuted)
+                    .then(
+                        if (onTrailingClick != null) {
+                            Modifier.clickable(onClick = onTrailingClick)
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = trailingText,
+                    style = SpineTheme.typography.caption,
+                    color = colors.primary,
+                    maxLines = 1,
+                )
+            }
+        } else if (trailingGlyph != null) {
             Box(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(RoundedCornerShape(SpineTheme.radius.sm))
-                    .background(colors.surface)
+                    .background(fieldBackground)
                     .then(
                         if (onTrailingClick != null) {
                             Modifier.clickable(onClick = onTrailingClick)
