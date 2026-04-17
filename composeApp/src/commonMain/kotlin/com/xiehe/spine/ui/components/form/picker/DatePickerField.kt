@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +34,7 @@ fun DatePickerField(
         modifier = modifier.clickable { showing = true },
         readOnly = true,
         leadingGlyph = IconToken.CALENDAR,
-        trailingGlyph = IconToken.CHEVRON_DOWN,
+        trailingText = "选择日期",
         onTrailingClick = { showing = true },
     )
 
@@ -41,7 +42,7 @@ fun DatePickerField(
         DateWheelPickerDialog(
             initialValue = value,
             onDismissRequest = { showing = false },
-            onConfirm = { onValueChange(it) },
+            onValueChange = onValueChange,
         )
     }
 }
@@ -50,7 +51,7 @@ fun DatePickerField(
 fun DateWheelPickerDialog(
     initialValue: String,
     onDismissRequest: () -> Unit,
-    onConfirm: (String) -> Unit,
+    onValueChange: (String) -> Unit,
 ) {
     val parsed = parseDate(initialValue)
     var yearIdx by remember { mutableIntStateOf((parsed.first - YEAR_START).coerceAtLeast(0)) }
@@ -69,16 +70,17 @@ fun DateWheelPickerDialog(
     }
 
     val title = "${currentYear}年${currentMonth}月"
+    val selectedDate = formatDate(currentYear, currentMonth, dayIdx + 1)
+
+    LaunchedEffect(selectedDate) {
+        onValueChange(selectedDate)
+    }
 
     PickerDialog(
-        title = "",
+        title = "选择出生日期",
         onDismissRequest = onDismissRequest,
-        overlayMaxAlpha = 0f,
-        roundBottomCorners = true,
-        onConfirm = {
-            val result = formatDate(currentYear, currentMonth, dayIdx + 1)
-            onConfirm(result)
-        },
+        showActionRow = false,
+        edgeToEdge = true,
     ) {
         Text(
             text = "$title ▲",

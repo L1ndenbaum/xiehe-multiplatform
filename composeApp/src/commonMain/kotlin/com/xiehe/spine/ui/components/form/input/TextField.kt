@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.theme.SpineTheme
 
 @Composable
@@ -91,27 +90,10 @@ fun TextField(
             )
         }
         if (trailingText != null) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(SpineTheme.radius.full))
-                    .background(colors.primaryMuted)
-                    .then(
-                        if (onTrailingClick != null) {
-                            Modifier.clickable(onClick = onTrailingClick)
-                        } else {
-                            Modifier
-                        },
-                    )
-                    .padding(horizontal = 10.dp, vertical = 5.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = trailingText,
-                    style = SpineTheme.typography.caption,
-                    color = colors.primary,
-                    maxLines = 1,
-                )
-            }
+            FieldActionChip(
+                text = trailingText,
+                onClick = onTrailingClick,
+            )
         } else if (trailingGlyph != null) {
             Box(
                 modifier = Modifier

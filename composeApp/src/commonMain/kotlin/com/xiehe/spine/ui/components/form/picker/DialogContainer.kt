@@ -26,9 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.xiehe.spine.ui.motion.AppBottomSheetHost
 import com.xiehe.spine.ui.theme.SpineTheme
-import kotlinx.coroutines.delay
 
 @Composable
 fun PickerDialog(
@@ -48,13 +49,6 @@ fun PickerDialog(
 
     LaunchedEffect(Unit) {
         visible = true
-    }
-
-    LaunchedEffect(visible) {
-        if (!visible) {
-            delay(220)
-            onDismissRequest()
-        }
     }
 
     val dismiss = {
@@ -77,75 +71,84 @@ fun PickerDialog(
         result
     }
 
-    AppBottomSheetHost(
-        visible = visible,
+    Dialog(
         onDismissRequest = dismiss,
-        onDismissed = onDismissRequest,
-        scrimAlpha = overlayMaxAlpha.coerceIn(0f, 1f),
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false,
+        ),
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .then(sizeModifier)
-                .then(
-                    if (edgeToEdge) {
-                        Modifier
-                    } else {
-                        Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-                    },
-                )
-                .background(SpineTheme.colors.surface, containerShape)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        AppBottomSheetHost(
+            visible = visible,
+            onDismissRequest = dismiss,
+            onDismissed = onDismissRequest,
+            scrimAlpha = overlayMaxAlpha.coerceIn(0f, 1f),
         ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .width(42.dp)
-                    .height(4.dp)
-                    .background(
-                        color = SpineTheme.colors.borderStrong,
-                        shape = RoundedCornerShape(SpineTheme.radius.full),
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .then(sizeModifier)
+                    .then(
+                        if (edgeToEdge) {
+                            Modifier
+                        } else {
+                            Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                        },
                     )
-            )
-
-            if (title.isNotBlank()) {
-                Text(
-                    text = title,
-                    style = SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
-                    modifier = Modifier.fillMaxWidth(),
-                    color = SpineTheme.colors.textPrimary,
+                    .background(SpineTheme.colors.surface, containerShape)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(42.dp)
+                        .height(4.dp)
+                        .background(
+                            color = SpineTheme.colors.borderStrong,
+                            shape = RoundedCornerShape(SpineTheme.radius.full),
+                        )
                 )
-            }
 
-            content(dismiss)
-
-            if (showActionRow) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "取消",
-                            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
-                            color = SpineTheme.colors.textSecondary,
-                            modifier = Modifier.clickable(onClick = dismiss),
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(28.dp)
-                            .background(SpineTheme.colors.borderSubtle),
+                if (title.isNotBlank()) {
+                    Text(
+                        text = title,
+                        style = SpineTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
+                        modifier = Modifier.fillMaxWidth(),
+                        color = SpineTheme.colors.textPrimary,
                     )
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "确定",
-                            style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
-                            color = SpineTheme.colors.primary,
-                            modifier = Modifier.clickable {
-                                onConfirm?.invoke()
-                                dismiss()
-                            },
+                }
+
+                content(dismiss)
+
+                if (showActionRow) {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "取消",
+                                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+                                color = SpineTheme.colors.textSecondary,
+                                modifier = Modifier.clickable(onClick = dismiss),
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(28.dp)
+                                .background(SpineTheme.colors.borderSubtle),
                         )
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "确定",
+                                style = SpineTheme.typography.body.copy(fontWeight = FontWeight.SemiBold),
+                                color = SpineTheme.colors.primary,
+                                modifier = Modifier.clickable {
+                                    onConfirm?.invoke()
+                                    dismiss()
+                                },
+                            )
+                        }
                     }
                 }
             }
