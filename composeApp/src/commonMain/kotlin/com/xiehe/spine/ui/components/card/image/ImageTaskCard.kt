@@ -1,6 +1,9 @@
 package com.xiehe.spine.ui.components.card.image
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,11 +45,14 @@ import com.xiehe.spine.ui.components.card.shared.Card
 import com.xiehe.spine.ui.components.text.shared.Text
 import com.xiehe.spine.ui.components.icon.shared.AppIcon
 import com.xiehe.spine.ui.components.icon.shared.IconToken
+import com.xiehe.spine.ui.motion.AppMotion
 import com.xiehe.spine.ui.theme.SpineTheme
 import com.xiehe.spine.ui.theme.resolve
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.decodeToImageBitmap
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 
 data class ImageTaskAction(
     val text: String,
@@ -262,17 +268,7 @@ private fun ImageThumbnail(
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         when (val current = state) {
             ThumbnailState.Loading -> {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    AppIcon(glyph = IconToken.HOURGLASS, tint = SpineTheme.colors.textTertiary, modifier = Modifier.size(18.dp))
-                    Text(
-                        text = "加载中",
-                        style = SpineTheme.typography.caption,
-                        color = SpineTheme.colors.textTertiary,
-                    )
-                }
+                ThumbnailLoadingIndicator()
             }
 
             is ThumbnailState.Success -> {
@@ -298,6 +294,40 @@ private fun ImageThumbnail(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ThumbnailLoadingIndicator(
+    modifier: Modifier = Modifier,
+) {
+    val colors = SpineTheme.colors
+    val transition = rememberInfiniteTransition(label = "thumbnail_loading_transition")
+    val startAngle by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = AppMotion.loadingSpinSpec(),
+        label = "thumbnail_loading_angle",
+    )
+
+    Canvas(
+        modifier = modifier.size(26.dp),
+    ) {
+        val strokeWidth = 3.dp.toPx()
+        drawArc(
+            color = colors.borderSubtle,
+            startAngle = 0f,
+            sweepAngle = 360f,
+            useCenter = false,
+            style = Stroke(width = strokeWidth),
+        )
+        drawArc(
+            color = colors.primary,
+            startAngle = startAngle,
+            sweepAngle = 112f,
+            useCenter = false,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+        )
     }
 }
 
