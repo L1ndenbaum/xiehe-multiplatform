@@ -83,8 +83,8 @@ internal fun DrawScope.drawSacralWithPerpendicular(
     drawLine(color = color, start = points[0], end = points[1], strokeWidth = 2.4f)
     val mid = midpoint(points[0], points[1])
     drawDashedSegment(
-        start = Offset(mid.x, mid.y - 800f),
-        end = Offset(mid.x, mid.y + 800f),
+        start = mid,
+        end = Offset(mid.x, size.height + 100f),
         color = helperGuideColor,
         strokeWidth = 1.4f,
         dashed = true,

@@ -55,10 +55,10 @@ class AnnotationMetadataTest {
     }
 
     @Test
-    fun ttsTagAnchor_movesToRightOfGuideLines() {
+    fun tsTagAnchor_movesToRightOfGuideLines() {
         val anchor = resolveMeasurementTagAnchor(
             measurement = measurement(
-                type = "TTS",
+                type = "TS",
                 points = listOf(
                     MeasurementPoint(10.0, 30.0),
                     MeasurementPoint(50.0, 30.0),
@@ -73,6 +73,37 @@ class AnnotationMetadataTest {
 
         assertEquals(85f, anchor.x)
         assertEquals(10f, anchor.y)
+    }
+
+    @Test
+    fun ttsTagAnchor_usesC7OffsetGuideLinePosition() {
+        val anchor = resolveMeasurementTagAnchor(
+            measurement = measurement(
+                type = "TTS",
+                points = listOf(
+                    MeasurementPoint(10.0, 30.0),
+                    MeasurementPoint(50.0, 30.0),
+                    MeasurementPoint(20.0, 60.0),
+                    MeasurementPoint(60.0, 60.0),
+                    MeasurementPoint(25.0, 100.0),
+                    MeasurementPoint(70.0, 100.0),
+                ),
+            ),
+            sx = 1f,
+            sy = 1f,
+            imageScale = 2f,
+        )
+
+        assertEquals(95f, anchor.x)
+        assertEquals(25f, anchor.y)
+    }
+
+    @Test
+    fun renderType_usesPointCountToDisambiguateTtsAndC7Offset() {
+        assertEquals(AnnotationRenderType.TTS, resolveAnnotationRenderType(type = "TS", pointsCount = 4))
+        assertEquals(AnnotationRenderType.TTS, resolveAnnotationRenderType(type = "TTS", pointsCount = 4))
+        assertEquals(AnnotationRenderType.C7_OFFSET, resolveAnnotationRenderType(type = "TTS", pointsCount = 6))
+        assertEquals(AnnotationRenderType.C7_OFFSET, resolveAnnotationRenderType(type = "TS(Trunk Shift)", pointsCount = 6))
     }
 
     @Test

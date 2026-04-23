@@ -121,8 +121,8 @@ fun createManualAnnotationMeasurement(
 
         TOOL_TS -> distanceMeasurement(
             key = measurementKey,
-            type = "TTS",
-            description = "躯干偏移量(Trunk Shift)",
+            type = "TS",
+            description = "躯干偏移量TS(Trunk Shift)",
             points = points,
             distanceMm = calculateActualDistance(
                 abs(midpoint(points[0], points[1]).x - midpoint(points[2], points[3]).x),
@@ -143,8 +143,8 @@ fun createManualAnnotationMeasurement(
             val reference = midpoint(points[4], points[5])
             distanceMeasurement(
                 key = measurementKey,
-                type = "TS(Trunk Shift)",
-                description = "C7偏移距离（正面6点法）",
+                type = "TTS",
+                description = "C7偏移距离TTS(Trunk Shift)",
                 points = points,
                 distanceMm = calculateActualDistance(abs(center.x - reference.x), calibration),
             )

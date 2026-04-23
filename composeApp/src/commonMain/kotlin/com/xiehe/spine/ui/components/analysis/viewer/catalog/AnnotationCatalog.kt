@@ -173,7 +173,7 @@ val ANNOTATION_TOOL_CATALOG = listOf(
     ),
     AnnotationToolDefinition(
         id = TOOL_TS,
-        label = "TTS",
+        label = "TS",
         icon = IconToken.MEASURE_TS,
         section = AnnotationToolSection.MEASURE,
         colorKey = AnnotationToolColorKey.TS,
@@ -191,7 +191,7 @@ val ANNOTATION_TOOL_CATALOG = listOf(
     ),
     AnnotationToolDefinition(
         id = TOOL_C7_OFFSET,
-        label = "TS(Trunk Shift)",
+        label = "TTS",
         icon = IconToken.MEASURE_C7_OFFSET,
         section = AnnotationToolSection.MEASURE,
         colorKey = AnnotationToolColorKey.C7_OFFSET,
@@ -443,6 +443,12 @@ val ANNOTATION_TOOL_CATALOG = listOf(
 
 private val annotationToolMap = ANNOTATION_TOOL_CATALOG.associateBy(AnnotationToolDefinition::id)
 private val annotationMeasurementTypeMap = ANNOTATION_TOOL_CATALOG.associateBy(AnnotationToolDefinition::measurementType)
+private val annotationMeasurementTypeAliases = mapOf(
+    "TS(Trunk Shift)" to TOOL_C7_OFFSET,
+)
 
 fun getAnnotationTool(toolId: String): AnnotationToolDefinition? = annotationToolMap[toolId]
-fun getAnnotationToolByMeasurementType(type: String): AnnotationToolDefinition? = annotationMeasurementTypeMap[type]
+fun getAnnotationToolByMeasurementType(type: String): AnnotationToolDefinition? {
+    return annotationMeasurementTypeMap[type]
+        ?: annotationMeasurementTypeAliases[type]?.let(annotationToolMap::get)
+}

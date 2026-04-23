@@ -140,7 +140,7 @@ fun buildInheritedPointMap(
     val inherited = linkedMapOf<Int, MeasurementPoint>()
 
     pointInheritanceRules[toolId].orEmpty().forEach { rule ->
-        val source = measurements.firstOrNull { it.type == rule.fromType } ?: return@forEach
+        val source = findMeasurementForInheritance(rule.fromType, measurements) ?: return@forEach
         rule.sourcePointIndices.indices.forEach { index ->
             val sourceIndex = rule.sourcePointIndices[index]
             val destinationIndex = rule.destinationPointIndices[index]
@@ -156,7 +156,7 @@ fun buildInheritedPointMap(
 
         for (participant in group.participants) {
             if (participant.toolId == toolId) continue
-            val source = measurements.firstOrNull { it.type == participant.typeName } ?: continue
+            val source = findMeasurementForInheritance(participant.typeName, measurements) ?: continue
             val sourcePoint = source.points.getOrNull(participant.pointIndex) ?: continue
             inherited[ownParticipant.pointIndex] = sourcePoint
             break
@@ -183,4 +183,17 @@ fun getEffectivePointsNeeded(
     measurements: List<AnnotationMeasurement>,
 ): Int {
     return (totalPointsNeeded - buildInheritedPointMap(toolId, measurements).size).coerceAtLeast(0)
+}
+
+private fun findMeasurementForInheritance(
+    expectedType: String,
+    measurements: List<AnnotationMeasurement>,
+): AnnotationMeasurement? {
+    return measurements.firstOrNull { measurement ->
+        when (expectedType) {
+            "TTS" -> measurement.type == "TS" || (measurement.type == "TTS" && measurement.points.size < 6)
+            "TS(Trunk Shift)" -> measurement.type == "TS(Trunk Shift)" || (measurement.type == "TTS" && measurement.points.size >= 6)
+            else -> measurement.type == expectedType
+        }
+    }
 }

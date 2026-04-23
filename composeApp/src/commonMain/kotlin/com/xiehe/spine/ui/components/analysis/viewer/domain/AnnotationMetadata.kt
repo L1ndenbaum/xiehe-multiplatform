@@ -39,46 +39,51 @@ internal enum class AnnotationRenderType {
     VERTEBRA_CENTER,
 }
 
-internal fun resolveAnnotationRenderType(type: String): AnnotationRenderType = when (type) {
-    "T1 Tilt",
-    "T1 Slope",
-    -> AnnotationRenderType.LINE_WITH_HORIZONTAL_ARC
+internal fun resolveAnnotationRenderType(
+    type: String,
+    pointsCount: Int = 0,
+): AnnotationRenderType = when {
+    isC7OffsetMeasurement(type, pointsCount) -> AnnotationRenderType.C7_OFFSET
+    isTrunkShiftMeasurement(type, pointsCount) -> AnnotationRenderType.TTS
+    else -> when (type) {
+        "T1 Tilt",
+        "T1 Slope",
+        -> AnnotationRenderType.LINE_WITH_HORIZONTAL_ARC
 
-    "CA",
-    "Pelvic",
-    -> AnnotationRenderType.SINGLE_LINE_WITH_HORIZONTAL
+        "CA",
+        "Pelvic",
+        -> AnnotationRenderType.SINGLE_LINE_WITH_HORIZONTAL
 
-    "Cobb",
-    "C2-C7 CL",
-    "TK T2-T5",
-    "TK T5-T12",
-    "T10-L2",
-    "LL L1-S1",
-    "LL L1-L4",
-    "LL L4-S1",
-    "角度标注",
-    -> AnnotationRenderType.TWO_DASHED_LINES
+        "Cobb",
+        "C2-C7 CL",
+        "TK T2-T5",
+        "TK T5-T12",
+        "T10-L2",
+        "LL L1-S1",
+        "LL L1-L4",
+        "LL L4-S1",
+        "角度标注",
+        -> AnnotationRenderType.TWO_DASHED_LINES
 
-    "Sacral" -> AnnotationRenderType.SACRAL_WITH_PERPENDICULAR
-    "SS" -> AnnotationRenderType.SS
-    "PI" -> AnnotationRenderType.PI
-    "PT" -> AnnotationRenderType.PT
-    "AVT" -> AnnotationRenderType.VERTICAL_GUIDE_LINES
-    "TTS" -> AnnotationRenderType.TTS
-    "LLD" -> AnnotationRenderType.HORIZONTAL_GUIDE_LINES
-    "TS(Trunk Shift)" -> AnnotationRenderType.C7_OFFSET
-    "TPA" -> AnnotationRenderType.TPA
-    "SVA" -> AnnotationRenderType.SVA
-    "角度测量" -> AnnotationRenderType.THREE_POINT_ANGLE
-    "辅助水平线" -> AnnotationRenderType.SINGLE_HORIZONTAL_LINE
-    "辅助垂直线" -> AnnotationRenderType.SINGLE_VERTICAL_LINE
-    "Auxiliary Circle" -> AnnotationRenderType.CIRCLE
-    "Auxiliary Ellipse" -> AnnotationRenderType.ELLIPSE
-    "Auxiliary Box" -> AnnotationRenderType.BOX
-    "Arrow" -> AnnotationRenderType.ARROW
-    "Polygons" -> AnnotationRenderType.POLYGON
-    "椎体中心" -> AnnotationRenderType.VERTEBRA_CENTER
-    else -> AnnotationRenderType.SIMPLE_LINE
+        "Sacral" -> AnnotationRenderType.SACRAL_WITH_PERPENDICULAR
+        "SS" -> AnnotationRenderType.SS
+        "PI" -> AnnotationRenderType.PI
+        "PT" -> AnnotationRenderType.PT
+        "AVT" -> AnnotationRenderType.VERTICAL_GUIDE_LINES
+        "LLD" -> AnnotationRenderType.HORIZONTAL_GUIDE_LINES
+        "TPA" -> AnnotationRenderType.TPA
+        "SVA" -> AnnotationRenderType.SVA
+        "角度测量" -> AnnotationRenderType.THREE_POINT_ANGLE
+        "辅助水平线" -> AnnotationRenderType.SINGLE_HORIZONTAL_LINE
+        "辅助垂直线" -> AnnotationRenderType.SINGLE_VERTICAL_LINE
+        "Auxiliary Circle" -> AnnotationRenderType.CIRCLE
+        "Auxiliary Ellipse" -> AnnotationRenderType.ELLIPSE
+        "Auxiliary Box" -> AnnotationRenderType.BOX
+        "Arrow" -> AnnotationRenderType.ARROW
+        "Polygons" -> AnnotationRenderType.POLYGON
+        "椎体中心" -> AnnotationRenderType.VERTEBRA_CENTER
+        else -> AnnotationRenderType.SIMPLE_LINE
+    }
 }
 
 fun resolveAnnotationColor(
@@ -89,7 +94,7 @@ fun resolveAnnotationColor(
         return colors.detectedPoint
     }
 
-    val tool = getAnnotationToolByMeasurementType(measurement.type)
+    val tool = resolveMeasurementTool(measurement)
     return tool?.let { colors.resolveColor(it.colorKey) } ?: colors.length
 }
 
@@ -108,7 +113,7 @@ fun shouldShowMetricTag(measurement: AnnotationMeasurement): Boolean {
 
 fun shouldShowAuxiliaryShapeTag(measurement: AnnotationMeasurement): Boolean {
     if (!measurement.auxiliary) return false
-    return resolveAnnotationRenderType(measurement.type) in setOf(
+    return resolveAnnotationRenderType(measurement.type, measurement.points.size) in setOf(
         AnnotationRenderType.CIRCLE,
         AnnotationRenderType.ELLIPSE,
         AnnotationRenderType.BOX,
@@ -145,7 +150,7 @@ fun resolveMeasurementTagAnchor(
         points = points,
         imageScale = safeScale,
     ) ?: run {
-        val tool = getAnnotationToolByMeasurementType(measurement.type)
+        val tool = resolveMeasurementTool(measurement)
         when (tool?.tagAnchorStyle) {
             AnnotationTagAnchorStyle.MIDPOINT_ABOVE -> midpoint(points.first(), points.last()).copy(
                 y = minOf(points.first().y, points.last().y) - 20f,
@@ -225,27 +230,19 @@ private fun resolveCatalogTagAnchor(
             y = minOf(points[0].y, points[1].y) - 20f / imageScale,
         )
 
-        "TTS" -> {
-            val trunkMidY = (points[0].y + points[1].y) / 2f
-            val sacralMidY = (points[2].y + points[3].y) / 2f
-            Offset(
-                x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
-                y = minOf(trunkMidY, sacralMidY) - LABEL_OFFSET_TOP / imageScale,
-            )
-        }
+        "TS" -> resolveTsTagAnchor(points, imageScale)
 
         "LLD" -> Offset(
             x = max(points[0].x, points[1].x) + 20f / imageScale,
             y = (points[0].y + points[1].y) / 2f,
         )
 
-        "TS(Trunk Shift)" -> {
-            val centerY = points.take(4).averageOf { it.y }
-            val refY = (points[4].y + points[5].y) / 2f
-            Offset(
-                x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
-                y = minOf(centerY, refY) - LABEL_OFFSET_TOP / imageScale,
-            )
+        "TTS",
+        "TS(Trunk Shift)",
+        -> if (isC7OffsetMeasurement(type, points.size)) {
+            resolveC7OffsetTagAnchor(points, imageScale)
+        } else {
+            resolveTsTagAnchor(points, imageScale)
         }
 
         "T1 Slope" -> Offset(
@@ -360,6 +357,55 @@ private fun resolveCatalogTagAnchor(
 
         else -> null
     }
+}
+
+private fun resolveMeasurementTool(measurement: AnnotationMeasurement) = when {
+    isC7OffsetMeasurement(measurement.type, measurement.points.size) -> getAnnotationToolByMeasurementType("TTS")
+    isTrunkShiftMeasurement(measurement.type, measurement.points.size) -> getAnnotationToolByMeasurementType("TS")
+    else -> getAnnotationToolByMeasurementType(measurement.type)
+}
+
+private fun isTrunkShiftMeasurement(
+    type: String,
+    pointsCount: Int,
+): Boolean = type == "TS" || (type == "TTS" && pointsCount < 6)
+
+private fun isC7OffsetMeasurement(
+    type: String,
+    pointsCount: Int,
+): Boolean = type == "TS(Trunk Shift)" || (type == "TTS" && pointsCount >= 6)
+
+private fun resolveTsTagAnchor(
+    points: List<Offset>,
+    imageScale: Float,
+): Offset {
+    if (points.size < 4) {
+        return Offset(
+            x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
+            y = points.minOf { it.y } - LABEL_OFFSET_TOP / imageScale,
+        )
+    }
+    val trunkMidY = (points[0].y + points[1].y) / 2f
+    val sacralMidY = (points[2].y + points[3].y) / 2f
+    return Offset(
+        x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
+        y = minOf(trunkMidY, sacralMidY) - LABEL_OFFSET_TOP / imageScale,
+    )
+}
+
+private fun resolveC7OffsetTagAnchor(
+    points: List<Offset>,
+    imageScale: Float,
+): Offset {
+    if (points.size < 6) {
+        return resolveTsTagAnchor(points, imageScale)
+    }
+    val centerY = points.take(4).averageOf { it.y }
+    val refY = (points[4].y + points[5].y) / 2f
+    return Offset(
+        x = points.maxOf { it.x } + LABEL_OFFSET_RIGHT / imageScale,
+        y = minOf(centerY, refY) - LABEL_OFFSET_TOP / imageScale,
+    )
 }
 
 private data class PelvicGeometry(

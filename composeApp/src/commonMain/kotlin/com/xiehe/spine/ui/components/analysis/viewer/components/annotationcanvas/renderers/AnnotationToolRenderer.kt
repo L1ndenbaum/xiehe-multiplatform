@@ -52,7 +52,7 @@ fun DrawScope.drawAnnotationMeasurement(
         )
     }
 
-    when (resolveAnnotationRenderType(item.type)) {
+    when (resolveAnnotationRenderType(item.type, item.points.size)) {
         AnnotationRenderType.LINE_WITH_HORIZONTAL_ARC -> drawLineWithHorizontalAndArc(points, color, toolColors.helperGuide)
         AnnotationRenderType.SINGLE_LINE_WITH_HORIZONTAL -> drawSingleLineWithHorizontal(points, color, toolColors.helperGuide)
         AnnotationRenderType.TWO_DASHED_LINES -> drawTwoDashedLines(points, color, toolColors.helperGuide)
